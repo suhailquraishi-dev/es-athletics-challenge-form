@@ -1255,7 +1255,17 @@ textarea:focus {
 }
 
 .trending-card h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   padding: 18px 18px 0;
+}
+
+.trending-heading-icon {
+  width: 1em;
+  height: 1em;
+  background: var(--blue);
+  mask: url("assets/trending-topic.svg") center / contain no-repeat;
 }
 
 .editor-hero {
