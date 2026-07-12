@@ -1033,16 +1033,19 @@ textarea:focus {
 }
 
 .source-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: max-content;
   border: 2.298px solid #aad1fa;
   border-radius: 0;
-  padding: 8px 6px;
+  padding: 7px 6px;
   background: #fff;
   color: #112841;
   font-family: "Acumin Pro Condensed Black", var(--font-title);
   font-size: 16px;
   font-weight: 900;
-  line-height: 0.925;
+  line-height: 1;
   text-transform: uppercase;
 }
 
