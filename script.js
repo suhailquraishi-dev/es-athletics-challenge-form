@@ -265,6 +265,9 @@ function renderSources(articles) {
   ];
   sourceList.innerHTML = articles.map((article, index) => `
     <article class="source-card">
+      <a class="source-card-image" href="${escapeHtml(article.url)}" target="_blank" rel="noopener">
+        <img src="${escapeHtml(article.image || sourceImages[index % sourceImages.length])}" alt="">
+      </a>
       <div class="source-card-body">
         <span class="source-tag">${escapeHtml(article.tag)}</span>
         <h3><a href="${escapeHtml(article.url)}" target="_blank" rel="noopener">${escapeHtml(article.title)}</a></h3>
