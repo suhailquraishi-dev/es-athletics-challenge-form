@@ -1195,12 +1195,7 @@ textarea:focus {
 }
 
 .youtube-thumb {
-  background: #fff;
-}
-
-.youtube-thumb img {
-  object-fit: contain;
-  padding: 9px;
+  background: #111;
 }
 
 .news-item > div a,
@@ -1246,6 +1241,17 @@ textarea:focus {
   height: 16px;
   border-radius: 4px;
   flex: 0 0 auto;
+}
+
+.source-logo-only {
+  display: inline-flex;
+  align-items: center;
+}
+
+.source-logo-only img {
+  width: 54px;
+  height: auto;
+  display: block;
 }
 
 .trending-card h2 {
