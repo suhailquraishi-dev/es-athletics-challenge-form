@@ -1168,7 +1168,7 @@ textarea:focus {
 }
 
 .trending-card article {
-  grid-template-columns: 1fr;
+  grid-template-columns: 82px minmax(0, 1fr);
 }
 
 .news-thumb {
@@ -1178,11 +1178,29 @@ textarea:focus {
   background: var(--canvas);
 }
 
-.news-thumb img {
+.news-thumb img,
+.trending-thumb img {
   display: block;
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
+}
+
+.trending-thumb {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--canvas);
+}
+
+.youtube-thumb {
+  background: #fff;
+}
+
+.youtube-thumb img {
+  object-fit: contain;
+  padding: 9px;
 }
 
 .news-item > div a,
@@ -1199,6 +1217,12 @@ textarea:focus {
   gap: 5px;
 }
 
+.trending-card article > div {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
 .news-item > div a:hover,
 .trending-card a:hover {
   color: var(--blue);
@@ -1209,6 +1233,19 @@ textarea:focus {
   color: #8f9aad;
   font-size: 12px;
   font-weight: 700;
+}
+
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.source-badge img {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex: 0 0 auto;
 }
 
 .trending-card h2 {
