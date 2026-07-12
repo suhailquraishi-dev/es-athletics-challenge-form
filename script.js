@@ -6,28 +6,36 @@ const seedArticles = [
     title: "Noah Lyles' Rival Who Made Unsportsmanlike Comment Reveals Their Current Standing",
     url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-noah-lyles-rival-who-made-unsportsmanlike-comment-reveals-their-current-standing/",
     dek: "Noah Lyles' rival revealed where things stand nearly a year after their heated clash at the USATF Championships.",
-    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-5.1.jpg"
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-5.1.jpg",
+    author: "Pranav Venkatesh",
+    date: "19 hrs ago"
   },
   {
     tag: "Track",
     title: "Sha'Carri Richardson and Melissa Jefferson-Wooden Set to Go Against Each Other Once Again",
     url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-shacarri-richardson-and-melissa-jefferson-wooden-set-to-go-against-each-other-once-again/",
     dek: "Richardson and Jefferson-Wooden are set for another showdown after their thrilling Prefontaine Classic battle.",
-    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/image-13-5.png"
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/image-13-5.png",
+    author: "Karthik Sri Hari KC",
+    date: "19 hrs ago"
   },
   {
     tag: "Sprints",
     title: "Noah Lyles Chooses Gold Medal in Every Race Over $100 Million for This Reason",
     url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-noah-lyles-chooses-gold-medal-in-every-race-over-hundred-million-dollars-for-this-reason/",
     dek: "Lyles explained why he would rather win gold in every event he enters than accept a massive offer.",
-    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-1-1.jpeg"
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-1-1.jpeg",
+    author: "Pranav Venkatesh",
+    date: "20 hrs ago"
   },
   {
     tag: "Diamond League",
     title: "World Champion Climbs Back to the Top After Shocking Loss to NCAA Athlete",
     url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-world-champion-climbs-back-to-the-top-after-shocking-loss-to-ncaa-athlete/",
     dek: "Oblique Seville answered a rare defeat with a commanding 100m victory at the Monaco Diamond League.",
-    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/imago833691748.jpg"
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/imago833691748.jpg",
+    author: "Karthik Sri Hari KC",
+    date: "20 hrs ago"
   }
 ];
 
@@ -257,12 +265,13 @@ function renderSources(articles) {
   ];
   sourceList.innerHTML = articles.map((article, index) => `
     <article class="source-card">
-      <img src="${escapeHtml(article.image || sourceImages[index % sourceImages.length])}" alt="">
       <div class="source-card-body">
         <span class="source-tag">${escapeHtml(article.tag)}</span>
         <h3><a href="${escapeHtml(article.url)}" target="_blank" rel="noopener">${escapeHtml(article.title)}</a></h3>
-        <p>${escapeHtml(article.dek)}</p>
-        <a class="read-article-button" href="${escapeHtml(article.url)}" target="_blank" rel="noopener">Read Full Story</a>
+        <div class="source-meta">
+          <a href="${escapeHtml(article.url)}" target="_blank" rel="noopener">${escapeHtml(article.author || "EssentiallySports")}</a>
+          <span>${escapeHtml(article.date || "Just now")}</span>
+        </div>
       </div>
     </article>
   `).join("");
