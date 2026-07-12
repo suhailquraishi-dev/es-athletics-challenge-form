@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Editor workspace for creating EssentiallySports newsletter challenge forms.">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
+    <title>Editor | EssentiallySports Athletics Challenge</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="es-site-header">
+      <div class="es-header-main">
+        <a class="es-logo" href="https://www.essentiallysports.com/" aria-label="EssentiallySports home">
+          <img src="assets/brand-logo-blue.svg" alt="EssentiallySports">
+        </a>
+        <nav class="es-primary-nav" aria-label="EssentiallySports navigation">
+          <a href="https://www.essentiallysports.com/">Latest</a>
+          <a class="has-chevron" href="https://www.essentiallysports.com/category/nfl/">Sports</a>
+          <a href="https://www.essentiallysports.com/newsletters/">Newsletters</a>
+          <a href="https://www.essentiallysports.com/think-tank/">Think Tank</a>
+          <a class="has-chevron" href="https://www.essentiallysports.com/case-studies/">Case Studies</a>
+        </nav>
+        <div class="header-actions">
+          <a class="nav-social" href="https://www.facebook.com/essentiallysports" aria-label="EssentiallySports Facebook">
+            <img src="assets/social-icons/nav-facebook.svg" alt="">
+          </a>
+          <a class="nav-social" href="https://twitter.com/es_sportsnews" aria-label="EssentiallySports on X">
+            <img src="assets/social-icons/nav-x.svg" alt="">
+          </a>
+          <a class="nav-social" href="https://www.instagram.com/essentiallysports" aria-label="EssentiallySports Instagram">
+            <img src="assets/social-icons/nav-instagram.svg" alt="">
+          </a>
+          <a class="nav-social" href="https://www.linkedin.com/company/essentiallysports" aria-label="EssentiallySports LinkedIn">
+            <img src="assets/social-icons/nav-linkedin.svg" alt="">
+          </a>
+          <a class="nav-social" href="https://www.youtube.com/essentiallysports" aria-label="EssentiallySports YouTube">
+            <img src="assets/social-icons/nav-youtube.svg" alt="">
+          </a>
+          <a class="nav-social" href="https://news.google.com/publications/CAAqBwgKMJqW_gwwkoGBAw" aria-label="EssentiallySports Google News">
+            <img src="assets/social-icons/nav-google-news.svg" alt="">
+          </a>
+        </div>
+        <button class="es-menu-button" type="button" aria-label="Open menu"><span></span><span></span><span></span></button>
+      </div>
+    </header>
+
+    <main>
+      <section class="editor-layout">
+        <section class="panel builder-panel" id="builder" aria-labelledby="builder-title">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Editor workspace</span>
+              <h2 id="builder-title">Challenge settings</h2>
+            </div>
+            <div class="editor-actions">
+              <a class="secondary-button" href="index.html">Reader view</a>
+              <button class="secondary-button" type="button" id="load-sample">Load sample</button>
+              <button class="primary-button" type="button" id="save-challenge">Save draft</button>
+            </div>
+          </div>
+
+          <div class="builder-grid">
+            <label>
+              Challenge title
+              <input id="edit-title" type="text" value="Essentially Athletics Weekly Challenge">
+            </label>
+            <label>
+              Sport/category
+              <input id="edit-category" type="text" value="Athletics">
+            </label>
+            <label class="full-width">
+              Intro copy
+              <textarea id="edit-intro" rows="3">Answer the questions from this week's Essentially Athletics stories and see your points instantly.</textarea>
+            </label>
+          </div>
+
+          <div class="builder-toolbar" aria-label="Add question type">
+            <button type="button" data-add-type="short">Short answer</button>
+            <button type="button" data-add-type="paragraph">Paragraph</button>
+            <button type="button" data-add-type="radio">Multiple choice</button>
+            <button type="button" data-add-type="checkbox">Checkboxes</button>
+            <button type="button" data-add-type="select">Dropdown</button>
+            <button type="button" data-add-type="scale">Linear scale</button>
+            <button type="button" data-add-type="date">Date</button>
+            <button type="button" data-add-type="time">Time</button>
+            <button type="button" data-add-type="file">File upload</button>
+          </div>
+
+          <div id="editor-question-list" class="editor-question-list"></div>
+        </section>
+
+        <aside class="panel editor-preview" id="preview" aria-labelledby="preview-title">
+          <div class="section-head compact">
+            <div>
+              <span class="eyebrow">Live preview</span>
+              <h2 id="preview-title">Reader form</h2>
+            </div>
+          </div>
+          <div id="editor-preview-list" class="question-list preview-list"></div>
+          <div class="draft-note">Saved drafts stay in this browser until backend storage is connected.</div>
+        </aside>
+      </section>
+    </main>
+
+    <footer class="es-site-footer">
+      <div class="es-footer-brand">
+        <a class="footer-logo-link" href="https://www.essentiallysports.com/" aria-label="EssentiallySports home">
+          <img src="assets/brand-logo-white.svg" alt="EssentiallySports">
+        </a>
+        <p>EssentiallySports is a sports media platform built for modern fandom and culture, giving equal coverage to the overlooked and the mainstream.</p>
+        <div class="footer-socials" aria-label="Social links">
+          <a href="https://www.facebook.com/essentiallysports" aria-label="Facebook"><img src="assets/social-icons/footer-facebook.svg" alt=""></a>
+          <a href="https://twitter.com/es_sportsnews" aria-label="X"><img src="assets/social-icons/footer-x.svg" alt=""></a>
+          <a href="https://www.instagram.com/essentiallysports" aria-label="Instagram"><img src="assets/social-icons/footer-instagram.svg" alt=""></a>
+          <a href="https://www.linkedin.com/company/essentiallysports" aria-label="LinkedIn"><img src="assets/social-icons/footer-linkedin.svg" alt=""></a>
+          <a href="https://www.youtube.com/essentiallysports" aria-label="YouTube"><img src="assets/social-icons/footer-youtube.svg" alt=""></a>
+          <a href="https://news.google.com/publications/CAAqBwgKMJqW_gwwkoGBAw" aria-label="Google News"><img src="assets/social-icons/footer-google-news.svg" alt=""></a>
+        </div>
+        <span>EssentiallySports Media, Inc. © 2026 | All Rights Reserved</span>
+      </div>
+      <div class="es-footer-links">
+        <section>
+          <h2>EssentiallySports</h2>
+          <a href="https://www.essentiallysports.com/about-us/">About Us</a>
+          <a href="https://www.essentiallysports.com/advertise/">Advertise</a>
+          <a href="https://www.essentiallysports.com/authors/">Authors</a>
+          <a href="https://www.essentiallysports.com/editorial-team/">Editorial Team</a>
+          <a href="https://www.essentiallysports.com/editorial-policies/">Editorial Policies</a>
+          <a href="https://www.essentiallysports.com/in-the-press/">In The Press</a>
+          <a href="https://www.essentiallysports.com/contact-us/">Contact Us</a>
+          <a href="https://www.essentiallysports.com/faqs/">FAQs</a>
+          <a href="https://www.essentiallysports.com/privacy-policy/">Privacy Policy</a>
+          <a href="https://www.essentiallysports.com/terms-of-use/">Terms of Use</a>
+        </section>
+        <section>
+          <h2>Newsletters</h2>
+          <a href="https://luckydogontrack.beehiiv.com/">Lucky Dog on Track</a>
+          <a href="https://essentiallygolf.beehiiv.com/">Essentially Golf</a>
+          <a href="https://shegotgame.beehiiv.com/">She Got Game</a>
+          <a href="https://essentially-basketball.beehiiv.com/">Essentially Dunk</a>
+          <a href="https://essentiallyathletics.beehiiv.com/">Essentially Athletics</a>
+          <a href="https://the-nfl-huddle.beehiiv.com/">The Huddle</a>
+          <a href="https://chiefshuddle.beehiiv.com/">Chiefs Huddle</a>
+          <a href="https://cowboyshuddle.beehiiv.com/">Cowboys Huddle</a>
+          <a href="https://steelershuddle.beehiiv.com/">Steelers Huddle</a>
+          <a href="https://essentiallycfb.beehiiv.com/">Essentially CFB</a>
+          <a href="https://buckeyedaily.beehiiv.com/">Buckeye Daily</a>
+        </section>
+        <section>
+          <h2>Podcasts</h2>
+          <a href="https://www.essentiallysports.com/think-tank/">ES Think Tank</a>
+          <a href="https://www.essentiallysports.com/es-fancast/">ES Fancast</a>
+          <h2 class="footer-section-offset">Events</h2>
+          <a href="https://www.essentiallysports.com/events/wnba-all-star-2025/">WNBA All-Star 2025</a>
+          <a href="https://www.essentiallysports.com/events/us-open-2025/">US Open 2025</a>
+        </section>
+        <section class="sports-footer">
+          <h2>Sports</h2>
+          <div class="footer-sports-columns">
+            <div>
+              <a href="https://www.essentiallysports.com/">All</a>
+              <a href="https://www.essentiallysports.com/category/boxing/">Boxing</a>
+              <a href="https://www.essentiallysports.com/category/golf/">Golf</a>
+              <a href="https://www.essentiallysports.com/category/nascar/">NASCAR</a>
+              <a href="https://www.essentiallysports.com/category/nba/">NBA</a>
+              <a href="https://www.essentiallysports.com/category/nfl/">NFL</a>
+              <a href="https://www.essentiallysports.com/category/tennis/">Tennis</a>
+              <a href="https://www.essentiallysports.com/category/ufc/">UFC</a>
+              <a href="https://www.essentiallysports.com/category/wnba/">WNBA</a>
+            </div>
+            <div>
+              <a href="https://www.essentiallysports.com/category/college-football/">College Football</a>
+              <a href="https://www.essentiallysports.com/category/track-and-field/">Track and Field</a>
+              <a href="https://www.essentiallysports.com/category/gymnastics/">Gymnastics</a>
+              <a href="https://www.essentiallysports.com/category/olympics/">Olympics</a>
+              <a href="https://www.essentiallysports.com/category/mlb/">MLB</a>
+              <a href="https://www.essentiallysports.com/category/soccer/">Soccer</a>
+              <a href="https://www.essentiallysports.com/category/swimming/">Swimming</a>
+              <a href="https://www.essentiallysports.com/category/nhl/">NHL</a>
+            </div>
+          </div>
+        </section>
+      </div>
+      <nav class="es-legal-nav" aria-label="Legal links">
+        <a href="https://www.essentiallysports.com/privacy-policy/">Privacy Policy</a>
+        <a href="https://www.essentiallysports.com/es-pressroom/">ES Pressroom</a>
+        <a href="https://www.essentiallysports.com/ethics-policy/">Ethics Policy</a>
+        <a href="https://www.essentiallysports.com/fact-checking-policy/">Fact-Checking Policy</a>
+        <a href="https://www.essentiallysports.com/corrections-policy/">Corrections Policy</a>
+        <a href="https://www.essentiallysports.com/cookies-policy/">Cookies Policy</a>
+        <a href="https://www.essentiallysports.com/gdpr-compliance/">GDPR Compliance</a>
+        <a href="https://www.essentiallysports.com/terms-of-use/">Terms of Use</a>
+        <a href="https://www.essentiallysports.com/editorial-guidelines/">Editorial Guidelines</a>
+        <a href="https://www.essentiallysports.com/ownership-and-funding-information/">Ownership and funding Information</a>
+      </nav>
+    </footer>
+    <button class="hub-sticker" type="button" aria-label="Accessibility options">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <script src="script.js"></script>
+  </body>
+</html>
