@@ -1292,7 +1292,7 @@ textarea:focus {
   align-items: center;
   justify-content: flex-start;
   gap: 7px;
-  padding: 18px 18px 0;
+  padding: 18px 0 0;
 }
 
 .trending-heading-icon {
