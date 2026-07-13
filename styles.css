@@ -2665,6 +2665,10 @@ body {
 }
 
 /* Newsletter poll treatment for challenge questions */
+.question-list {
+  gap: 28px;
+}
+
 .question-card {
   padding: 28px 30px;
   background: #f8fcfe;
@@ -2683,9 +2687,9 @@ body {
   padding: 28px 30px;
 }
 
-.question-card-content > .question-meta:first-child {
+.question-heading > .question-meta:first-child {
   gap: 10px;
-  margin: 0 0 12px;
+  margin: 0 0 18px;
 }
 
 .question-card .question-meta:first-child strong {
@@ -2987,6 +2991,14 @@ body {
   .question-card,
   .question-card.has-question-image .question-card-content {
     padding: 22px 20px;
+  }
+
+  .question-list {
+    gap: 22px;
+  }
+
+  .question-heading > .question-meta:first-child {
+    margin-bottom: 15px;
   }
 
   .question-card h3 {
