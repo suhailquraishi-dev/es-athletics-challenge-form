@@ -2,6 +2,8 @@
 
 Static first version for an EssentiallySports newsletter challenge product.
 
+See [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) for the full product brief, design rules, current architecture, data flow, QC checklist, and backend roadmap.
+
 ## Pages
 
 - `index.html` - reader challenge form with instant score, source articles, and Athletics news rail.
