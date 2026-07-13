@@ -884,7 +884,7 @@ function syncNewsFeedHeight() {
 
   const listRect = list.getBoundingClientRect();
   const fourthRect = fourthStory.getBoundingClientRect();
-  const previewHeight = Math.min(150, Math.max(130, fourthRect.height * 0.55));
+  const previewHeight = Math.min(130, Math.max(110, fourthRect.height * 0.5));
   list.style.setProperty("--news-feed-height", `${Math.ceil(fourthRect.top - listRect.top + previewHeight)}px`);
 }
 
