@@ -1249,7 +1249,7 @@ textarea:focus {
   font-size: 18.387px;
   font-style: normal;
   font-weight: 900;
-  line-height: normal;
+  line-height: 12.395px;
   text-transform: uppercase;
 }
 
@@ -1492,17 +1492,19 @@ textarea:focus {
 .trending-card .rail-story-tag {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   width: max-content;
-  border: 1.5px solid #aad1fa;
+  border: 2.298px solid #aad1fa;
   border-radius: 0;
-  padding: 5px 6px 4px;
+  margin: 0;
+  padding: 9.193px 6.895px;
   background: #fff;
   color: #112841;
   font-family: "Acumin Pro Condensed Black", var(--font-title);
-  font-size: 13px;
+  font-size: 18.387px;
   font-style: normal;
   font-weight: 900;
-  line-height: 1;
+  line-height: 12.395px;
   text-transform: uppercase;
 }
 
