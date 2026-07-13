@@ -143,6 +143,9 @@
       <section class="layout-grid">
         <div class="content-stack">
           <section id="challenge" class="panel challenge-panel" aria-labelledby="challenge-title">
+            <div class="challenge-brand-band">
+              <img src="assets/es-athletics.svg" alt="Essentially Athletics">
+            </div>
             <div class="section-head">
               <div>
                 <h1 id="challenge-title">Essentially Athletics Weekly Challenge</h1>
@@ -156,10 +159,12 @@
             </div>
 
             <form id="challenge-form" novalidate>
-              <label class="field-label" for="reader-email">Email ID</label>
-              <div class="email-row">
+              <div class="email-field">
+                <div class="field-heading">
+                  <label class="field-label" for="reader-email">Email ID</label>
+                  <span class="required-note" id="email-note">Required for scoring</span>
+                </div>
                 <input id="reader-email" name="readerEmail" type="email" autocomplete="email" placeholder="you@example.com" aria-describedby="email-note form-error" required>
-                <span class="required-note" id="email-note">Required for points</span>
               </div>
 
               <div id="question-list" class="question-list"></div>
@@ -217,38 +222,10 @@
             <div class="news-list" id="news-list"></div>
           </section>
 
-          <section class="rail-card trending-card" aria-label="Trending">
+          <section class="rail-card trending-card" aria-label="Athletics exclusives">
             <h2><span class="trending-heading-icon" aria-hidden="true"></span>Trending</h2>
-            <article>
-              <a class="trending-thumb youtube-thumb" href="https://www.youtube.com/watch?v=QR8xZWE7D-w" target="_blank" rel="noopener" aria-label="Watch We Try to Name Every NFL RB1 Since 2016 on YouTube">
-                <img src="https://i.ytimg.com/vi/QR8xZWE7D-w/hqdefault.jpg" alt="" loading="lazy" decoding="async">
-              </a>
-              <div>
-                <div class="rail-tag-row"><span class="rail-story-tag">Video</span></div>
-                <a href="https://www.youtube.com/watch?v=QR8xZWE7D-w" target="_blank" rel="noopener">We Try to Name Every NFL RB1 Since 2016</a>
-                <span class="source-logo-only"><img src="assets/youtube-logo.webp" alt="YouTube"></span>
-              </div>
-            </article>
-            <article>
-              <a class="trending-thumb youtube-thumb" href="https://www.youtube.com/watch?v=JnVF2lRxLGA" target="_blank" rel="noopener" aria-label="Watch Finding the NFL Equivalent of Every World Cup Superstar on YouTube">
-                <img src="https://i.ytimg.com/vi/JnVF2lRxLGA/hqdefault.jpg" alt="" loading="lazy" decoding="async">
-              </a>
-              <div>
-                <div class="rail-tag-row"><span class="rail-story-tag">Video</span></div>
-                <a href="https://www.youtube.com/watch?v=JnVF2lRxLGA" target="_blank" rel="noopener">Finding the NFL Equivalent of Every World Cup Superstar</a>
-                <span class="source-logo-only"><img src="assets/youtube-logo.webp" alt="YouTube"></span>
-              </div>
-            </article>
-            <article>
-              <a class="trending-thumb" href="https://www.essentiallysports.com/category/track-and-field/" target="_blank" rel="noopener" aria-label="Read The sprint form everyone is watching on EssentiallySports">
-                <img src="https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-5.1.jpg" alt="" loading="lazy" decoding="async">
-              </a>
-              <div>
-                <div class="rail-tag-row"><span class="rail-story-tag">Athletics</span></div>
-                <a href="https://www.essentiallysports.com/category/track-and-field/" target="_blank" rel="noopener">The sprint form everyone is watching</a>
-                <span class="source-badge"><img src="assets/es-rounded-logo.png" alt="">EssentiallySports</span>
-              </div>
-            </article>
+            <div class="exclusive-status" id="exclusive-status">Loading ES exclusives...</div>
+            <div class="exclusive-list" id="exclusive-list"></div>
           </section>
         </aside>
       </section>

@@ -10,9 +10,22 @@ const CATEGORY_URLS = {
 
 exports.handler = async (event) => {
   const category = (event.queryStringParameters?.category || "athletics").toLowerCase();
+  const mode = (event.queryStringParameters?.mode || "latest").toLowerCase();
   const url = CATEGORY_URLS[category] || CATEGORY_URLS.athletics;
 
   try {
+    if (mode === "exclusive") {
+      const stories = await fetchExclusiveStories();
+      return {
+        statusCode: 200,
+        headers: {
+          "content-type": "application/json",
+          "cache-control": "public, max-age=900"
+        },
+        body: JSON.stringify({ source: url, stories })
+      };
+    }
+
     const response = await fetch(url, {
       headers: {
         "user-agent": "Mozilla/5.0 ES Athletics Challenge"
@@ -42,6 +55,37 @@ exports.handler = async (event) => {
     };
   }
 };
+
+async function fetchExclusiveStories() {
+  const endpoint = new URL("https://www.staging.essentiallysports.com/wp-json/wp/v2/posts");
+  endpoint.searchParams.set("categories", "31241");
+  endpoint.searchParams.set("search", "exclusive");
+  endpoint.searchParams.set("per_page", "30");
+  endpoint.searchParams.set("_embed", "1");
+
+  const response = await fetch(endpoint, {
+    headers: { "user-agent": "Mozilla/5.0 ES Athletics Challenge" }
+  });
+  if (!response.ok) throw new Error(`Exclusive fetch failed with ${response.status}`);
+
+  const posts = await response.json();
+  return posts
+    .filter((post) => {
+      const title = stripTags(post.title?.rendered || "");
+      return /\bexclusive\b/i.test(title) &&
+        /(track|field|olympic|athlet|enhanced games|noah lyles|usain bolt|world champion)/i.test(title);
+    })
+    .map((post) => ({
+      tag: "Track & Field",
+      title: decodeEntities(stripTags(post.title?.rendered || "EssentiallySports exclusive")),
+      url: post.link,
+      date: post.date,
+      image: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || "",
+      author: post._embedded?.author?.[0]?.name || "EssentiallySports",
+      exclusive: true
+    }))
+    .slice(0, 3);
+}
 
 function extractStories(html) {
   const seen = new Set();

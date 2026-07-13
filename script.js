@@ -48,6 +48,7 @@ const seedQuestions = [
     required: true,
     options: ["Noah Lyles", "Fred Kerley", "Kenny Bednarek", "Oblique Seville"],
     answer: "Noah Lyles",
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-5.1.jpg",
     source: "Noah Lyles' Rival Who Made Unsportsmanlike Comment Reveals Their Current Standing"
   },
   {
@@ -68,6 +69,7 @@ const seedQuestions = [
     required: true,
     options: ["Gold in every race", "A coaching role", "A marathon debut", "A Diamond League bye"],
     answer: "Gold in every race",
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-1-1.jpeg",
     source: "Noah Lyles Chooses Gold Medal in Every Race Over $100 Million for This Reason"
   },
   {
@@ -114,6 +116,36 @@ const backupNews = [
   }
 ];
 
+const backupExclusives = [
+  {
+    tag: "Track & Field",
+    title: "EXCLUSIVE Sam Hurley Shuts Down Money Talk and Shares Honest Take on NIL Growth in Track and Field",
+    url: "https://www.essentiallysports.com/olympics-track-and-field-news-exclusive-sam-hurley-shuts-down-money-talk-and-shares-honest-take-on-nil-growth-in-track-and-field/",
+    date: "Nov 16, 2025",
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/image-78-1.png",
+    author: "Krushna Prasad Pattnaik",
+    exclusive: true
+  },
+  {
+    tag: "Track & Field",
+    title: "EXCLUSIVE: Carl Lewis Gets Real on Enhanced Games as Fred Kerley & More Sign Up",
+    url: "https://www.essentiallysports.com/olympics-track-and-field-news-exclusive-carl-lewis-gets-real-on-enhanced-games-as-fred-kerley-more-sign-up/",
+    date: "Oct 13, 2025",
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Exclusive13_10.jpg",
+    author: "Rahul Goutam Hoom",
+    exclusive: true
+  },
+  {
+    tag: "Track & Field",
+    title: "EXCLUSIVE: Nick Mayhugh Talks Struggles and Sacrifices Behind Track and Field Career",
+    url: "https://www.essentiallysports.com/olympics-track-and-field-news-exclusive-nick-mayhugh-throws-victim-card-away-to-reveal-struggles-and-sacrifices-behind-track-and-field-career/",
+    date: "Sep 17, 2025",
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/imago1049359885.jpg",
+    author: "Rahul Goutam Hoom",
+    exclusive: true
+  }
+];
+
 const sampleChallenge = {
   title: "Essentially Athletics Weekly Challenge",
   category: "Athletics",
@@ -132,6 +164,17 @@ function getChallenge() {
         question.id === "q6" &&
         question.title === "In one line, which story would you want the newsletter to follow up on next?"
       ));
+      let imageCount = 0;
+      challenge.questions = challenge.questions.map((question) => {
+        let nextQuestion = question;
+        if (!Object.prototype.hasOwnProperty.call(question, "image")) {
+          const seedQuestion = seedQuestions.find((item) => item.id === question.id);
+          nextQuestion = { ...question, image: seedQuestion?.image || "" };
+        }
+        if (nextQuestion.image && imageCount >= 2) return { ...nextQuestion, image: "" };
+        if (nextQuestion.image) imageCount += 1;
+        return nextQuestion;
+      });
     }
     return challenge;
   } catch (error) {
@@ -245,6 +288,7 @@ function renderReaderPage() {
   questionList.innerHTML = challenge.questions.map((question, index) => renderQuestion(question, index, false)).join("");
   renderSources(challenge.articles);
   fetchNews(challenge.category || "Athletics");
+  fetchExclusives();
 
   document.querySelector("#refresh-news")?.addEventListener("click", () => fetchNews(challenge.category || "Athletics"));
   document.querySelector("#reset-form").addEventListener("click", () => {
@@ -290,6 +334,7 @@ function renderQuestion(question, index, editorPreview) {
   const points = Number(question.points || 0);
   const required = question.required ? "required" : "";
   const source = question.source ? `<span>Source: ${escapeHtml(question.source)}</span>` : "<span></span>";
+  const image = String(question.image || "").trim();
   const meta = `
     <div class="question-meta">
       <strong>Question ${index + 1}</strong>
@@ -328,11 +373,14 @@ function renderQuestion(question, index, editorPreview) {
   }
 
   return `
-    <article class="question-card" role="group" aria-labelledby="question-title-${index}">
-      ${meta}
-      <h3 id="question-title-${index}">${escapeHtml(question.title)}</h3>
-      ${control}
-      ${editorPreview ? "" : `<div class="question-meta question-source">${source}</div>`}
+    <article class="question-card${image ? " has-question-image" : ""}" role="group" aria-labelledby="question-title-${index}">
+      <div class="question-card-content">
+        ${meta}
+        <h3 id="question-title-${index}">${escapeHtml(question.title)}</h3>
+        ${control}
+        ${editorPreview ? "" : `<div class="question-meta question-source">${source}</div>`}
+      </div>
+      ${image ? `<figure class="question-media"><img src="${escapeHtml(image)}" alt="Related to ${escapeHtml(question.title)}" loading="lazy" decoding="async"></figure>` : ""}
     </article>
   `;
 }
@@ -480,6 +528,59 @@ function renderNews(items) {
   }).join("");
 }
 
+async function fetchExclusives() {
+  const list = document.querySelector("#exclusive-list");
+  const status = document.querySelector("#exclusive-status");
+  if (!list || !status) return;
+
+  renderExclusives(backupExclusives);
+  status.textContent = "Latest Athletics exclusives";
+
+  try {
+    const response = await fetch("/.netlify/functions/news?category=track-and-field&mode=exclusive");
+    if (!response.ok) return;
+    const payload = await response.json();
+    if (!Array.isArray(payload.stories) || payload.stories.length === 0) return;
+    const merged = [...payload.stories, ...backupExclusives].filter((story, index, stories) => (
+      stories.findIndex((candidate) => candidate.url === story.url) === index
+    ));
+    renderExclusives(merged.slice(0, 3));
+  } catch (error) {
+    // Curated ES exclusives remain visible when the live feed is unavailable.
+  }
+}
+
+function renderExclusives(items) {
+  const list = document.querySelector("#exclusive-list");
+  if (!list) return;
+
+  list.innerHTML = items.map((item) => {
+    const title = String(item.title || "EssentiallySports exclusive").replace(/^exclusive:?\s*/i, "");
+    return `
+      <article>
+        <a class="trending-thumb" href="${escapeHtml(item.url)}" target="_blank" rel="noopener" aria-label="Read ${escapeHtml(title)}">
+          <img src="${escapeHtml(item.image || "assets/workspace-card-newsletter-assets.webp")}" alt="" loading="lazy" decoding="async">
+        </a>
+        <div>
+          <div class="rail-tag-row">
+            <span class="rail-story-tag">${escapeHtml(item.tag || "Track & Field")}</span>
+            <span class="rail-story-tag is-exclusive">Exclusive</span>
+          </div>
+          <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>
+          <span class="news-source"><img src="assets/es-rounded-logo.png" alt="">${escapeHtml(item.author || "EssentiallySports")} · ${escapeHtml(formatStoryDate(item.date))}</span>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function formatStoryDate(value) {
+  if (!value) return "EssentiallySports";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return String(value);
+  return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
 function renderEditorPage() {
   const editorList = document.querySelector("#editor-question-list");
   if (!editorList) return;
@@ -506,6 +607,7 @@ function renderEditorPage() {
         <label>Options, comma separated<input data-field="options" value="${escapeHtml((question.options || []).join(", "))}"></label>
         <label>Correct answer<input data-field="answer" value="${escapeHtml(Array.isArray(question.answer) ? question.answer.join(", ") : question.answer)}"></label>
         <label>Source article<input data-field="source" value="${escapeHtml(question.source || "")}"></label>
+        <label class="full-width">Question image URL (maximum 2)<input data-field="image" type="url" placeholder="https://..." value="${escapeHtml(question.image || "")}"></label>
         <label>Points<input data-field="points" type="number" min="0" value="${escapeHtml(question.points || 0)}"></label>
       </article>
     `).join("");
@@ -544,6 +646,7 @@ function renderEditorPage() {
       required: true,
       options: ["Option 1", "Option 2", "Option 3"],
       answer: type === "checkbox" ? ["Option 1"] : "Option 1",
+      image: "",
       source: "Source article"
     });
     renderBuilder();
@@ -552,7 +655,8 @@ function renderEditorPage() {
   editorList.addEventListener("input", (event) => {
     const card = event.target.closest(".editor-question");
     if (!card) return;
-    const question = challenge.questions[Number(card.dataset.index)];
+    const questionIndex = Number(card.dataset.index);
+    const question = challenge.questions[questionIndex];
     const field = event.target.dataset.field;
     if (field === "options") {
       question.options = event.target.value.split(",").map((item) => item.trim()).filter(Boolean);
@@ -560,6 +664,17 @@ function renderEditorPage() {
       question.answer = event.target.value.split(",").map((item) => item.trim()).filter(Boolean);
     } else if (field === "points") {
       question.points = Number(event.target.value || 0);
+    } else if (field === "image") {
+      const value = event.target.value.trim();
+      const otherImages = challenge.questions.filter((item, index) => index !== questionIndex && item.image).length;
+      if (value && otherImages >= 2) {
+        event.target.value = question.image || "";
+        event.target.setCustomValidity("A challenge can include images on a maximum of two questions.");
+        event.target.reportValidity();
+        return;
+      }
+      event.target.setCustomValidity("");
+      question.image = value;
     } else {
       question[field] = event.target.value;
     }
