@@ -1,4 +1,5 @@
 const STORAGE_KEY = "es-athletics-challenge-draft-v2";
+const Q1_IMAGE_REMOVAL_KEY = "es-athletics-q1-image-removed-v2";
 
 const seedArticles = [
   {
@@ -48,7 +49,7 @@ const seedQuestions = [
     required: true,
     options: ["Noah Lyles", "Fred Kerley", "Kenny Bednarek", "Oblique Seville"],
     answer: "Noah Lyles",
-    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-5.1.jpg",
+    image: "",
     source: "Noah Lyles' Rival Who Made Unsportsmanlike Comment Reveals Their Current Standing"
   },
   {
@@ -157,7 +158,11 @@ const sampleChallenge = {
 function getChallenge() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return sampleChallenge;
+    const removeLegacyQ1Image = localStorage.getItem(Q1_IMAGE_REMOVAL_KEY) !== "true";
+    if (!saved) {
+      localStorage.setItem(Q1_IMAGE_REMOVAL_KEY, "true");
+      return sampleChallenge;
+    }
     const challenge = JSON.parse(saved);
     if (Array.isArray(challenge.questions)) {
       challenge.questions = challenge.questions.filter((question) => !(
@@ -171,11 +176,18 @@ function getChallenge() {
           const seedQuestion = seedQuestions.find((item) => item.id === question.id);
           nextQuestion = { ...question, image: seedQuestion?.image || "" };
         }
+        if (removeLegacyQ1Image && nextQuestion.id === "q1") {
+          nextQuestion = { ...nextQuestion, image: "" };
+        }
         if (nextQuestion.image && imageCount >= 2) return { ...nextQuestion, image: "" };
         if (nextQuestion.image) imageCount += 1;
         return nextQuestion;
       });
     }
+    if (removeLegacyQ1Image) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(challenge));
+    }
+    localStorage.setItem(Q1_IMAGE_REMOVAL_KEY, "true");
     return challenge;
   } catch (error) {
     return sampleChallenge;

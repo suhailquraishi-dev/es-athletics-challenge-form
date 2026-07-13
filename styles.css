@@ -1233,10 +1233,6 @@ textarea:focus {
   background: #e7f4ff;
 }
 
-.option-list label:last-child {
-  border-bottom: 0;
-}
-
 .option-list input {
   width: 18px;
   height: 18px;
@@ -1864,8 +1860,8 @@ textarea:focus {
 }
 
 .trending-heading-icon {
-  width: 1.25em;
-  height: 1.25em;
+  width: 1.5em;
+  height: 1.5em;
   flex: 0 0 auto;
   background: var(--blue);
   mask: url("assets/trending-topic.svg") center / contain no-repeat;
