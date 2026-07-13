@@ -2884,13 +2884,15 @@ body {
   }
 
   .es-logo {
+    min-width: 0;
+    flex: 1 1 auto;
     margin-right: 0;
   }
 
   .es-logo img {
-    width: 235px;
-    max-width: none;
-    height: 28px;
+    width: min(235px, 100%);
+    max-width: 235px;
+    height: auto;
   }
 
   .es-primary-nav,
@@ -2900,11 +2902,11 @@ body {
 
   .es-menu-button {
     display: block;
-    width: 32px;
-    height: 28px;
-    flex: 0 0 32px;
+    width: 44px;
+    height: 43px;
+    flex: 0 0 44px;
     margin-left: auto;
-    padding: 5px 6px;
+    padding: 12px;
   }
 
   .es-menu-button span {
@@ -3007,7 +3009,40 @@ body {
   }
 
   .question-list {
+    grid-template-columns: minmax(0, 1fr);
     gap: 22px;
+  }
+
+  .challenge-panel > .section-head {
+    margin: 20px 16px 18px;
+  }
+
+  .challenge-panel > form,
+  .question-list,
+  .question-card,
+  .question-card-content,
+  .question-heading,
+  .option-list,
+  .option-list label {
+    min-width: 0;
+  }
+
+  .question-card {
+    width: 100%;
+  }
+
+  .question-card h3,
+  .question-source {
+    overflow-wrap: anywhere;
+  }
+
+  .scale-row {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .score-set small {
+    font-size: 10px;
+    font-weight: 900;
   }
 
   .question-heading > .question-meta:first-child {
