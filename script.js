@@ -273,7 +273,6 @@ function renderSources(articles) {
       <div class="source-card-body">
         <span class="source-tag">${escapeHtml(article.tag)}</span>
         <h3><a href="${escapeHtml(article.url)}" target="_blank" rel="noopener">${escapeHtml(article.title)}</a></h3>
-        <p>${escapeHtml(article.dek || "Read the full story behind this challenge question.")}</p>
         <div class="source-meta">
           <img class="source-publisher-logo" src="assets/es-rounded-logo.png" alt="">
           <a href="${escapeHtml(article.url)}" target="_blank" rel="noopener">${escapeHtml(article.author || "EssentiallySports")}</a>

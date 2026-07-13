@@ -400,7 +400,7 @@ button {
 }
 
 main {
-  width: min(1220px, calc(100% - 28px));
+  width: min(1340px, calc(100% - 28px));
   margin: 0 auto;
   padding-top: 24px;
 }
@@ -597,7 +597,7 @@ h3 {
 
 .layout-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 390px;
+  grid-template-columns: minmax(0, 1fr) 460px;
   gap: 24px;
   align-items: start;
   padding-bottom: 48px;
@@ -1403,13 +1403,13 @@ textarea:focus {
 .news-item,
 .trending-card article {
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-columns: 160px minmax(0, 1fr);
   gap: 12px;
   align-items: stretch;
 }
 
 .trending-card article {
-  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-columns: 160px minmax(0, 1fr);
 }
 
 .news-item + .news-item,
@@ -2000,7 +2000,7 @@ textarea:focus {
   }
 
   main {
-    width: min(100% - 22px, 1220px);
+    width: min(100% - 22px, 1340px);
   }
 
   .hero-shell {
@@ -2065,7 +2065,7 @@ textarea:focus {
 
   .es-footer-links,
   .es-legal-nav {
-    width: min(100% - 22px, 1220px);
+    width: min(100% - 22px, 1340px);
   }
 
   .es-footer-links {
