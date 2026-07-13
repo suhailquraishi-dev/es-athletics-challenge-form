@@ -1717,7 +1717,6 @@ textarea:focus {
   max-height: var(--news-feed-height, 560px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-bottom: 82px;
   scrollbar-width: none;
 }
 
@@ -1726,17 +1725,15 @@ textarea:focus {
 }
 
 .news-more-fade {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  position: relative;
   z-index: 2;
   display: none;
-  min-height: 76px;
+  min-height: 112px;
   align-items: flex-end;
   justify-content: center;
-  padding: 18px 18px 10px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55) 50%, #fff 88%, #fff 100%);
+  margin-top: -64px;
+  padding: 64px 18px 8px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.72) 48%, #fff 64%, #fff 100%);
   pointer-events: none;
 }
 
