@@ -92,18 +92,21 @@ const seedQuestions = [
 
 const backupNews = [
   {
+    tag: "Athletics",
     title: "Noah Lyles' Rival Who Made Unsportsmanlike Comment Reveals Their Current Standing",
     url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-noah-lyles-rival-who-made-unsportsmanlike-comment-reveals-their-current-standing/",
     date: "19 hrs ago",
     image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-5.1.jpg"
   },
   {
+    tag: "Athletics",
     title: "Sha'Carri Richardson and Melissa Jefferson-Wooden Set to Go Against Each Other Once Again",
     url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-shacarri-richardson-and-melissa-jefferson-wooden-set-to-go-against-each-other-once-again/",
     date: "19 hrs ago",
     image: "https://image-cdn.essentiallysports.com/wp-content/uploads/image-13-5.png"
   },
   {
+    tag: "Athletics",
     title: "Noah Lyles Chooses Gold Medal in Every Race Over $100 Million for This Reason",
     url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-noah-lyles-chooses-gold-medal-in-every-race-over-hundred-million-dollars-for-this-reason/",
     date: "20 hrs ago",
@@ -360,7 +363,8 @@ async function fetchNews(category) {
       title: stripTags(post.title?.rendered || "EssentiallySports story"),
       url: post.link,
       date: new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-      image: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || ""
+      image: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || "",
+      tag: post._embedded?.["wp:term"]?.flat()?.find((term) => term.taxonomy === "category")?.name || "Athletics"
     })));
   } catch (error) {
     status.textContent = "Latest Athletics picks";
@@ -376,17 +380,24 @@ function stripTags(value) {
 
 function renderNews(items) {
   const list = document.querySelector("#news-list");
-  list.innerHTML = items.map((item) => `
+  list.innerHTML = items.map((item) => {
+    const isExclusive = Boolean(item.exclusive) || /\bexclusive\b/i.test(item.title || "");
+    return `
     <article class="news-item">
       <a class="news-thumb" href="${escapeHtml(item.url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(item.title)}">
         <img src="${escapeHtml(item.image || "assets/workspace-card-newsletter-assets.webp")}" alt="">
       </a>
       <div>
+        <div class="rail-tag-row">
+          <span class="rail-story-tag">${escapeHtml(item.tag || "Athletics")}</span>
+          ${isExclusive ? '<span class="rail-story-tag is-exclusive">Exclusive</span>' : ""}
+        </div>
         <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a>
         <span class="news-source"><img src="assets/es-rounded-logo.png" alt="">${escapeHtml(item.date)}</span>
       </div>
     </article>
-  `).join("");
+  `;
+  }).join("");
 }
 
 function renderEditorPage() {

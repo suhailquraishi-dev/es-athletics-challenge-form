@@ -597,8 +597,8 @@ h3 {
 
 .layout-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 348px;
-  gap: 22px;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 24px;
   align-items: start;
   padding-bottom: 48px;
 }
@@ -1264,7 +1264,7 @@ textarea:focus {
   position: sticky;
   top: 92px;
   display: grid;
-  gap: 22px;
+  gap: 24px;
   min-width: 0;
 }
 
@@ -1287,9 +1287,9 @@ textarea:focus {
 .rail-card h2 {
   margin: 0;
   color: #66758c;
-  font-family: var(--font-ui);
-  font-size: 16px;
-  font-weight: 700;
+  font-family: "Acumin Pro Condensed Black", var(--font-title);
+  font-size: 18px;
+  font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -1376,7 +1376,7 @@ textarea:focus {
 .news-status {
   min-height: 18px;
   color: #8f9aad;
-  font-size: 12px;
+  font-size: 13px;
   margin: 0;
   padding: 0 18px 8px;
 }
@@ -1388,8 +1388,8 @@ textarea:focus {
 
 .top-stories .news-list,
 .trending-card {
-  gap: 18px;
-  padding: 14px 18px 22px;
+  gap: 16px;
+  padding: 18px;
 }
 
 .trending-card {
@@ -1403,13 +1403,19 @@ textarea:focus {
 .news-item,
 .trending-card article {
   display: grid;
-  grid-template-columns: 82px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 12px;
   align-items: start;
 }
 
 .trending-card article {
-  grid-template-columns: 82px minmax(0, 1fr);
+  grid-template-columns: 112px minmax(0, 1fr);
+}
+
+.news-item + .news-item,
+.trending-card article + article {
+  border-top: 1px solid #e6edf5;
+  padding-top: 16px;
 }
 
 .news-thumb {
@@ -1423,7 +1429,7 @@ textarea:focus {
 .trending-thumb img {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 2;
   object-fit: cover;
 }
 
@@ -1443,19 +1449,19 @@ textarea:focus {
 .trending-card a {
   color: var(--ink);
   font-family: var(--font-ui);
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
-  line-height: 1.08;
+  line-height: 1.12;
 }
 
 .news-item > div {
   display: grid;
-  gap: 5px;
+  gap: 7px;
 }
 
 .trending-card article > div {
   display: grid;
-  gap: 6px;
+  gap: 7px;
   align-content: start;
 }
 
@@ -1469,6 +1475,40 @@ textarea:focus {
   color: #8f9aad;
   font-size: 12px;
   font-weight: 700;
+}
+
+.rail-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.news-item .rail-story-tag,
+.trending-card .rail-story-tag {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  border: 1.5px solid #aad1fa;
+  border-radius: 0;
+  padding: 5px 6px 4px;
+  background: #fff;
+  color: #112841;
+  font-family: "Acumin Pro Condensed Black", var(--font-title);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.news-item .rail-story-tag.is-exclusive,
+.trending-card .rail-story-tag.is-exclusive {
+  border-color: #ffea00;
+  background: #ffea00;
+  color: #111;
+  font-style: italic;
 }
 
 .news-source {
