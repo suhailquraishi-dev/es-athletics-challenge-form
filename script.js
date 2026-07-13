@@ -114,6 +114,13 @@ const backupNews = [
     url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-noah-lyles-chooses-gold-medal-in-every-race-over-hundred-million-dollars-for-this-reason/",
     date: "20 hrs ago",
     image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-1-1.jpeg"
+  },
+  {
+    tag: "Diamond League",
+    title: "World Champion Climbs Back to the Top After Shocking Loss to NCAA Athlete",
+    url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-world-champion-climbs-back-to-the-top-after-shocking-loss-to-ncaa-athlete/",
+    date: "20 hrs ago",
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/imago833691748.jpg"
   }
 ];
 
@@ -438,6 +445,7 @@ function renderReaderPage() {
   questionList.innerHTML = challenge.questions.map((question, index) => renderQuestion(question, index, false)).join("");
   setupSimpleSelects(questionList);
   renderSources(challenge.articles);
+  setupNewsScroller();
   fetchNews(challenge.category || "Athletics");
   fetchExclusives();
 
@@ -751,7 +759,7 @@ async function fetchNews(category) {
       const payload = await functionResponse.json();
       if (Array.isArray(payload.stories) && payload.stories.length > 0) {
         status.textContent = "Latest Athletics picks";
-        renderNews(payload.stories);
+        renderNews(mergeStories(payload.stories, backupNews).slice(0, 6));
         return;
       }
     }
@@ -761,13 +769,14 @@ async function fetchNews(category) {
     const posts = await response.json();
     if (!Array.isArray(posts) || posts.length === 0) throw new Error("No posts found");
     status.textContent = "Latest Athletics picks";
-    renderNews(posts.map((post) => ({
+    const mappedPosts = posts.map((post) => ({
       title: stripTags(post.title?.rendered || "EssentiallySports story"),
       url: post.link,
       date: new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       image: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || "",
       tag: post._embedded?.["wp:term"]?.flat()?.find((term) => term.taxonomy === "category")?.name || "Athletics"
-    })));
+    }));
+    renderNews(mergeStories(mappedPosts, backupNews).slice(0, 6));
   } catch (error) {
     status.textContent = "Latest Athletics picks";
     renderNews(backupNews);
@@ -780,8 +789,63 @@ function stripTags(value) {
   return div.textContent || div.innerText || "";
 }
 
+function mergeStories(primary, secondary) {
+  return [...primary, ...secondary].filter((story, index, stories) => (
+    stories.findIndex((candidate) => candidate.url === story.url) === index
+  ));
+}
+
+function setupNewsScroller() {
+  const list = document.querySelector("#news-list");
+  const button = document.querySelector("#news-more-button");
+  if (!list || !button) return;
+
+  const label = button.querySelector("span");
+  const updateControl = () => {
+    const isAtEnd = list.scrollTop + list.clientHeight >= list.scrollHeight - 8;
+    button.classList.toggle("is-return", isAtEnd);
+    label.textContent = isAtEnd ? "Back to top" : "See more updates";
+  };
+
+  button.addEventListener("click", () => {
+    const isAtEnd = list.scrollTop + list.clientHeight >= list.scrollHeight - 8;
+    list.scrollTo({
+      top: isAtEnd ? 0 : Math.min(list.scrollHeight, list.scrollTop + Math.round(list.clientHeight * 0.72)),
+      behavior: "smooth"
+    });
+  });
+
+  list.addEventListener("scroll", updateControl, { passive: true });
+  let resizeFrame;
+  window.addEventListener("resize", () => {
+    cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(syncNewsFeedHeight);
+  }, { passive: true });
+  updateControl();
+}
+
+function syncNewsFeedHeight() {
+  const list = document.querySelector("#news-list");
+  const fourthStory = list?.children[3];
+  if (!list || !fourthStory) {
+    list?.style.removeProperty("--news-feed-height");
+    return;
+  }
+
+  const listRect = list.getBoundingClientRect();
+  const fourthRect = fourthStory.getBoundingClientRect();
+  const previewHeight = Math.min(112, Math.max(92, fourthRect.height * 0.45));
+  list.style.setProperty("--news-feed-height", `${Math.ceil(fourthRect.top - listRect.top + previewHeight)}px`);
+}
+
 function renderNews(items) {
   const list = document.querySelector("#news-list");
+  const shell = document.querySelector("#news-feed-shell");
+  const button = document.querySelector("#news-more-button");
+  list.scrollTop = 0;
+  shell?.classList.toggle("has-more-stories", items.length > 3);
+  button?.classList.remove("is-return");
+  if (button) button.querySelector("span").textContent = "See more updates";
   list.innerHTML = items.map((item) => {
     const isExclusive = Boolean(item.exclusive) || /\bexclusive\b/i.test(item.title || "");
     return `
@@ -800,6 +864,7 @@ function renderNews(items) {
     </article>
   `;
   }).join("");
+  requestAnimationFrame(syncNewsFeedHeight);
 }
 
 async function fetchExclusives() {
