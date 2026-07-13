@@ -2486,6 +2486,7 @@ body {
   z-index: 5000;
   height: 69px;
   border: 0;
+  border-bottom: 1px solid var(--blue);
   background: #fff;
 }
 
