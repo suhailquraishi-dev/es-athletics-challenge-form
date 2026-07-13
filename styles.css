@@ -8,8 +8,40 @@
 
 @font-face {
   font-family: "Acumin Pro Condensed Black";
-  src: url("assets/fonts/acumin-pro-condensed-bold.otf") format("opentype");
+  src: url("assets/fonts/acumin-pro-condensed-black.otf") format("opentype");
   font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Roboto Condensed";
+  src: url("assets/fonts/roboto-condensed-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("assets/fonts/roboto-regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("assets/fonts/roboto-medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("assets/fonts/roboto-bold.ttf") format("truetype");
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -32,7 +64,7 @@
   --shadow: 0 12px 34px rgba(3, 49, 98, 0.07);
   --font-body: "Roboto";
   --font-ui: "Roboto Condensed";
-  --font-title: "Acumin Post Bold";
+  --font-title: "Acumin Pro Condensed Black";
 }
 
 * {
@@ -66,6 +98,15 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(10, 125, 250, 0.4);
+  outline-offset: 3px;
 }
 
 img {
@@ -223,6 +264,19 @@ button {
   height: 3px;
   margin: 5px 0;
   background: var(--ink);
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.es-site-header.is-menu-open .es-menu-button span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.es-site-header.is-menu-open .es-menu-button span:nth-child(2) {
+  opacity: 0;
+}
+
+.es-site-header.is-menu-open .es-menu-button span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
 }
 
 .score-ticker {
@@ -292,7 +346,8 @@ button {
 
 .ticker-track {
   width: max-content;
-  animation: athletics-ticker-scroll 30s linear infinite;
+  animation: athletics-ticker-scroll var(--ticker-duration, 30s) linear infinite;
+  will-change: transform;
 }
 
 .ticker-window:hover .ticker-track {
@@ -319,7 +374,7 @@ button {
 .ticker-match {
   display: grid;
   align-items: start;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
 }
 
@@ -330,6 +385,7 @@ button {
   font-size: 10px;
   font-weight: 700;
   line-height: 11px;
+  margin-bottom: 4px;
   white-space: nowrap;
 }
 
@@ -395,7 +451,7 @@ button {
 
 @keyframes athletics-ticker-scroll {
   to {
-    transform: translateX(-50%);
+    transform: translateX(var(--ticker-shift, -990px));
   }
 }
 
@@ -694,7 +750,7 @@ h3 {
   white-space: normal;
 }
 
-.challenge-panel .section-head h2,
+.challenge-panel .section-head h1,
 .sources-panel .section-head h2,
 .news-rail .section-head h2 {
   color: var(--ink);
@@ -704,7 +760,8 @@ h3 {
   color: var(--ink);
 }
 
-.challenge-panel .section-head h2 {
+.challenge-panel .section-head h1 {
+  margin: 0;
   max-width: 640px;
   color: #111;
   font-family: "Acumin Pro Condensed Black", var(--font-title);
@@ -1271,7 +1328,7 @@ textarea:focus {
 .rail-card {
   overflow: hidden;
   border: 1px solid var(--line-soft);
-  border-radius: 14px;
+  border-radius: 8px;
   background: #fff;
   box-shadow: none;
 }
@@ -1979,6 +2036,30 @@ textarea:focus {
   .es-menu-button {
     flex: 0 0 auto;
     margin-left: auto;
+  }
+
+  .es-site-header.is-menu-open .es-primary-nav {
+    position: absolute;
+    top: 69px;
+    left: 0;
+    z-index: 2;
+    display: flex;
+    width: 100%;
+    max-height: calc(100vh - 69px);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    overflow-y: auto;
+    padding: 8px 16px 14px;
+    border-bottom: 1px solid var(--line-soft);
+    background: #fff;
+  }
+
+  .es-site-header.is-menu-open .es-primary-nav a {
+    min-height: 46px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eef2f7;
+    font-size: 18px;
   }
 
   .score-ticker {

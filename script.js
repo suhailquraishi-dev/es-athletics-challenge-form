@@ -160,6 +160,76 @@ function getTotalPoints(questions) {
   return questions.reduce((sum, question) => sum + Number(question.points || 0), 0);
 }
 
+function setupTickerLoop() {
+  const windowElement = document.querySelector(".ticker-window");
+  const track = document.querySelector(".ticker-track");
+  const firstLoop = track?.querySelector(".ticker-loop");
+  if (!windowElement || !track || !firstLoop) return;
+
+  let lastWindowWidth = 0;
+
+  const rebuild = () => {
+    const windowWidth = Math.round(windowElement.getBoundingClientRect().width);
+    if (!windowWidth || windowWidth === lastWindowWidth) return;
+    lastWindowWidth = windowWidth;
+
+    track.querySelectorAll(".ticker-loop").forEach((loop, index) => {
+      if (index > 0) loop.remove();
+    });
+
+    const loopWidth = Math.round(firstLoop.getBoundingClientRect().width);
+    if (!loopWidth) return;
+
+    const clonesNeeded = Math.max(1, Math.ceil(windowWidth / loopWidth));
+    for (let index = 0; index < clonesNeeded; index += 1) {
+      const clone = firstLoop.cloneNode(true);
+      clone.setAttribute("aria-hidden", "true");
+      track.append(clone);
+    }
+
+    track.style.setProperty("--ticker-shift", `-${loopWidth}px`);
+    track.style.setProperty("--ticker-duration", `${Math.max(22, loopWidth / 34).toFixed(2)}s`);
+  };
+
+  rebuild();
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(rebuild).observe(windowElement);
+  } else {
+    window.addEventListener("resize", rebuild, { passive: true });
+  }
+}
+
+function setupMobileMenu() {
+  const header = document.querySelector(".es-site-header");
+  const button = document.querySelector(".es-menu-button");
+  const nav = document.querySelector("#es-primary-nav");
+  if (!header || !button || !nav) return;
+
+  const closeMenu = () => {
+    header.classList.remove("is-menu-open");
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-label", "Open menu");
+  };
+
+  button.addEventListener("click", () => {
+    const open = !header.classList.contains("is-menu-open");
+    header.classList.toggle("is-menu-open", open);
+    button.setAttribute("aria-expanded", String(open));
+    button.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  });
+
+  nav.addEventListener("click", closeMenu);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMenu();
+      button.focus();
+    }
+  });
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 680) closeMenu();
+  }, { passive: true });
+}
+
 function renderReaderPage() {
   const form = document.querySelector("#challenge-form");
   const questionList = document.querySelector("#question-list");
@@ -179,28 +249,39 @@ function renderReaderPage() {
   document.querySelector("#refresh-news")?.addEventListener("click", () => fetchNews(challenge.category || "Athletics"));
   document.querySelector("#reset-form").addEventListener("click", () => {
     form.reset();
+    form.querySelectorAll("[aria-invalid='true']").forEach((field) => field.removeAttribute("aria-invalid"));
     document.querySelector("#result-panel").classList.add("is-hidden");
     document.querySelector("#form-error").textContent = "";
   });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    const email = document.querySelector("#reader-email").value.trim();
+    const emailField = document.querySelector("#reader-email");
+    const email = emailField.value.trim();
     const error = document.querySelector("#form-error");
-    if (!email || !email.includes("@")) {
+    if (!email || !emailField.checkValidity()) {
       error.textContent = "Enter a valid email ID before submitting.";
+      emailField.setAttribute("aria-invalid", "true");
+      emailField.focus();
       return;
     }
 
     const missing = challenge.questions.find((question) => question.required && !hasAnswer(form, question));
     if (missing) {
       error.textContent = "Complete all required questions before submitting.";
+      const missingField = Array.from(form.elements).find((field) => field.name === missing.id);
+      missingField?.setAttribute("aria-invalid", "true");
+      missingField?.focus();
       return;
     }
 
     error.textContent = "";
     const score = calculateScore(form, challenge.questions);
     showScore(score, totalPoints);
+  });
+
+  form.addEventListener("input", (event) => {
+    event.target.removeAttribute?.("aria-invalid");
   });
 }
 
@@ -247,9 +328,9 @@ function renderQuestion(question, index, editorPreview) {
   }
 
   return `
-    <article class="question-card">
+    <article class="question-card" role="group" aria-labelledby="question-title-${index}">
       ${meta}
-      <h3>${escapeHtml(question.title)}</h3>
+      <h3 id="question-title-${index}">${escapeHtml(question.title)}</h3>
       ${control}
       ${editorPreview ? "" : `<div class="question-meta question-source">${source}</div>`}
     </article>
@@ -268,7 +349,7 @@ function renderSources(articles) {
   sourceList.innerHTML = articles.map((article, index) => `
     <article class="source-card">
       <a class="source-card-image" href="${escapeHtml(article.url)}" target="_blank" rel="noopener">
-        <img src="${escapeHtml(article.image || sourceImages[index % sourceImages.length])}" alt="">
+        <img src="${escapeHtml(article.image || sourceImages[index % sourceImages.length])}" alt="${escapeHtml(article.title)}" loading="lazy" decoding="async">
       </a>
       <div class="source-card-body">
         <span class="source-tag">${escapeHtml(article.tag)}</span>
@@ -347,7 +428,7 @@ async function fetchNews(category) {
     if (functionResponse.ok) {
       const payload = await functionResponse.json();
       if (Array.isArray(payload.stories) && payload.stories.length > 0) {
-        status.textContent = "Live category feed loaded";
+        status.textContent = "Latest Athletics picks";
         renderNews(payload.stories);
         return;
       }
@@ -357,7 +438,7 @@ async function fetchNews(category) {
     if (!response.ok) throw new Error("News fetch failed");
     const posts = await response.json();
     if (!Array.isArray(posts) || posts.length === 0) throw new Error("No posts found");
-    status.textContent = "Live feed loaded";
+    status.textContent = "Latest Athletics picks";
     renderNews(posts.map((post) => ({
       title: stripTags(post.title?.rendered || "EssentiallySports story"),
       url: post.link,
@@ -384,7 +465,7 @@ function renderNews(items) {
     return `
     <article class="news-item">
       <a class="news-thumb" href="${escapeHtml(item.url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(item.title)}">
-        <img src="${escapeHtml(item.image || "assets/workspace-card-newsletter-assets.webp")}" alt="">
+        <img src="${escapeHtml(item.image || "assets/workspace-card-newsletter-assets.webp")}" alt="" loading="lazy" decoding="async">
       </a>
       <div>
         <div class="rail-tag-row">
@@ -510,6 +591,8 @@ function renderEditorPage() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  setupTickerLoop();
+  setupMobileMenu();
   renderReaderPage();
   renderEditorPage();
 });
