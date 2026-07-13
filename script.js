@@ -286,6 +286,7 @@ function renderReaderPage() {
   if (challengeTitleEl) challengeTitleEl.textContent = challenge.title;
 
   questionList.innerHTML = challenge.questions.map((question, index) => renderQuestion(question, index, false)).join("");
+  setupSimpleSelects(questionList);
   renderSources(challenge.articles);
   fetchNews(challenge.category || "Athletics");
   fetchExclusives();
@@ -293,6 +294,7 @@ function renderReaderPage() {
   document.querySelector("#refresh-news")?.addEventListener("click", () => fetchNews(challenge.category || "Athletics"));
   document.querySelector("#reset-form").addEventListener("click", () => {
     form.reset();
+    resetSimpleSelects(form);
     form.querySelectorAll("[aria-invalid='true']").forEach((field) => field.removeAttribute("aria-invalid"));
     document.querySelector("#result-panel").classList.add("is-hidden");
     document.querySelector("#form-error").textContent = "";
@@ -314,8 +316,11 @@ function renderReaderPage() {
     if (missing) {
       error.textContent = "Complete all required questions before submitting.";
       const missingField = Array.from(form.elements).find((field) => field.name === missing.id);
-      missingField?.setAttribute("aria-invalid", "true");
-      missingField?.focus();
+      const missingSelect = Array.from(form.querySelectorAll(".simple-select"))
+        .find((select) => select.dataset.selectName === missing.id);
+      const invalidControl = missingSelect?.querySelector(".simple-select-trigger") || missingField;
+      invalidControl?.setAttribute("aria-invalid", "true");
+      invalidControl?.focus();
       return;
     }
 
@@ -352,10 +357,20 @@ function renderQuestion(question, index, editorPreview) {
       <label><input type="checkbox" name="${name}" value="${escapeHtml(option)}"> <span>${escapeHtml(option)}</span></label>
     `).join("")}</div>`;
   } else if (question.type === "select") {
-    control = `<select name="${name}" ${required}>
-      <option value="">Select an answer</option>
-      ${(question.options || []).map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`).join("")}
-    </select>`;
+    const listId = `question-select-${index}`;
+    control = `
+      <div class="simple-select" data-select-name="${name}">
+        <input type="hidden" name="${name}" value="">
+        <button class="simple-select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="${listId}">
+          <span>Select an answer</span>
+          <i aria-hidden="true"></i>
+        </button>
+        <div class="simple-select-menu" id="${listId}" role="listbox" hidden>
+          ${(question.options || []).map((option) => `
+            <button type="button" role="option" aria-selected="false" data-value="${escapeHtml(option)}">${escapeHtml(option)}</button>
+          `).join("")}
+        </div>
+      </div>`;
   } else if (question.type === "scale") {
     control = `<div class="scale-row">${[1, 2, 3, 4, 5].map((value) => `
       <label><input type="radio" name="${name}" value="${value}" ${required}> ${value}</label>
@@ -374,19 +389,124 @@ function renderQuestion(question, index, editorPreview) {
 
   return `
     <article class="question-card${image ? " has-question-image" : ""}" role="group" aria-labelledby="question-title-${index}">
+      ${image ? `<figure class="question-media"><img src="${escapeHtml(image)}" alt="Related to ${escapeHtml(question.title)}" loading="lazy" decoding="async"></figure>` : ""}
       <div class="question-card-content">
         <div class="question-header">
           <div class="question-heading">
             ${meta}
             <h3 id="question-title-${index}">${escapeHtml(question.title)}</h3>
           </div>
-          ${image ? `<figure class="question-media"><img src="${escapeHtml(image)}" alt="Related to ${escapeHtml(question.title)}" loading="lazy" decoding="async"></figure>` : ""}
         </div>
         ${control}
         ${editorPreview ? "" : `<div class="question-meta question-source">${source}</div>`}
       </div>
     </article>
   `;
+}
+
+function setupSimpleSelects(root) {
+  root.querySelectorAll(".simple-select").forEach((select) => {
+    const trigger = select.querySelector(".simple-select-trigger");
+    const menu = select.querySelector(".simple-select-menu");
+    const input = select.querySelector("input[type='hidden']");
+    const options = Array.from(menu.querySelectorAll("[role='option']"));
+
+    const close = (restoreFocus = false) => {
+      menu.hidden = true;
+      select.classList.remove("is-open");
+      trigger.setAttribute("aria-expanded", "false");
+      if (restoreFocus) trigger.focus();
+    };
+
+    const open = () => {
+      document.querySelectorAll(".simple-select.is-open").forEach((openSelect) => {
+        if (openSelect !== select) openSelect.querySelector(".simple-select-trigger").click();
+      });
+      menu.hidden = false;
+      select.classList.add("is-open");
+      trigger.setAttribute("aria-expanded", "true");
+    };
+
+    const choose = (option) => {
+      input.value = option.dataset.value;
+      trigger.querySelector("span").textContent = option.textContent.trim();
+      trigger.classList.add("has-value");
+      trigger.removeAttribute("aria-invalid");
+      options.forEach((item) => item.setAttribute("aria-selected", String(item === option)));
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+      close(true);
+    };
+
+    trigger.addEventListener("click", () => {
+      if (select.classList.contains("is-open")) {
+        close();
+      } else {
+        open();
+      }
+    });
+
+    trigger.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && select.classList.contains("is-open")) {
+        event.preventDefault();
+        close();
+        return;
+      }
+      if (!["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key)) return;
+      event.preventDefault();
+      open();
+      const selected = options.find((option) => option.getAttribute("aria-selected") === "true");
+      (selected || options[event.key === "ArrowUp" ? options.length - 1 : 0])?.focus();
+    });
+
+    options.forEach((option, optionIndex) => {
+      option.addEventListener("click", () => choose(option));
+      option.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          close(true);
+        } else if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          choose(option);
+        } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+          event.preventDefault();
+          const direction = event.key === "ArrowDown" ? 1 : -1;
+          options[(optionIndex + direction + options.length) % options.length].focus();
+        } else if (event.key === "Home" || event.key === "End") {
+          event.preventDefault();
+          options[event.key === "Home" ? 0 : options.length - 1].focus();
+        }
+      });
+    });
+
+  });
+
+  if (!document.documentElement.dataset.simpleSelectOutsideClick) {
+    document.documentElement.dataset.simpleSelectOutsideClick = "true";
+    document.addEventListener("click", (event) => {
+      document.querySelectorAll(".simple-select.is-open").forEach((select) => {
+        if (select.contains(event.target)) return;
+        select.classList.remove("is-open");
+        select.querySelector(".simple-select-trigger").setAttribute("aria-expanded", "false");
+        select.querySelector(".simple-select-menu").hidden = true;
+      });
+    });
+  }
+}
+
+function resetSimpleSelects(root) {
+  root.querySelectorAll(".simple-select").forEach((select) => {
+    const trigger = select.querySelector(".simple-select-trigger");
+    const menu = select.querySelector(".simple-select-menu");
+    select.querySelector("input[type='hidden']").value = "";
+    trigger.querySelector("span").textContent = "Select an answer";
+    trigger.classList.remove("has-value");
+    trigger.removeAttribute("aria-invalid");
+    trigger.setAttribute("aria-expanded", "false");
+    select.classList.remove("is-open");
+    menu.hidden = true;
+    menu.querySelectorAll("[role='option']").forEach((option) => option.setAttribute("aria-selected", "false"));
+  });
 }
 
 function renderSources(articles) {
@@ -621,6 +741,7 @@ function renderEditorPage() {
   function renderEditorPreview() {
     const preview = document.querySelector("#editor-preview-list");
     preview.innerHTML = challenge.questions.map((question, index) => renderQuestion(question, index, true)).join("");
+    setupSimpleSelects(preview);
   }
 
   function captureSettings() {
