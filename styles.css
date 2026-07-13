@@ -1405,7 +1405,7 @@ textarea:focus {
   display: grid;
   grid-template-columns: 112px minmax(0, 1fr);
   gap: 12px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .trending-card article {
@@ -1420,6 +1420,7 @@ textarea:focus {
 
 .news-thumb {
   display: block;
+  height: 100%;
   overflow: hidden;
   border-radius: 6px;
   background: var(--canvas);
@@ -1429,13 +1430,15 @@ textarea:focus {
 .trending-thumb img {
   display: block;
   width: 100%;
-  aspect-ratio: 3 / 2;
+  height: 100%;
+  min-height: 100%;
   object-fit: cover;
 }
 
 .trending-thumb {
   display: grid;
   place-items: center;
+  height: 100%;
   overflow: hidden;
   border-radius: 6px;
   background: var(--canvas);
