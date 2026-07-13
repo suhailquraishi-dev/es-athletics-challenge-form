@@ -15,7 +15,7 @@
 }
 
 :root {
-  --page: #f5f7fb;
+  --page: #f7f8fa;
   --paper: #ffffff;
   --canvas: #edf6ff;
   --canvas-soft: #f3f9ff;
@@ -49,6 +49,18 @@ body {
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.5;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 a {
@@ -210,6 +222,172 @@ button {
   height: 3px;
   margin: 5px 0;
   background: var(--ink);
+}
+
+.score-ticker {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  width: 100%;
+  height: 80px;
+  overflow: hidden;
+  border-bottom: 1px solid #e4e7eb;
+  background: #fff;
+  color: #121417;
+  font-family: var(--font-ui);
+}
+
+.ticker-title {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 80px;
+  padding: 8px 8px 7px;
+  border-right: 3px solid #7d35c5;
+  background: #fff;
+}
+
+.ticker-title img {
+  display: block;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.ticker-title span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.ticker-live-dot {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #ef233c;
+}
+
+.ticker-window {
+  position: relative;
+  height: 80px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.ticker-track,
+.ticker-loop {
+  display: flex;
+  height: 80px;
+}
+
+.ticker-track {
+  width: max-content;
+  animation: athletics-ticker-scroll 30s linear infinite;
+}
+
+.ticker-window:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+.ticker-loop {
+  flex: 0 0 auto;
+}
+
+.ticker-card {
+  display: grid;
+  grid-template-columns: 166px auto;
+  gap: 11px;
+  align-items: start;
+  width: 330px;
+  min-width: 330px;
+  height: 80px;
+  padding: 12px 13px 9px;
+  border-right: 1px solid #9d9d9d;
+  background: #fff;
+}
+
+.ticker-match {
+  display: grid;
+  align-items: start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ticker-meta {
+  overflow: hidden;
+  color: #667085;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 11px;
+  white-space: nowrap;
+}
+
+.ticker-row {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 15px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 15px;
+}
+
+.ticker-country {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticker-score {
+  display: flex;
+  align-items: start;
+  gap: 9px;
+  height: 57px;
+}
+
+.score-set {
+  display: grid;
+  grid-template-rows: 11px 18px 18px;
+  justify-items: center;
+  min-width: 18px;
+  color: #667085;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 15px;
+}
+
+.score-set small {
+  color: #98a2b3;
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 10px;
+  text-transform: uppercase;
+}
+
+.score-set b {
+  color: #121417;
+  font-weight: 900;
+}
+
+.score-total {
+  min-width: 30px;
+}
+
+@keyframes athletics-ticker-scroll {
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 main {
@@ -930,11 +1108,13 @@ textarea:focus {
 .source-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
   gap: 22px;
 }
 
 .source-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border: 0;
   border-radius: 8px;
@@ -958,14 +1138,17 @@ textarea:focus {
 }
 
 .source-card-body {
-  display: grid;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 13px;
   padding: 15px 0 0;
 }
 
 .source-card h3 {
   max-width: 390px;
-  margin-bottom: 14px;
+  margin-bottom: 0;
   color: #111;
   font-family: var(--font-ui);
   font-size: 23px;
@@ -991,6 +1174,16 @@ textarea:focus {
   font-size: 12px;
   font-weight: 500;
   line-height: 16px;
+}
+
+.source-card .source-publisher-logo {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: transparent;
 }
 
 .source-meta a {
@@ -1263,6 +1456,19 @@ textarea:focus {
   font-weight: 700;
 }
 
+.news-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.news-source img {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
 .source-badge {
   display: inline-flex;
   align-items: center;
@@ -1293,14 +1499,16 @@ textarea:focus {
   justify-content: flex-start;
   gap: 7px;
   padding: 18px 0 0;
+  line-height: 1;
 }
 
 .trending-heading-icon {
-  width: 1.35em;
-  height: 1.35em;
+  width: 1.25em;
+  height: 1.25em;
   flex: 0 0 auto;
   background: var(--blue);
   mask: url("assets/trending-topic.svg") center / contain no-repeat;
+  transform: translateY(-1px);
 }
 
 .editor-hero {
@@ -1664,6 +1872,16 @@ textarea:focus {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
+
+  .ticker-window {
+    overflow-x: auto;
+  }
+}
+
 @media (max-width: 680px) {
   .es-primary-nav,
   .nav-social {
@@ -1677,6 +1895,10 @@ textarea:focus {
   .es-header-main {
     align-items: center;
     flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0;
+    height: 69px;
+    padding: 18px 16px;
   }
 
   .header-actions {
@@ -1685,8 +1907,31 @@ textarea:focus {
 
   .es-logo img {
     width: auto;
-    max-width: min(250px, calc(100vw - 110px));
+    max-width: min(240px, calc(100vw - 96px));
     height: 31px;
+  }
+
+  .es-logo {
+    margin-right: 0;
+  }
+
+  .es-menu-button {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .score-ticker {
+    grid-template-columns: 110px minmax(0, 1fr);
+  }
+
+  .ticker-title span {
+    font-size: 15px;
+  }
+
+  .ticker-card {
+    grid-template-columns: 148px auto;
+    width: 310px;
+    min-width: 310px;
   }
 
   .es-sports-nav {
@@ -1723,6 +1968,15 @@ textarea:focus {
 
   .scale-row {
     grid-template-columns: repeat(5, minmax(36px, 1fr));
+  }
+
+  .question-card {
+    padding: 20px;
+  }
+
+  .question-card h3 {
+    font-size: 23px;
+    line-height: 1.18;
   }
 
   .challenge-panel .section-head,

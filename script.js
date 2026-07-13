@@ -88,15 +88,6 @@ const seedQuestions = [
     answer: "5",
     source: "All source reads"
   },
-  {
-    id: "q6",
-    type: "paragraph",
-    title: "In one line, which story would you want the newsletter to follow up on next?",
-    points: 5,
-    required: false,
-    answer: "",
-    source: "Reader response"
-  }
 ];
 
 const backupNews = [
@@ -131,7 +122,15 @@ const sampleChallenge = {
 function getChallenge() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : sampleChallenge;
+    if (!saved) return sampleChallenge;
+    const challenge = JSON.parse(saved);
+    if (Array.isArray(challenge.questions)) {
+      challenge.questions = challenge.questions.filter((question) => !(
+        question.id === "q6" &&
+        question.title === "In one line, which story would you want the newsletter to follow up on next?"
+      ));
+    }
+    return challenge;
   } catch (error) {
     return sampleChallenge;
   }
@@ -271,10 +270,13 @@ function renderSources(articles) {
       <div class="source-card-body">
         <span class="source-tag">${escapeHtml(article.tag)}</span>
         <h3><a href="${escapeHtml(article.url)}" target="_blank" rel="noopener">${escapeHtml(article.title)}</a></h3>
+        <p>${escapeHtml(article.dek || "Read the full story behind this challenge question.")}</p>
         <div class="source-meta">
+          <img class="source-publisher-logo" src="assets/es-rounded-logo.png" alt="">
           <a href="${escapeHtml(article.url)}" target="_blank" rel="noopener">${escapeHtml(article.author || "EssentiallySports")}</a>
           <span>${escapeHtml(article.date || "Just now")}</span>
         </div>
+        <a class="read-article-button" href="${escapeHtml(article.url)}" target="_blank" rel="noopener">Read Full Story</a>
       </div>
     </article>
   `).join("");
@@ -381,7 +383,7 @@ function renderNews(items) {
       </a>
       <div>
         <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a>
-        <span>${escapeHtml(item.date)}</span>
+        <span class="news-source"><img src="assets/es-rounded-logo.png" alt="">${escapeHtml(item.date)}</span>
       </div>
     </article>
   `).join("");
