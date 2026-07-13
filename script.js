@@ -375,12 +375,16 @@ function renderQuestion(question, index, editorPreview) {
   return `
     <article class="question-card${image ? " has-question-image" : ""}" role="group" aria-labelledby="question-title-${index}">
       <div class="question-card-content">
-        ${meta}
-        <h3 id="question-title-${index}">${escapeHtml(question.title)}</h3>
+        <div class="question-header">
+          <div class="question-heading">
+            ${meta}
+            <h3 id="question-title-${index}">${escapeHtml(question.title)}</h3>
+          </div>
+          ${image ? `<figure class="question-media"><img src="${escapeHtml(image)}" alt="Related to ${escapeHtml(question.title)}" loading="lazy" decoding="async"></figure>` : ""}
+        </div>
         ${control}
         ${editorPreview ? "" : `<div class="question-meta question-source">${source}</div>`}
       </div>
-      ${image ? `<figure class="question-media"><img src="${escapeHtml(image)}" alt="Related to ${escapeHtml(question.title)}" loading="lazy" decoding="async"></figure>` : ""}
     </article>
   `;
 }

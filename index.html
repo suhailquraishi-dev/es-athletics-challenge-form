@@ -159,13 +159,13 @@
             </div>
 
             <form id="challenge-form" novalidate>
-              <div class="email-field">
-                <div class="field-heading">
-                  <label class="field-label" for="reader-email">Email ID</label>
+              <fieldset class="email-field">
+                <legend class="field-label">Email ID</legend>
+                <div class="email-control-row">
+                  <input id="reader-email" name="readerEmail" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Email ID" aria-describedby="email-note form-error" required>
                   <span class="required-note" id="email-note">Required for scoring</span>
                 </div>
-                <input id="reader-email" name="readerEmail" type="email" autocomplete="email" placeholder="you@example.com" aria-describedby="email-note form-error" required>
-              </div>
+              </fieldset>
 
               <div id="question-list" class="question-list"></div>
 
