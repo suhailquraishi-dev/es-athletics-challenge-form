@@ -260,28 +260,166 @@ function setupMobileMenu() {
   const nav = document.querySelector("#es-primary-nav");
   if (!header || !button || !nav) return;
 
-  const closeMenu = () => {
+  const sportsColumns = [
+    [
+      ["NFL", "https://www.essentiallysports.com/category/nfl/", true],
+      ["College Football", "https://www.essentiallysports.com/category/college-football/"],
+      ["College Basketball", "https://www.essentiallysports.com/category/college-basketball/"],
+      ["Golf", "https://www.essentiallysports.com/category/golf/"]
+    ],
+    [
+      ["Tennis", "https://www.essentiallysports.com/category/tennis/"],
+      ["Boxing", "https://www.essentiallysports.com/category/boxing/"],
+      ["NBA", "https://www.essentiallysports.com/category/nba/"],
+      ["NASCAR", "https://www.essentiallysports.com/category/nascar/"]
+    ],
+    [
+      ["Olympics", "https://www.essentiallysports.com/category/olympics/"],
+      ["UFC", "https://www.essentiallysports.com/category/ufc/"],
+      ["WNBA", "https://www.essentiallysports.com/category/wnba/"],
+      ["MLB", "https://www.essentiallysports.com/category/mlb/"]
+    ]
+  ];
+  const sportsLinks = sportsColumns.flat();
+  const sportsGrid = sportsColumns.map((column) => `
+    <div class="es-sports-column">
+      ${column.map(([label, url, hasArrow]) => `<a href="${url}"${hasArrow ? ' class="has-inline-arrow"' : ""}>${label}</a>`).join("")}
+    </div>
+  `).join("");
+
+  nav.innerHTML = `
+    <div class="es-nav-item"><a href="https://www.essentiallysports.com/latest-news/">Latest</a></div>
+    <div class="es-nav-item es-nav-item-menu">
+      <button class="es-nav-trigger" type="button" aria-expanded="false" aria-controls="es-sports-dropdown" data-nav-trigger="sports">Sports<span class="es-nav-chevron" aria-hidden="true"></span></button>
+      <section class="es-nav-dropdown es-sports-dropdown" id="es-sports-dropdown" aria-label="Sports" data-nav-dropdown="sports" hidden>
+        <h2>Sports</h2>
+        <div class="es-sports-grid">${sportsGrid}</div>
+      </section>
+    </div>
+    <div class="es-nav-item"><a href="https://www.essentiallysports.com/newsletter-hub/">Newsletters</a></div>
+    <div class="es-nav-item"><a href="https://www.essentiallysports.com/think-tank/">Think Tank</a></div>
+    <div class="es-nav-item es-nav-item-menu">
+      <button class="es-nav-trigger" type="button" aria-expanded="false" aria-controls="es-case-dropdown" data-nav-trigger="case-studies">Case Studies<span class="es-nav-chevron" aria-hidden="true"></span></button>
+      <section class="es-nav-dropdown es-case-dropdown" id="es-case-dropdown" aria-label="Case Studies" data-nav-dropdown="case-studies" hidden>
+        <h2>Case Studies</h2>
+        <div class="es-case-links">
+          <a href="https://www.essentiallysports.com/case-studies/">Partnerships<span aria-hidden="true"></span></a>
+          <a href="https://www.essentiallysports.com/case-studies/">Events<span aria-hidden="true"></span></a>
+        </div>
+      </section>
+    </div>
+  `;
+
+  header.insertAdjacentHTML("beforeend", `
+    <button class="es-nav-overlay" type="button" aria-label="Close navigation menu" hidden></button>
+    <aside class="es-mobile-panel" id="es-mobile-panel" aria-label="EssentiallySports mobile navigation" hidden>
+      <nav class="es-mobile-nav">
+        <a class="es-mobile-main-link" href="https://www.essentiallysports.com/latest-news/">Latest</a>
+        <details class="es-mobile-details">
+          <summary>Sports<span class="es-nav-chevron" aria-hidden="true"></span></summary>
+          <div class="es-mobile-sports-grid">
+            ${sportsLinks.map(([label, url]) => `<a href="${url}">${label}</a>`).join("")}
+          </div>
+        </details>
+        <a class="es-mobile-main-link" href="https://www.essentiallysports.com/newsletter-hub/">Newsletters</a>
+        <a class="es-mobile-main-link" href="https://www.essentiallysports.com/think-tank/">Think Tank</a>
+        <details class="es-mobile-details">
+          <summary>Case Studies<span class="es-nav-chevron" aria-hidden="true"></span></summary>
+          <div class="es-mobile-case-links">
+            <a href="https://www.essentiallysports.com/case-studies/">Partnerships</a>
+            <a href="https://www.essentiallysports.com/case-studies/">Events</a>
+          </div>
+        </details>
+        <div class="es-mobile-socials"></div>
+      </nav>
+    </aside>
+  `);
+
+  const overlay = header.querySelector(".es-nav-overlay");
+  const panel = header.querySelector(".es-mobile-panel");
+  const mobileSocials = panel.querySelector(".es-mobile-socials");
+  const desktopTriggers = Array.from(nav.querySelectorAll(".es-nav-trigger"));
+  const dropdowns = Array.from(nav.querySelectorAll(".es-nav-dropdown"));
+  let activeTrigger = null;
+
+  mobileSocials.innerHTML = document.querySelector(".header-actions")?.innerHTML || "";
+  button.setAttribute("aria-controls", "es-mobile-panel");
+
+  const closeDesktopMenus = (restoreFocus = false) => {
+    dropdowns.forEach((dropdown) => { dropdown.hidden = true; });
+    desktopTriggers.forEach((trigger) => trigger.setAttribute("aria-expanded", "false"));
+    overlay.hidden = true;
+    header.classList.remove("has-open-dropdown");
+    if (restoreFocus) activeTrigger?.focus();
+    activeTrigger = null;
+  };
+
+  const positionDropdown = (trigger, dropdown) => {
+    const width = Math.min(775, window.innerWidth - 32);
+    const left = Math.min(Math.max(16, trigger.getBoundingClientRect().left - 9), window.innerWidth - width - 16);
+    dropdown.style.width = `${width}px`;
+    dropdown.style.left = `${left}px`;
+  };
+
+  const closeMenu = (restoreFocus = false) => {
     header.classList.remove("is-menu-open");
     button.setAttribute("aria-expanded", "false");
     button.setAttribute("aria-label", "Open menu");
+    panel.hidden = true;
+    if (restoreFocus) button.focus();
   };
+
+  desktopTriggers.forEach((trigger) => {
+    trigger.addEventListener("click", () => {
+      const dropdown = nav.querySelector(`[data-nav-dropdown="${trigger.dataset.navTrigger}"]`);
+      const opening = trigger.getAttribute("aria-expanded") !== "true";
+      closeDesktopMenus();
+      if (!opening) return;
+      closeMenu();
+      positionDropdown(trigger, dropdown);
+      dropdown.hidden = false;
+      overlay.hidden = false;
+      trigger.setAttribute("aria-expanded", "true");
+      header.classList.add("has-open-dropdown");
+      activeTrigger = trigger;
+    });
+  });
+
+  overlay.addEventListener("click", () => closeDesktopMenus());
 
   button.addEventListener("click", () => {
     const open = !header.classList.contains("is-menu-open");
+    closeDesktopMenus();
     header.classList.toggle("is-menu-open", open);
     button.setAttribute("aria-expanded", String(open));
     button.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    panel.hidden = !open;
   });
 
-  nav.addEventListener("click", closeMenu);
+  panel.addEventListener("click", (event) => {
+    if (event.target.closest("a")) closeMenu();
+  });
+
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      closeMenu();
-      button.focus();
+      if (header.classList.contains("is-menu-open")) {
+        closeMenu(true);
+      } else if (header.classList.contains("has-open-dropdown")) {
+        closeDesktopMenus(true);
+      }
     }
   });
+
   window.addEventListener("resize", () => {
-    if (window.innerWidth > 680) closeMenu();
+    if (window.innerWidth > 1023) {
+      closeMenu();
+      if (activeTrigger) {
+        const dropdown = nav.querySelector(`[data-nav-dropdown="${activeTrigger.dataset.navTrigger}"]`);
+        positionDropdown(activeTrigger, dropdown);
+      }
+    } else {
+      closeDesktopMenus();
+    }
   }, { passive: true });
 }
 
