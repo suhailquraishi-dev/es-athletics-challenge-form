@@ -96,31 +96,73 @@ const seedQuestions = [
 const backupNews = [
   {
     tag: "Athletics",
+    title: "Melissa Jefferson-Wooden Keeps Awkward Tension as Rival Becomes 3rd Fastest Ever",
+    url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-melissa-jefferson-wooden-keeps-awkward-tension-as-rival-becomes-third-fastest-ever/",
+    date: "20 hrs ago",
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/imago1066769294.jpg"
+  },
+  {
+    tag: "Athletics",
+    title: "College Athlete Announces Early Track and Field Retirement to Pursue Another Passion",
+    url: "https://www.essentiallysports.com/olympics-news-track-and-field-college-athlete-announces-early-track-and-field-retirement-to-pursue-another-passion/",
+    date: "22 hrs ago",
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Sanaa-Morris-2.1.jpg"
+  },
+  {
+    tag: "Athletics",
     title: "Noah Lyles' Rival Who Made Unsportsmanlike Comment Reveals Their Current Standing",
     url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-noah-lyles-rival-who-made-unsportsmanlike-comment-reveals-their-current-standing/",
-    date: "19 hrs ago",
+    date: "1 day ago",
     image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-5.1.jpg"
   },
   {
     tag: "Athletics",
     title: "Sha'Carri Richardson and Melissa Jefferson-Wooden Set to Go Against Each Other Once Again",
     url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-shacarri-richardson-and-melissa-jefferson-wooden-set-to-go-against-each-other-once-again/",
-    date: "19 hrs ago",
+    date: "1 day ago",
     image: "https://image-cdn.essentiallysports.com/wp-content/uploads/image-13-5.png"
   },
   {
     tag: "Athletics",
     title: "Noah Lyles Chooses Gold Medal in Every Race Over $100 Million for This Reason",
     url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-noah-lyles-chooses-gold-medal-in-every-race-over-hundred-million-dollars-for-this-reason/",
-    date: "20 hrs ago",
+    date: "1 day ago",
     image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-1-1.jpeg"
   },
   {
-    tag: "Diamond League",
+    tag: "Athletics",
     title: "World Champion Climbs Back to the Top After Shocking Loss to NCAA Athlete",
     url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-world-champion-climbs-back-to-the-top-after-shocking-loss-to-ncaa-athlete/",
-    date: "20 hrs ago",
+    date: "2 days ago",
     image: "https://image-cdn.essentiallysports.com/wp-content/uploads/imago833691748.jpg"
+  },
+  {
+    tag: "Athletics",
+    title: "Very Bad Injury: Olympic Champion Addresses Back-to-Back Losses After Failing to Make Podium at Monaco DL",
+    url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-very-bad-injury-olympic-champion-addresses-back-to-back-losses-after-failing-to-make-podium-at-monaco-dl/",
+    date: "2 days ago",
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/imago1065216240.jpg"
+  },
+  {
+    tag: "Athletics",
+    title: "I Was Screaming: Julien Alfred Defeats Gabby Thomas to Take Olympics Revenge After 2 Years",
+    url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-i-was-screaming-julien-alfred-defeats-gabby-thomas-to-take-olympics-revenge-after-two-years/",
+    date: "2 days ago",
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Gabby-Thomas-and-Julien-Alfred-1.jpg"
+  },
+  {
+    tag: "Athletics",
+    title: "Olympic Champion Switches Events to Break 27-Year-Old World Record After Last Disappointing Race",
+    url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-olympic-champion-switches-events-to-break-twenty-seven-year-old-world-record-after-last-disappointing-race/",
+    date: "2 days ago",
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/imago1078386869.jpg.jpeg"
+  },
+  {
+    tag: "Athletics",
+    title: "Track Legend Reveals Alleged Altercation Rumor at Sha'Carri Richardson's Training Camp",
+    url: "https://www.essentiallysports.com/olympics-news-track-and-field-news-track-legend-reveals-alleged-altercation-rumor-at-shacarri-richardsons-training-camp/",
+    date: "2 days ago",
+    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Olympics-16.png"
   }
 ];
 
@@ -155,7 +197,7 @@ const backupExclusives = [
 ];
 
 const sampleChallenge = {
-  title: "Essentially Athletics Weekly Challenge",
+  title: "Weekly Challenge",
   category: "Athletics",
   intro: "Answer the questions from this week's Essentially Athletics stories and see your points instantly.",
   articles: seedArticles,
@@ -171,6 +213,10 @@ function getChallenge() {
       return sampleChallenge;
     }
     const challenge = JSON.parse(saved);
+    if (challenge.title === "Essentially Athletics Weekly Challenge") {
+      challenge.title = "Weekly Challenge";
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(challenge));
+    }
     if (Array.isArray(challenge.questions)) {
       challenge.questions = challenge.questions.filter((question) => !(
         question.id === "q6" &&
@@ -752,19 +798,19 @@ async function fetchNews(category) {
   const searchTerm = category.toLowerCase() === "athletics" ? "track and field" : category;
   const functionCategory = category.toLowerCase() === "athletics" ? "track-and-field" : category.toLowerCase();
   const functionEndpoint = `/.netlify/functions/news?category=${encodeURIComponent(functionCategory)}`;
-  const endpoint = `https://www.essentiallysports.com/wp-json/wp/v2/posts?search=${encodeURIComponent(searchTerm)}&per_page=5&_embed=1`;
+  const endpoint = `https://www.essentiallysports.com/wp-json/wp/v2/posts?search=${encodeURIComponent(searchTerm)}&per_page=12&_embed=1`;
   try {
-    const functionResponse = await fetch(functionEndpoint);
+    const functionResponse = await fetch(`${functionEndpoint}&limit=12&ts=${Date.now()}`, { cache: "no-store" });
     if (functionResponse.ok) {
       const payload = await functionResponse.json();
-      if (Array.isArray(payload.stories) && payload.stories.length > 0) {
+      if (Array.isArray(payload.stories) && payload.stories.length >= 10) {
         status.textContent = "Latest Athletics picks";
-        renderNews(mergeStories(payload.stories, backupNews).slice(0, 6));
+        renderNews(mergeStories(payload.stories, backupNews).slice(0, 12));
         return;
       }
     }
 
-    const response = await fetch(endpoint);
+    const response = await fetch(endpoint, { cache: "no-store" });
     if (!response.ok) throw new Error("News fetch failed");
     const posts = await response.json();
     if (!Array.isArray(posts) || posts.length === 0) throw new Error("No posts found");
@@ -776,7 +822,7 @@ async function fetchNews(category) {
       image: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || "",
       tag: post._embedded?.["wp:term"]?.flat()?.find((term) => term.taxonomy === "category")?.name || "Athletics"
     }));
-    renderNews(mergeStories(mappedPosts, backupNews).slice(0, 6));
+    renderNews(mergeStories(mappedPosts, backupNews).slice(0, 12));
   } catch (error) {
     status.textContent = "Latest Athletics picks";
     renderNews(backupNews);
@@ -826,6 +872,10 @@ function setupNewsScroller() {
 
 function syncNewsFeedHeight() {
   const list = document.querySelector("#news-list");
+  if (window.matchMedia("(max-width: 680px)").matches) {
+    list?.style.removeProperty("--news-feed-height");
+    return;
+  }
   const fourthStory = list?.children[3];
   if (!list || !fourthStory) {
     list?.style.removeProperty("--news-feed-height");
@@ -834,7 +884,7 @@ function syncNewsFeedHeight() {
 
   const listRect = list.getBoundingClientRect();
   const fourthRect = fourthStory.getBoundingClientRect();
-  const previewHeight = Math.min(112, Math.max(92, fourthRect.height * 0.45));
+  const previewHeight = Math.min(150, Math.max(130, fourthRect.height * 0.55));
   list.style.setProperty("--news-feed-height", `${Math.ceil(fourthRect.top - listRect.top + previewHeight)}px`);
 }
 
@@ -960,7 +1010,7 @@ function renderEditorPage() {
   }
 
   function captureSettings() {
-    challenge.title = titleInput.value.trim() || "Essentially Athletics Weekly Challenge";
+    challenge.title = titleInput.value.trim() || "Weekly Challenge";
     challenge.category = categoryInput.value.trim() || "Athletics";
     challenge.intro = introInput.value.trim();
   }

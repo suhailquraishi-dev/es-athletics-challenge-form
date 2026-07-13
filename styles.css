@@ -1718,8 +1718,11 @@ textarea:focus {
   overflow-y: auto;
   overscroll-behavior: contain;
   padding-bottom: 82px;
-  scrollbar-color: #b6d8fb transparent;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+}
+
+.news-feed-shell.has-more-stories .news-list::-webkit-scrollbar {
+  display: none;
 }
 
 .news-more-fade {
@@ -1729,11 +1732,11 @@ textarea:focus {
   left: 0;
   z-index: 2;
   display: none;
-  min-height: 96px;
+  min-height: 76px;
   align-items: flex-end;
   justify-content: center;
-  padding: 34px 18px 16px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.68) 48%, #fff 78%, #fff 100%);
+  padding: 18px 18px 10px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55) 50%, #fff 88%, #fff 100%);
   pointer-events: none;
 }
 
@@ -3138,5 +3141,28 @@ body {
     padding: 10px 20px;
     font-size: 17px;
     line-height: 28px;
+  }
+}
+
+@media (max-width: 680px) {
+  .news-feed-shell.has-more-stories .news-list {
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 18px;
+  }
+
+  .news-more-fade {
+    display: none !important;
+  }
+
+  .option-list {
+    gap: 8px;
+  }
+
+  .option-list label {
+    min-height: 46px;
+    padding: 8px 14px;
+    font-size: 16px;
+    line-height: 24px;
   }
 }

@@ -11,6 +11,8 @@ const CATEGORY_URLS = {
 exports.handler = async (event) => {
   const category = (event.queryStringParameters?.category || "athletics").toLowerCase();
   const mode = (event.queryStringParameters?.mode || "latest").toLowerCase();
+  const requestedLimit = Number.parseInt(event.queryStringParameters?.limit || "12", 10);
+  const limit = Math.min(20, Math.max(10, Number.isFinite(requestedLimit) ? requestedLimit : 12));
   const url = CATEGORY_URLS[category] || CATEGORY_URLS.athletics;
 
   try {
@@ -37,13 +39,13 @@ exports.handler = async (event) => {
     }
 
     const html = await response.text();
-    const stories = extractStories(html).slice(0, 5);
+    const stories = extractStories(html).slice(0, limit);
 
     return {
       statusCode: 200,
       headers: {
         "content-type": "application/json",
-        "cache-control": "public, max-age=300"
+        "cache-control": "no-store"
       },
       body: JSON.stringify({ source: url, stories })
     };
@@ -94,12 +96,21 @@ function extractStories(html) {
   let match;
 
   while ((match = linkPattern.exec(html)) !== null) {
-    const href = decodeEntities(match[1]);
-    const text = stripTags(match[2]).replace(/\s+/g, " ").trim();
+    const rawHref = decodeEntities(match[1]);
+    let href;
+    try {
+      href = new URL(rawHref, "https://www.essentiallysports.com/").href;
+    } catch (error) {
+      continue;
+    }
+    const headingMatch = match[2].match(/<h[2-6][^>]*>([\s\S]*?)<\/h[2-6]>/i);
+    const text = stripTags(headingMatch?.[1] || match[2]).replace(/\s+/g, " ").trim();
+    const pathname = new URL(href).pathname;
 
     if (
       !href.startsWith("https://www.essentiallysports.com/") ||
-      href.includes("/category/") ||
+      /\/(category|author|tag)\//.test(pathname) ||
+      !/(track|field|olympic|athlet)/i.test(`${pathname} ${text}`) ||
       text.length < 35 ||
       seen.has(href)
     ) {
@@ -110,8 +121,9 @@ function extractStories(html) {
     stories.push({
       title: text,
       url: href,
-      date: "EssentiallySports",
-      image: findNearbyImage(html, match.index)
+      date: findNearbyDate(html, match.index),
+      image: findImage(match[0]) || findNearbyImage(html, match.index),
+      tag: "Athletics"
     });
   }
 
@@ -119,11 +131,29 @@ function extractStories(html) {
 }
 
 function findNearbyImage(html, index) {
-  const start = Math.max(0, index - 1200);
-  const end = Math.min(html.length, index + 1200);
+  const start = Math.max(0, index - 5000);
+  const end = Math.min(html.length, index + 5000);
   const chunk = html.slice(start, end);
-  const imageMatch = chunk.match(/https:\/\/image-cdn\.essentiallysports\.com\/[^"'\s)]+/i);
-  return imageMatch ? decodeEntities(imageMatch[0]) : "";
+  const anchorOffset = index - start;
+  const matches = [...chunk.matchAll(/https:\/\/image-cdn\.essentiallysports\.com\/[^"'\s)]+/gi)];
+  matches.sort((a, b) => Math.abs(a.index - anchorOffset) - Math.abs(b.index - anchorOffset));
+  return matches[0] ? decodeEntities(matches[0][0]) : "";
+}
+
+function findImage(value) {
+  const match = value.match(/https:\/\/image-cdn\.essentiallysports\.com\/[^"'\s)]+/i);
+  return match ? decodeEntities(match[0]) : "";
+}
+
+function findNearbyDate(html, index) {
+  const start = Math.max(0, index - 5000);
+  const chunk = html.slice(start, Math.min(html.length, index + 5000));
+  const anchorOffset = index - start;
+  const matches = [...chunk.matchAll(/\b\d+\s*(?:mins?|hrs?|hours?|days?|weeks?)\s+ago\b/gi)];
+  const followingMatches = matches.filter((match) => match.index >= anchorOffset);
+  const candidates = followingMatches.length ? followingMatches : matches;
+  candidates.sort((a, b) => Math.abs(a.index - anchorOffset) - Math.abs(b.index - anchorOffset));
+  return candidates[0]?.[0] || "Latest";
 }
 
 function stripTags(value) {
