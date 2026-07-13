@@ -709,7 +709,7 @@ h3 {
 
 .challenge-brand-band img {
   display: block;
-  width: min(100%, 440px);
+  width: min(100%, 220px);
   height: auto;
 }
 
