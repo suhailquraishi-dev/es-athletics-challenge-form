@@ -133,10 +133,10 @@ button {
   gap: 26px;
   flex: 0 1 auto;
   color: var(--ink);
-  font-family: var(--font-ui);
+  font-family: "Acumin Pro Condensed Black", var(--font-title);
   font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
+  font-weight: 900;
+  line-height: 21px;
   text-transform: none;
 }
 
@@ -166,12 +166,13 @@ button {
   margin-left: auto;
   gap: 12px;
   flex: 0 0 auto;
+  padding-right: 26px;
 }
 
 .nav-social {
   justify-content: center;
   width: 28px;
-  height: 28px;
+  height: 33px;
   border: 0;
   background: transparent;
   transition: opacity 150ms ease;
@@ -378,6 +379,14 @@ button {
 .score-set b {
   color: #121417;
   font-weight: 900;
+}
+
+.score-set b.is-winning-score {
+  color: #07824b;
+}
+
+.score-set b.is-losing-score {
+  color: #4b5563;
 }
 
 .score-total {
@@ -1232,13 +1241,15 @@ textarea:focus {
   width: max-content;
   border: 2.298px solid #aad1fa;
   border-radius: 0;
-  padding: 6px;
+  margin: 0;
+  padding: 9.193px 6.895px;
   background: #fff;
   color: #112841;
   font-family: "Acumin Pro Condensed Black", var(--font-title);
-  font-size: 16px;
+  font-size: 18.387px;
+  font-style: normal;
   font-weight: 900;
-  line-height: 1;
+  line-height: normal;
   text-transform: uppercase;
 }
 
@@ -1381,6 +1392,10 @@ textarea:focus {
   padding: 14px 18px 22px;
 }
 
+.trending-card {
+  padding: 18px;
+}
+
 .top-stories .news-list {
   border-top: 1px solid #eef2f7;
 }
@@ -1498,7 +1513,7 @@ textarea:focus {
   align-items: center;
   justify-content: flex-start;
   gap: 7px;
-  padding: 18px 0 0;
+  padding: 0;
   line-height: 1;
 }
 
@@ -1856,6 +1871,7 @@ textarea:focus {
 
   .header-actions {
     width: auto;
+    padding-right: 0;
   }
 
   .hero-shell,
