@@ -432,6 +432,18 @@ button {
   text-transform: uppercase;
 }
 
+.ticker-score > .score-set:nth-child(1) small {
+  color: #956c00;
+}
+
+.ticker-score > .score-set:nth-child(2) small {
+  color: #68727e;
+}
+
+.ticker-score > .score-set:nth-child(3) small {
+  color: #a45f2a;
+}
+
 .score-set b {
   color: #121417;
   font-weight: 900;
