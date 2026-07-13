@@ -50,7 +50,7 @@ const seedQuestions = [
     options: ["Noah Lyles", "Fred Kerley", "Kenny Bednarek", "Oblique Seville"],
     answer: "Noah Lyles",
     image: "",
-    source: "Noah Lyles' Rival Who Made Unsportsmanlike Comment Reveals Their Current Standing"
+    source: "Think back to the rivalry covered after the heated USATF Championships clash."
   },
   {
     id: "q2",
@@ -60,7 +60,7 @@ const seedQuestions = [
     required: true,
     options: ["Sha'Carri Richardson", "Melissa Jefferson-Wooden", "Gabby Thomas", "Julien Alfred"],
     answer: ["Sha'Carri Richardson", "Melissa Jefferson-Wooden"],
-    source: "Sha'Carri Richardson and Melissa Jefferson-Wooden Set to Go Against Each Other Once Again"
+    source: "Two leading U.S. sprinters are expected to meet again after the Prefontaine Classic."
   },
   {
     id: "q3",
@@ -71,7 +71,7 @@ const seedQuestions = [
     options: ["Gold in every race", "A coaching role", "A marathon debut", "A Diamond League bye"],
     answer: "Gold in every race",
     image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-1-1.jpeg",
-    source: "Noah Lyles Chooses Gold Medal in Every Race Over $100 Million for This Reason"
+    source: "Lyles valued competitive legacy over the financial offer."
   },
   {
     id: "q4",
@@ -80,7 +80,7 @@ const seedQuestions = [
     points: 5,
     required: true,
     answer: "Oblique Seville",
-    source: "World Champion Climbs Back to the Top After Shocking Loss to NCAA Athlete"
+    source: "Look for the sprinter who rebounded at the Monaco Diamond League."
   },
   {
     id: "q5",
@@ -89,9 +89,18 @@ const seedQuestions = [
     points: 5,
     required: true,
     answer: "5",
-    source: "All source reads"
+    source: "Choose the number that best reflects how closely you followed this week's stories."
   },
 ];
+
+const legacySourceHints = {
+  "Noah Lyles' Rival Who Made Unsportsmanlike Comment Reveals Their Current Standing": "Think back to the rivalry covered after the heated USATF Championships clash.",
+  "Sha'Carri Richardson and Melissa Jefferson-Wooden Set to Go Against Each Other Once Again": "Two leading U.S. sprinters are expected to meet again after the Prefontaine Classic.",
+  "Noah Lyles Chooses Gold Medal in Every Race Over $100 Million for This Reason": "Lyles valued competitive legacy over the financial offer.",
+  "World Champion Climbs Back to the Top After Shocking Loss to NCAA Athlete": "Look for the sprinter who rebounded at the Monaco Diamond League.",
+  "All source reads": "Choose the number that best reflects how closely you followed this week's stories.",
+  "Source article": "Add a short clue that helps readers without revealing the answer."
+};
 
 const backupNews = [
   {
@@ -213,31 +222,44 @@ function getChallenge() {
       return sampleChallenge;
     }
     const challenge = JSON.parse(saved);
+    let challengeChanged = false;
     if (challenge.title === "Essentially Athletics Weekly Challenge") {
       challenge.title = "Weekly Challenge";
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(challenge));
+      challengeChanged = true;
     }
     if (Array.isArray(challenge.questions)) {
+      const questionCount = challenge.questions.length;
       challenge.questions = challenge.questions.filter((question) => !(
         question.id === "q6" &&
         question.title === "In one line, which story would you want the newsletter to follow up on next?"
       ));
+      if (challenge.questions.length !== questionCount) challengeChanged = true;
       let imageCount = 0;
       challenge.questions = challenge.questions.map((question) => {
         let nextQuestion = question;
+        const migratedHint = legacySourceHints[nextQuestion.source];
+        if (migratedHint) {
+          nextQuestion = { ...nextQuestion, source: migratedHint };
+          challengeChanged = true;
+        }
         if (!Object.prototype.hasOwnProperty.call(question, "image")) {
           const seedQuestion = seedQuestions.find((item) => item.id === question.id);
-          nextQuestion = { ...question, image: seedQuestion?.image || "" };
+          nextQuestion = { ...nextQuestion, image: seedQuestion?.image || "" };
+          challengeChanged = true;
         }
         if (removeLegacyQ1Image && nextQuestion.id === "q1") {
           nextQuestion = { ...nextQuestion, image: "" };
+          challengeChanged = true;
         }
-        if (nextQuestion.image && imageCount >= 2) return { ...nextQuestion, image: "" };
+        if (nextQuestion.image && imageCount >= 2) {
+          challengeChanged = true;
+          return { ...nextQuestion, image: "" };
+        }
         if (nextQuestion.image) imageCount += 1;
         return nextQuestion;
       });
     }
-    if (removeLegacyQ1Image) {
+    if (challengeChanged) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(challenge));
     }
     localStorage.setItem(Q1_IMAGE_REMOVAL_KEY, "true");
@@ -542,7 +564,7 @@ function renderQuestion(question, index, editorPreview) {
   const name = escapeHtml(question.id);
   const points = Number(question.points || 0);
   const required = question.required ? "required" : "";
-  const source = question.source ? `<span>Source: ${escapeHtml(question.source)}</span>` : "<span></span>";
+  const source = question.source ? `<span><strong>Hint:</strong> ${escapeHtml(question.source)}</span>` : "<span></span>";
   const image = String(question.image || "").trim();
   const meta = `
     <div class="question-meta">
@@ -995,7 +1017,7 @@ function renderEditorPage() {
         <label>Question<input data-field="title" value="${escapeHtml(question.title)}"></label>
         <label>Options, comma separated<input data-field="options" value="${escapeHtml((question.options || []).join(", "))}"></label>
         <label>Correct answer<input data-field="answer" value="${escapeHtml(Array.isArray(question.answer) ? question.answer.join(", ") : question.answer)}"></label>
-        <label>Source article<input data-field="source" value="${escapeHtml(question.source || "")}"></label>
+        <label>Hint<input data-field="source" placeholder="Give readers a useful clue" value="${escapeHtml(question.source || "")}"></label>
         <label class="full-width">Question image URL (maximum 2)<input data-field="image" type="url" placeholder="https://..." value="${escapeHtml(question.image || "")}"></label>
         <label>Points<input data-field="points" type="number" min="0" value="${escapeHtml(question.points || 0)}"></label>
       </article>
@@ -1037,7 +1059,7 @@ function renderEditorPage() {
       options: ["Option 1", "Option 2", "Option 3"],
       answer: type === "checkbox" ? ["Option 1"] : "Option 1",
       image: "",
-      source: "Source article"
+      source: "Add a short clue that helps readers without revealing the answer."
     });
     renderBuilder();
   });
