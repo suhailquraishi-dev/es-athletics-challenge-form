@@ -922,6 +922,7 @@ h3 {
   border-radius: 8px;
   padding: 12px 16px;
   font-size: 16px;
+  line-height: 20px;
 }
 
 .email-field input:focus {
@@ -929,8 +930,12 @@ h3 {
 }
 
 .email-field .required-note {
+  display: flex;
+  min-height: 52px;
   flex: 0 0 auto;
+  align-items: center;
   padding: 0 16px;
+  line-height: 20px;
   white-space: nowrap;
 }
 
@@ -987,7 +992,7 @@ textarea:focus {
 }
 
 .question-card {
-  border: 0;
+  border: 1px solid #dcebf2;
   border-radius: 8px;
   padding: 22px 24px 24px;
   background: #fffbed;
@@ -1473,11 +1478,12 @@ textarea:focus {
   transition: color 160ms ease;
 }
 
-.source-card h3 a:hover {
+.source-card h3 a:hover,
+.source-card h3 a:focus,
+.source-card h3 a:active,
+.source-card h3 a:visited {
   color: inherit;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+  text-decoration: none;
 }
 
 .source-meta {
@@ -1866,11 +1872,15 @@ textarea:focus {
 }
 
 .news-item > div a:hover,
-.trending-card a:hover {
+.news-item > div a:focus,
+.news-item > div a:active,
+.news-item > div a:visited,
+.trending-card a:hover,
+.trending-card a:focus,
+.trending-card a:active,
+.trending-card a:visited {
   color: inherit;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+  text-decoration: none;
 }
 
 .news-item span,
@@ -2497,6 +2507,7 @@ textarea:focus {
 
   .email-field .required-note {
     display: block;
+    min-height: 0;
     padding: 0 16px 12px;
   }
 
@@ -2800,6 +2811,7 @@ body {
   display: inline-flex;
   min-height: 26px;
   align-items: center;
+  border-radius: 4px;
   padding: 2px 7px;
   background: #0281c8;
   color: #fff;
@@ -2946,6 +2958,21 @@ body {
   border-radius: 16px;
   background: #fff;
   font-size: 18px;
+}
+
+.question-card input[type="text"]:focus,
+.question-card input[type="text"]:focus-visible,
+.question-card input[type="date"]:focus,
+.question-card input[type="date"]:focus-visible,
+.question-card input[type="time"]:focus,
+.question-card input[type="time"]:focus-visible,
+.question-card input[type="file"]:focus,
+.question-card input[type="file"]:focus-visible,
+.question-card textarea:focus,
+.question-card textarea:focus-visible {
+  border-color: #b9d9fb;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(10, 125, 250, 0.12);
 }
 
 .question-source {

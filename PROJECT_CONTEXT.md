@@ -71,11 +71,12 @@ Local font files are loaded with `@font-face` from `/assets/fonts`. Do not repla
 - ES blue is `#0A7DFA`.
 - The page background is a very light grey (`#F7F8FA`) so white cards remain distinguishable.
 - Question cards use a very light, calm newsletter tint; controls use restrained pale-yellow borders and states.
+- Question cards use a `1px` very light blue (`#DCEBF2`) stroke.
 - Question cards use only a very subtle navy-tinted shadow; do not increase it into a prominent floating-card effect.
 - Cards and images retain rounded corners, generally no more than `8px` unless a control intentionally uses a larger radius.
 - CTA buttons have no drop shadows.
 - Blue CTA hover treatment belongs to actual buttons, not article titles, footer links, option labels, or general text links.
-- Article/news title hover uses a restrained underline rather than turning the whole interface blue.
+- Article/news titles remain visually stable on hover and selection: no underline and no blue color shift.
 - Avoid nested decorative cards, oversized marketing heroes, gradient ornaments, or generic dashboard styling.
 - Inner padding must be consistent on all sides of boxes, cards, tags, and controls.
 - Images and cards in the same grid should have consistent heights and alignment.
@@ -114,6 +115,7 @@ The ticker sits immediately below the navigation and follows the ES Social Hub s
 - Public title is `Weekly Challenge`.
 - Logo, title, email field, and first question use a measured vertical rhythm.
 - Email is required for scoring and is styled as a single outlined fieldset with its label embedded in the border.
+- Email input text and the scoring note share a centered baseline with equal horizontal inset.
 
 ### Question Cards
 
@@ -134,9 +136,10 @@ Current sample challenge contains five scored questions worth 25 total points.
 Question card rules:
 
 - Calm spacing and strong readability for older readers.
-- Question number is an Acumin/ES label; points are shown in a separate highlighted badge.
+- Question number is an Acumin/ES label with restrained rounded corners; points are shown in a matching separate badge.
 - Options are large enough to tap but are reduced appropriately on phones.
 - Selected states are obvious without excessive saturation.
+- Text-field focus uses one subtle translucent blue ring rather than stacked outlines.
 - Dropdown trigger and open menu form one continuous control with joined corners.
 - A maximum of two question cards may include an image.
 - Question images, when used, are full width with limited height and rounded top corners.
