@@ -71,6 +71,7 @@ Local font files are loaded with `@font-face` from `/assets/fonts`. Do not repla
 - ES blue is `#0A7DFA`.
 - The page background is a very light grey (`#F7F8FA`) so white cards remain distinguishable.
 - Question cards use a very light, calm newsletter tint; controls use restrained pale-yellow borders and states.
+- Question cards use only a very subtle navy-tinted shadow; do not increase it into a prominent floating-card effect.
 - Cards and images retain rounded corners, generally no more than `8px` unless a control intentionally uses a larger radius.
 - CTA buttons have no drop shadows.
 - Blue CTA hover treatment belongs to actual buttons, not article titles, footer links, option labels, or general text links.
@@ -167,6 +168,7 @@ The `Questions picked from these stories` section lists the ES articles used to 
 - Story titles are clickable and open the real ES article.
 - Cards use ES category tags, image treatment, title typography, author/date metadata, and `Read Full Story` CTA styling.
 - Card heights and image dimensions should remain aligned across each row.
+- On phones, the story cards become a horizontal, touch-scrollable rail with scroll snapping and a visible next-card peek instead of a long vertical list.
 
 ### Right News Rail
 
