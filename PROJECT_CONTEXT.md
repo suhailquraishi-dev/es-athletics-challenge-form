@@ -72,7 +72,7 @@ Local font files are loaded with `@font-face` from `/assets/fonts`. Do not repla
 - The page background is a very light grey (`#F7F8FA`) so white cards remain distinguishable.
 - Question cards use a very light, calm newsletter tint; controls use restrained pale-yellow borders and states.
 - Question cards use a `1px` very light blue (`#DCEBF2`) stroke.
-- Question cards use only a very subtle navy-tinted shadow; do not increase it into a prominent floating-card effect.
+- Question cards do not use a drop shadow; separation comes from the light-blue stroke and spacing.
 - Cards and images retain rounded corners, generally no more than `8px` unless a control intentionally uses a larger radius.
 - CTA buttons have no drop shadows.
 - Blue CTA hover treatment belongs to actual buttons, not article titles, footer links, option labels, or general text links.
