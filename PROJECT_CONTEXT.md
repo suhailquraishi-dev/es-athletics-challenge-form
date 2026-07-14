@@ -160,9 +160,10 @@ On valid submission, `script.js` calculates the score from the current question 
 - Score and total possible points.
 - Percentage-based progress meter.
 - A short result message.
-- A static leaderboard tease with the reader's score.
+- A Gamezone-inspired completion header and score hierarchy.
+- A CTA explaining that results will be announced in the next day's ES Fancast episode.
 
-**Current limitation:** the score is not persisted remotely, the leaderboard names are illustrative, and the email address is not submitted to a backend.
+The result intentionally omits a leaderboard. The score is not persisted remotely, and the email address is not submitted to a backend.
 
 ### Story Cards
 

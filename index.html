@@ -178,29 +178,37 @@
           </section>
 
           <section class="panel result-panel is-hidden" id="result-panel" aria-live="polite">
-            <div class="result-topline">
-              <span class="eyebrow">Score reveal</span>
-              <strong id="score-line">0 / 30 points</strong>
-            </div>
-            <div class="score-meter" aria-hidden="true">
-              <span id="score-meter-fill"></span>
-            </div>
-            <p id="score-message"></p>
-            <div class="leaderboard-tease">
+            <header class="result-header">
               <div>
-                <span class="rank">#1</span>
-                <strong>Maya R.</strong>
-                <small>28 pts</small>
+                <span class="result-kicker">Weekly Challenge</span>
+                <h2>Thanks for playing!</h2>
               </div>
-              <div>
-                <span class="rank">#2</span>
-                <strong>Jordan K.</strong>
-                <small>26 pts</small>
+              <span class="result-badge">Score revealed</span>
+            </header>
+
+            <div class="result-body">
+              <div class="result-summary">
+                <div class="result-score-block">
+                  <span>Your score</span>
+                  <strong id="score-line">0 / 30</strong>
+                  <small>points</small>
+                </div>
+                <p id="score-message">Your answers are in for this week's challenge.</p>
               </div>
-              <div>
-                <span class="rank">You</span>
-                <strong id="reader-rank">After submit</strong>
-                <small id="reader-points">0 pts</small>
+
+              <div class="score-meter" id="score-meter" role="progressbar" aria-label="Challenge score" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0">
+                <span id="score-meter-fill"></span>
+              </div>
+
+              <div class="podcast-result-callout">
+                <div class="podcast-result-copy">
+                  <span class="podcast-date">Tomorrow</span>
+                  <div>
+                    <h3>Results announced on the podcast</h3>
+                    <p>Hear the challenge results in tomorrow's episode of ES Fancast.</p>
+                  </div>
+                </div>
+                <a class="podcast-result-cta" href="https://www.essentiallysports.com/es-fancast/">Visit ES Fancast <span aria-hidden="true">&#8594;</span></a>
               </div>
             </div>
           </section>

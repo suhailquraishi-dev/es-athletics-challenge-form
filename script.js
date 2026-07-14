@@ -797,14 +797,15 @@ function calculateScore(form, questions) {
 function showScore(score, totalPoints) {
   const resultPanel = document.querySelector("#result-panel");
   const percent = totalPoints ? Math.round((score / totalPoints) * 100) : 0;
-  document.querySelector("#score-line").textContent = `${score} / ${totalPoints} points`;
+  const scoreMeter = document.querySelector("#score-meter");
+  document.querySelector("#score-line").textContent = `${score} / ${totalPoints}`;
   document.querySelector("#score-meter-fill").style.width = `${percent}%`;
-  document.querySelector("#reader-points").textContent = `${score} pts`;
-  document.querySelector("#reader-rank").textContent = percent >= 80 ? "Leaderboard range" : "Keep climbing";
+  scoreMeter.setAttribute("aria-valuemax", String(totalPoints));
+  scoreMeter.setAttribute("aria-valuenow", String(score));
   document.querySelector("#score-message").textContent =
     percent >= 80
-      ? "Strong read. You are in leaderboard range for this challenge."
-      : "Thanks for playing. Your score is ready for the challenge board.";
+      ? "Great read. You were locked in on this week's biggest athletics stories."
+      : "Your answers are in. Thanks for taking on this week's athletics challenge.";
   resultPanel.classList.remove("is-hidden");
   resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
