@@ -342,6 +342,7 @@ Before pushing UI changes:
 - Athletics is the first category.
 - Reader and editor are separate pages.
 - Email is collected in the reader form but not yet stored.
+- Browser autofill must retain the email field's white background rather than introducing a separate tinted block inside the outlined control.
 - Scoring is instant and shown on the same page.
 - The reader sees article context and additional category news.
 - The public page follows ES Social Hub/editorial structure with some Gamezone challenge energy.
