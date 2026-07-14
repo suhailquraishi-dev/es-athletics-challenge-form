@@ -915,6 +915,7 @@ function renderNews(items) {
   const shell = document.querySelector("#news-feed-shell");
   const button = document.querySelector("#news-more-button");
   list.scrollTop = 0;
+  list.scrollLeft = 0;
   shell?.classList.toggle("has-more-stories", items.length > 3);
   button?.classList.remove("is-return");
   if (button) button.querySelector("span").textContent = "See more updates";

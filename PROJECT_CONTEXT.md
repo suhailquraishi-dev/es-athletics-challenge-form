@@ -113,7 +113,7 @@ The ticker sits immediately below the navigation and follows the ES Social Hub s
 
 - Athletics logo appears above the title as a logo, not as an eyebrow.
 - Public title is `Weekly Challenge`.
-- Logo, title, email field, and first question use a measured vertical rhythm.
+- Logo, title, email field, and first question use a measured vertical rhythm, with a compact logo-to-title gap.
 - Email is required for scoring and is styled as a single outlined fieldset with its label embedded in the border.
 - Email input text and the scoring note share a centered baseline with equal horizontal inset.
 
@@ -184,9 +184,10 @@ Top Stories behavior:
 
 - Requests up to 12 current stories.
 - Desktop and tablet show three full stories plus a faded preview of the fourth.
+- On desktop and tablet, the combined Top Stories/Exclusives rail stays sticky beneath the ES header and remains internally scrollable when taller than the viewport.
 - `See more updates` scrolls the internal feed; at the end it changes to `Back to top`.
 - The internal scrollbar is visually hidden.
-- Mobile removes the nested scrolling/fade and displays the stories in the natural page flow.
+- Mobile removes the vertical nested feed/fade and presents Top Stories as a horizontal snap carousel with a visible next-card peek.
 - The fade must be gradual, readable, and never create an abrupt white cut.
 
 Rail cards use real thumbnails, ES article tags, clickable Roboto Condensed titles, rounded images, and the rounded ES logo in source metadata.
@@ -244,6 +245,8 @@ Latest-story responses use `no-store` so the rail is refreshed rather than treat
 ### Exclusives
 
 Exclusive mode queries the ES staging WordPress API for the exclusive category, filters to Track and Field/Athletics-related titles, and returns up to three stories. Curated ES exclusives remain visible if the live request fails.
+
+On mobile, Exclusives uses the same horizontal snap-card pattern as Top Stories and the source-story rail.
 
 ### Data Safety Rules
 
