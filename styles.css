@@ -1863,6 +1863,7 @@ textarea:focus {
 .news-item > div {
   display: grid;
   gap: 7px;
+  align-content: start;
 }
 
 .trending-card article > div {

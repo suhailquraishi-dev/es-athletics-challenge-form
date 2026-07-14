@@ -919,24 +919,17 @@ function renderNews(items) {
   shell?.classList.toggle("has-more-stories", items.length > 3);
   button?.classList.remove("is-return");
   if (button) button.querySelector("span").textContent = "See more updates";
-  list.innerHTML = items.map((item) => {
-    const isExclusive = Boolean(item.exclusive) || /\bexclusive\b/i.test(item.title || "");
-    return `
+  list.innerHTML = items.map((item) => `
     <article class="news-item">
       <a class="news-thumb" href="${escapeHtml(item.url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(item.title)}">
         <img src="${escapeHtml(item.image || "assets/workspace-card-newsletter-assets.webp")}" alt="" loading="lazy" decoding="async">
       </a>
       <div>
-        <div class="rail-tag-row">
-          <span class="rail-story-tag">${escapeHtml(item.tag || "Athletics")}</span>
-          ${isExclusive ? '<span class="rail-story-tag is-exclusive">Exclusive</span>' : ""}
-        </div>
         <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a>
         <span class="news-source"><img src="assets/es-rounded-logo.png" alt="">${escapeHtml(item.date)}</span>
       </div>
     </article>
-  `;
-  }).join("");
+  `).join("");
   requestAnimationFrame(syncNewsFeedHeight);
 }
 

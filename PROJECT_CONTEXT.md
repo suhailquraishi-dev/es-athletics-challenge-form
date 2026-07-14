@@ -190,7 +190,7 @@ Top Stories behavior:
 - Mobile removes the vertical nested feed/fade and presents Top Stories as a horizontal snap carousel with a visible next-card peek.
 - The fade must be gradual, readable, and never create an abrupt white cut.
 
-Rail cards use real thumbnails, ES article tags, clickable Roboto Condensed titles, rounded images, and the rounded ES logo in source metadata.
+Rail cards use real thumbnails, clickable Roboto Condensed titles, rounded images, and the rounded ES logo in source metadata. Top Stories omits category tags for a cleaner scan; Exclusives retains its category and Exclusive labels.
 
 ## 5. Editor Experience
 
