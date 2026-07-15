@@ -106,6 +106,7 @@ The ticker sits immediately below the navigation and follows the ES Social Hub s
 - Gold, silver, and bronze indicators use medal-appropriate colors.
 - The ticker content is duplicated into two identical loops so the animation restarts seamlessly.
 - Hover pauses the animation; reduced-motion preferences disable unnecessary motion.
+- The ticker remains sticky below the live header height and gains the ES Social Hub elevation shadow only after the page is scrolled.
 
 **Current limitation:** medal values are static sample data in `index.html`. Live Yahoo Sports/Olympics ingestion has not been implemented.
 

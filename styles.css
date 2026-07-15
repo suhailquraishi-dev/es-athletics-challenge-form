@@ -285,6 +285,9 @@ button {
 }
 
 .score-ticker {
+  position: sticky;
+  top: var(--ticker-sticky-top, 69px);
+  z-index: 40;
   display: grid;
   grid-template-columns: 132px minmax(0, 1fr);
   width: 100%;
@@ -294,6 +297,13 @@ button {
   background: #fff;
   color: #121417;
   font-family: var(--font-ui);
+  box-shadow: none;
+  transition: box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.score-ticker.is-elevated {
+  border-bottom-color: transparent;
+  box-shadow: 0 10px 22px -6px rgba(15, 23, 42, 0.22);
 }
 
 .ticker-title {

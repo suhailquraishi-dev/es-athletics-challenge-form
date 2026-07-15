@@ -299,6 +299,29 @@ function setupTickerLoop() {
   }
 }
 
+function setupTickerElevation() {
+  const header = document.querySelector(".es-site-header");
+  const ticker = document.querySelector(".score-ticker");
+  if (!header || !ticker) return;
+
+  const syncHeaderOffset = () => {
+    ticker.style.setProperty("--ticker-sticky-top", `${Math.round(header.getBoundingClientRect().height)}px`);
+  };
+  const syncElevation = () => {
+    ticker.classList.toggle("is-elevated", window.scrollY > 0);
+  };
+
+  syncHeaderOffset();
+  syncElevation();
+  window.addEventListener("scroll", syncElevation, { passive: true });
+
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(syncHeaderOffset).observe(header);
+  } else {
+    window.addEventListener("resize", syncHeaderOffset, { passive: true });
+  }
+}
+
 function setupMobileMenu() {
   const header = document.querySelector(".es-site-header");
   const button = document.querySelector(".es-menu-button");
@@ -1030,6 +1053,7 @@ function renderEditorPage() {
 
 document.addEventListener("DOMContentLoaded", () => {
   setupTickerLoop();
+  setupTickerElevation();
   setupMobileMenu();
   renderReaderPage();
   renderEditorPage();
