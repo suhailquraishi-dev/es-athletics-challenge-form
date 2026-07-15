@@ -116,7 +116,7 @@ The ticker sits immediately below the navigation and follows the ES Social Hub s
 - Public title is `Weekly Challenge`.
 - Logo, title, email field, and first question use a measured vertical rhythm, with a compact logo-to-title gap.
 - Email is required for scoring and is styled as a single outlined fieldset with its label embedded in the border.
-- Email input text and the scoring note share a centered baseline with equal horizontal inset.
+- Email input text and the scoring note share a centered baseline with equal horizontal inset, and the field spans the same width as the question cards.
 
 ### Question Cards
 

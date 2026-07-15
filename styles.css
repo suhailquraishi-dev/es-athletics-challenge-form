@@ -894,7 +894,8 @@ h3 {
 
 .email-field {
   min-width: 0;
-  max-width: 720px;
+  width: 100%;
+  max-width: none;
   margin: 0 0 28px;
   padding: 0;
   border: 1px solid var(--line);
@@ -958,6 +959,29 @@ h3 {
   padding: 0 16px;
   line-height: 20px;
   white-space: nowrap;
+}
+
+@media (min-width: 681px) {
+  .email-field {
+    position: relative;
+  }
+
+  .email-field .field-label {
+    position: absolute;
+    top: -9px;
+    left: 12px;
+    z-index: 1;
+    margin: 0;
+  }
+
+  .email-control-row {
+    min-height: 64px;
+  }
+
+  .email-field input,
+  .email-field .required-note {
+    min-height: 62px;
+  }
 }
 
 .email-row {
