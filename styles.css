@@ -906,7 +906,7 @@ h3 {
 
 .email-field:focus-within {
   border-color: var(--blue);
-  box-shadow: 0 0 0 2px rgba(10, 125, 250, 0.08);
+  box-shadow: none;
 }
 
 .email-field .field-label {
@@ -949,6 +949,10 @@ h3 {
 
 .email-field input:focus {
   box-shadow: none;
+}
+
+.email-field input:focus-visible {
+  outline: none;
 }
 
 .email-field .required-note {
