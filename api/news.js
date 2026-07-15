@@ -1,4 +1,4 @@
-const { handler: netlifyNewsHandler } = require("../netlify/functions/news.js");
+const { handler: newsHandler } = require("../server/news.js");
 
 module.exports = async function handler(request, response) {
   if (request.method !== "GET") {
@@ -9,7 +9,7 @@ module.exports = async function handler(request, response) {
   const queryStringParameters = Object.fromEntries(
     Object.entries(request.query || {}).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value])
   );
-  const result = await netlifyNewsHandler({ queryStringParameters });
+  const result = await newsHandler({ queryStringParameters });
 
   Object.entries(result.headers || {}).forEach(([name, value]) => response.setHeader(name, value));
   return response.status(result.statusCode).send(result.body);

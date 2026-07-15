@@ -1,0 +1,8 @@
+{
+  "name": "es-athletics-challenge-form",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "check": "node --check script.js && node --check editor.js && node --test tests/*.test.js"
+  }
+}

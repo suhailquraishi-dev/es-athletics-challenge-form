@@ -1,18 +1,23 @@
-# EssentiallySports Athletics Challenge Form
+# EssentiallySports Athletics Challenge
 
-Static first version for an EssentiallySports newsletter challenge product.
+An EssentiallySports newsletter challenge product with a public reader form and a protected editorial builder.
 
-See [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) for the full product brief, design rules, current architecture, data flow, QC checklist, and backend roadmap.
+## Routes
 
-## Pages
+- `/index.html` loads the latest published challenge.
+- `/index.html?challenge=challenge-slug` loads a specific published challenge.
+- `/editor.html` is the password-protected draft and publish workspace.
+- `/api/news` returns current ES Athletics stories.
+- `/api/challenges/[slug]` returns a public challenge without answer keys.
+- `/api/challenge-submissions` grades and records a reader response on the server.
 
-- `index.html` - reader challenge form with instant score, source articles, and Athletics news rail.
-- `editor.html` - lightweight editor view for creating Google Forms-style questions and saving a browser-local draft.
+## Commands
 
-## Hosting
+```text
+npm test
+npm run check
+```
 
-Vercel is the current preview host. It publishes the repository root and serves the stable `/api/news` and `/api/challenge-submissions` endpoints from `/api`.
+Vercel is the only deployment target. Pushes to `main` deploy the production site. Google Sheets stores shared drafts and readable response tabs through the server-only Apps Script bridge.
 
-## Google Sheets
-
-Reader responses are sent through the server-only `/api/challenge-submissions` bridge. See [integrations/google-sheets/README.md](integrations/google-sheets/README.md) for the Google writer and Vercel environment setup.
+See [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) for architecture, security, editorial operations, design rules, deployment configuration, and QC requirements.

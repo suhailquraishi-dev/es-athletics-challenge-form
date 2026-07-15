@@ -1,31 +1,25 @@
-# Google Sheets Submission Bridge
+# Google Sheets Challenge Storage
 
-This integration writes challenge responses to:
+The Sheet is both the response destination and the small static-first content store for the challenge editor. Browser code never receives the Apps Script URL, shared secret, answer keys, or hidden administration data.
 
-- Spreadsheet: `Athletics Trivia Response Sheet`
-- Spreadsheet ID: `1zwzex2sC6bpWKJ-rQ1Gh1cy1Baio4MZIC7nfyROlbxs`
-- Worksheet tab: `Sheet1`
+## What Editors See
 
-The browser never receives Google credentials or the Apps Script URL. It posts to the stable same-origin route `/api/challenge-submissions`; Vercel serves that route from `api/challenge-submissions.js`.
+Each published challenge receives its own visible tab, named from the challenge slug. Responses use a Google Forms-style layout:
 
-## Submission Schema
+1. Timestamp
+2. Email
+3. Score (out of the challenge total)
+4. Percentage
+5. One readable column for each question
 
-The first accepted submission creates and freezes this header row:
+The final submission-ID column is hidden. Raw JSON, IP-derived fingerprints, browser metadata, challenge IDs, and answer keys are not placed in the visible response tabs.
 
-1. Submission ID
-2. Submitted At (UTC)
-3. Challenge ID
-4. Challenge Title
-5. Category
-6. Email
-7. Score
-8. Total Points
-9. Percentage
-10. Answers JSON
-11. Source URL
-12. User Agent
+The script keeps two hidden tabs:
 
-The writer allows one row per normalized email address and challenge ID. A later weekly challenge must use a new challenge ID; the same reader can then enter again.
+- `_Challenges` stores drafts, published challenge definitions, and answer keys.
+- `_RateLimits` stores short-lived hashed abuse-control counters.
+
+Published challenges are immutable. Use a new slug for a new weekly challenge so existing response columns and grading cannot change after readers begin submitting.
 
 ## One-Time Google Setup
 
@@ -37,28 +31,26 @@ The writer allows one row per normalized email address and challenge ID. A later
 6. Choose **Deploy > New deployment > Web app**.
 7. Set **Execute as** to `Me` and **Who has access** to `Anyone`.
 8. Deploy and copy the final `/exec` URL. Do not use the `/dev` URL.
+9. Select `installMaintenanceTrigger` in Apps Script and run it once. Approve the requested spreadsheet and trigger permissions.
 
-The public web-app URL is protected by the shared secret and is called only from the server adapter.
+If the original `Sheet1` has only the legacy header and no responses, the first publish automatically reuses and renames it. Existing response data is never cleared.
 
-## Vercel Setup
+## Vercel Environment
 
-Add these environment variables in the Vercel project settings for Production, Preview, and Development:
+Set these values for Production and Preview:
 
 ```text
 GOOGLE_APPS_SCRIPT_URL=https://script.google.com/macros/s/DEPLOYMENT_ID/exec
 SHEETS_WEBHOOK_SECRET=the-same-secret-used-in-Script-Properties
+EDITOR_ADMIN_PASSWORD=a-strong-editor-password
+EDITOR_SESSION_SECRET=a-random-secret-of-at-least-32-characters
+ABUSE_HASH_SECRET=a-different-random-secret-of-at-least-32-characters
 ```
 
-Redeploy the project after setting them. Never commit real values to `.env` or `.env.example`.
+Never commit real values. Redeploy after changing environment variables.
 
-## Activation Sequence
+## Retention And Migration
 
-After the Apps Script URL and Vercel variables are configured:
+`runMaintenance` removes response rows older than 90 days and rate-limit counters older than eight days. Change `RESPONSE_RETENTION_DAYS` only after confirming the editorial privacy policy.
 
-1. Verify a server-side test submission creates the header and first row.
-2. Verify duplicate, timeout, validation, success, and retry states.
-3. Confirm no answer or email data appears in browser logs.
-
-## ES Domain Migration
-
-The frontend contract remains `/api/challenge-submissions`. When this product moves to the EssentiallySports domain, the ES backend can implement that route and either keep this Sheet writer or replace it with the production datastore. No form markup or reader workflow depends on Vercel or Google.
+The public contracts remain same-origin routes under `/api`. When this product moves to the EssentiallySports domain, the ES backend can retain this adapter or replace Google Sheets without changing the reader form markup.

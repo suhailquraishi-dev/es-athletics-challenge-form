@@ -1,6 +1,3 @@
-const STORAGE_KEY = "es-athletics-challenge-draft-v2";
-const Q1_IMAGE_REMOVAL_KEY = "es-athletics-q1-image-removed-v2";
-
 const seedArticles = [
   {
     tag: "Athletics",
@@ -39,68 +36,6 @@ const seedArticles = [
     date: "20 hrs ago"
   }
 ];
-
-const seedQuestions = [
-  {
-    id: "q1",
-    type: "radio",
-    title: "Which sprinter's rival revealed their current standing after a heated USATF Championships clash?",
-    points: 5,
-    required: true,
-    options: ["Noah Lyles", "Fred Kerley", "Kenny Bednarek", "Oblique Seville"],
-    answer: "Noah Lyles",
-    image: "",
-    source: "Think back to the rivalry covered after the heated USATF Championships clash."
-  },
-  {
-    id: "q2",
-    type: "checkbox",
-    title: "Which athletes are framed for another showdown after the Prefontaine Classic battle?",
-    points: 6,
-    required: true,
-    options: ["Sha'Carri Richardson", "Melissa Jefferson-Wooden", "Gabby Thomas", "Julien Alfred"],
-    answer: ["Sha'Carri Richardson", "Melissa Jefferson-Wooden"],
-    source: "Two leading U.S. sprinters are expected to meet again after the Prefontaine Classic."
-  },
-  {
-    id: "q3",
-    type: "select",
-    title: "What did Noah Lyles say he would choose over a $100 million offer?",
-    points: 4,
-    required: true,
-    options: ["Gold in every race", "A coaching role", "A marathon debut", "A Diamond League bye"],
-    answer: "Gold in every race",
-    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Noah-Lyles-1-1.jpeg",
-    source: "Lyles valued competitive legacy over the financial offer."
-  },
-  {
-    id: "q4",
-    type: "short",
-    title: "Which world champion answered a rare defeat with a 100m win at the Monaco Diamond League?",
-    points: 5,
-    required: true,
-    answer: "Oblique Seville",
-    source: "Look for the sprinter who rebounded at the Monaco Diamond League."
-  },
-  {
-    id: "q5",
-    type: "scale",
-    title: "How closely did you follow this Athletics news set?",
-    points: 5,
-    required: true,
-    answer: "5",
-    source: "Choose the number that best reflects how closely you followed this week's stories."
-  },
-];
-
-const legacySourceHints = {
-  "Noah Lyles' Rival Who Made Unsportsmanlike Comment Reveals Their Current Standing": "Think back to the rivalry covered after the heated USATF Championships clash.",
-  "Sha'Carri Richardson and Melissa Jefferson-Wooden Set to Go Against Each Other Once Again": "Two leading U.S. sprinters are expected to meet again after the Prefontaine Classic.",
-  "Noah Lyles Chooses Gold Medal in Every Race Over $100 Million for This Reason": "Lyles valued competitive legacy over the financial offer.",
-  "World Champion Climbs Back to the Top After Shocking Loss to NCAA Athlete": "Look for the sprinter who rebounded at the Monaco Diamond League.",
-  "All source reads": "Choose the number that best reflects how closely you followed this week's stories.",
-  "Source article": "Add a short clue that helps readers without revealing the answer."
-};
 
 const backupNews = [
   {
@@ -174,79 +109,6 @@ const backupNews = [
     image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Olympics-16.png"
   }
 ];
-
-const sampleChallenge = {
-  id: "athletics-weekly-2026-07-15",
-  title: "Weekly Challenge",
-  category: "Athletics",
-  intro: "Answer the questions from this week's Essentially Athletics stories and see your points instantly.",
-  articles: seedArticles,
-  questions: seedQuestions
-};
-
-function getChallenge() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    const removeLegacyQ1Image = localStorage.getItem(Q1_IMAGE_REMOVAL_KEY) !== "true";
-    if (!saved) {
-      localStorage.setItem(Q1_IMAGE_REMOVAL_KEY, "true");
-      return sampleChallenge;
-    }
-    const challenge = JSON.parse(saved);
-    let challengeChanged = false;
-    if (!challenge.id) {
-      challenge.id = sampleChallenge.id;
-      challengeChanged = true;
-    }
-    if (challenge.title === "Essentially Athletics Weekly Challenge") {
-      challenge.title = "Weekly Challenge";
-      challengeChanged = true;
-    }
-    if (Array.isArray(challenge.questions)) {
-      const questionCount = challenge.questions.length;
-      challenge.questions = challenge.questions.filter((question) => !(
-        question.id === "q6" &&
-        question.title === "In one line, which story would you want the newsletter to follow up on next?"
-      ));
-      if (challenge.questions.length !== questionCount) challengeChanged = true;
-      let imageCount = 0;
-      challenge.questions = challenge.questions.map((question) => {
-        let nextQuestion = question;
-        const migratedHint = legacySourceHints[nextQuestion.source];
-        if (migratedHint) {
-          nextQuestion = { ...nextQuestion, source: migratedHint };
-          challengeChanged = true;
-        }
-        if (!Object.prototype.hasOwnProperty.call(question, "image")) {
-          const seedQuestion = seedQuestions.find((item) => item.id === question.id);
-          nextQuestion = { ...nextQuestion, image: seedQuestion?.image || "" };
-          challengeChanged = true;
-        }
-        if (removeLegacyQ1Image && nextQuestion.id === "q1") {
-          nextQuestion = { ...nextQuestion, image: "" };
-          challengeChanged = true;
-        }
-        if (nextQuestion.image && imageCount >= 2) {
-          challengeChanged = true;
-          return { ...nextQuestion, image: "" };
-        }
-        if (nextQuestion.image) imageCount += 1;
-        return nextQuestion;
-      });
-    }
-    if (challengeChanged) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(challenge));
-    }
-    localStorage.setItem(Q1_IMAGE_REMOVAL_KEY, "true");
-    return challenge;
-  } catch (error) {
-    return sampleChallenge;
-  }
-}
-
-function saveChallenge(challenge) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(challenge));
-}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -496,12 +358,38 @@ function setupMobileMenu() {
   }, { passive: true });
 }
 
-function renderReaderPage() {
+async function renderReaderPage() {
   const form = document.querySelector("#challenge-form");
   const questionList = document.querySelector("#question-list");
   if (!form || !questionList) return;
 
-  const challenge = getChallenge();
+  const submitButton = form.querySelector("button[type='submit']");
+  submitButton.disabled = true;
+  questionList.innerHTML = `<div class="challenge-loading" role="status">Loading this week's questions...</div>`;
+
+  let challenge;
+  try {
+    const requestedSlug = new URLSearchParams(window.location.search).get("challenge") || "current";
+    const response = await fetch(`/api/challenges/${encodeURIComponent(requestedSlug)}`, {
+      headers: { accept: "application/json" }
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result?.challenge) throw new Error(result?.code || "CHALLENGE_UNAVAILABLE");
+    challenge = result.challenge;
+  } catch (error) {
+    questionList.innerHTML = `
+      <div class="challenge-unavailable" role="alert">
+        <strong>This challenge is not available right now.</strong>
+        <span>Please check the newsletter link or try again shortly.</span>
+      </div>
+    `;
+    document.querySelector("#form-error").textContent = "Questions could not be loaded.";
+    renderSources(seedArticles);
+    setupNewsScroller();
+    fetchNews("Athletics");
+    return;
+  }
+
   const totalPoints = getTotalPoints(challenge.questions);
   const totalPointsEl = document.querySelector("#total-points");
   const challengeTitleEl = document.querySelector("#challenge-title");
@@ -513,6 +401,7 @@ function renderReaderPage() {
   renderSources(challenge.articles);
   setupNewsScroller();
   fetchNews(challenge.category || "Athletics");
+  submitButton.disabled = false;
 
   document.querySelector("#refresh-news")?.addEventListener("click", () => fetchNews(challenge.category || "Athletics"));
   document.querySelector("#reset-form").addEventListener("click", () => {
@@ -548,8 +437,6 @@ function renderReaderPage() {
     }
 
     error.textContent = "";
-    const score = calculateScore(form, challenge.questions);
-    const submitButton = form.querySelector("button[type='submit']");
     const originalButtonText = submitButton.textContent;
     submitButton.disabled = true;
     submitButton.setAttribute("aria-busy", "true");
@@ -559,12 +446,8 @@ function renderReaderPage() {
       const result = await submitChallenge({
         email,
         challenge,
-        score,
-        totalPoints,
         answers: challenge.questions.map((question) => ({
           id: question.id,
-          title: question.title,
-          type: question.type,
           value: getFormValues(form, question)
         })),
         website: form.elements.website?.value || ""
@@ -584,22 +467,17 @@ function renderReaderPage() {
   });
 }
 
-async function submitChallenge({ email, challenge, score, totalPoints, answers, website }) {
+async function submitChallenge({ email, challenge, answers, website }) {
   const response = await fetch("/api/challenge-submissions", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       email,
       challenge: {
-        id: challenge.id,
-        title: challenge.title,
-        category: challenge.category
+        id: challenge.slug || challenge.id
       },
-      score,
-      totalPoints,
       answers,
-      website,
-      sourceUrl: window.location.href
+      website
     })
   });
   const result = await response.json().catch(() => null);
@@ -654,8 +532,6 @@ function renderQuestion(question, index, editorPreview) {
     control = `<input type="date" name="${name}" ${required}>`;
   } else if (question.type === "time") {
     control = `<input type="time" name="${name}" ${required}>`;
-  } else if (question.type === "file") {
-    control = `<input type="file" name="${name}" ${required}>`;
   } else {
     control = `<input type="text" name="${name}" placeholder="Short answer" ${required}>`;
   }
@@ -826,21 +702,6 @@ function getFormValues(form, question) {
   return fields[0]?.value || "";
 }
 
-function calculateScore(form, questions) {
-  return questions.reduce((sum, question) => {
-    const answer = question.answer;
-    const value = getFormValues(form, question);
-    if (question.type === "paragraph" && normalize(value)) return sum + Number(question.points || 0);
-    if (Array.isArray(answer)) {
-      const selected = Array.isArray(value) ? value.map(normalize).sort().join("|") : "";
-      const expected = answer.map(normalize).sort().join("|");
-      return selected === expected ? sum + Number(question.points || 0) : sum;
-    }
-    if (!answer && normalize(value)) return sum + Number(question.points || 0);
-    return normalize(value) === normalize(answer) ? sum + Number(question.points || 0) : sum;
-  }, 0);
-}
-
 function showScore(score, totalPoints, duplicate = false) {
   const resultPanel = document.querySelector("#result-panel");
   const percent = totalPoints ? Math.round((score / totalPoints) * 100) : 0;
@@ -982,135 +843,9 @@ function renderNews(items) {
   requestAnimationFrame(syncNewsFeedHeight);
 }
 
-function renderEditorPage() {
-  const editorList = document.querySelector("#editor-question-list");
-  if (!editorList) return;
-
-  let challenge = getChallenge();
-  const titleInput = document.querySelector("#edit-title");
-  const categoryInput = document.querySelector("#edit-category");
-  const introInput = document.querySelector("#edit-intro");
-
-  function syncInputs() {
-    titleInput.value = challenge.title;
-    categoryInput.value = challenge.category;
-    introInput.value = challenge.intro;
-  }
-
-  function renderBuilder() {
-    editorList.innerHTML = challenge.questions.map((question, index) => `
-      <article class="editor-question" data-index="${index}">
-        <div class="editor-question-head">
-          <strong>${escapeHtml(question.type)}</strong>
-          <button class="danger-button" type="button" data-remove="${index}">Remove</button>
-        </div>
-        <label>Question<input data-field="title" value="${escapeHtml(question.title)}"></label>
-        <label>Options, comma separated<input data-field="options" value="${escapeHtml((question.options || []).join(", "))}"></label>
-        <label>Correct answer<input data-field="answer" value="${escapeHtml(Array.isArray(question.answer) ? question.answer.join(", ") : question.answer)}"></label>
-        <label>Hint<input data-field="source" placeholder="Give readers a useful clue" value="${escapeHtml(question.source || "")}"></label>
-        <label class="full-width">Question image URL (maximum 2)<input data-field="image" type="url" placeholder="https://..." value="${escapeHtml(question.image || "")}"></label>
-        <label>Points<input data-field="points" type="number" min="0" value="${escapeHtml(question.points || 0)}"></label>
-      </article>
-    `).join("");
-    renderEditorPreview();
-  }
-
-  function renderEditorPreview() {
-    const preview = document.querySelector("#editor-preview-list");
-    preview.innerHTML = challenge.questions.map((question, index) => renderQuestion(question, index, true)).join("");
-    setupSimpleSelects(preview);
-  }
-
-  function captureSettings() {
-    challenge.title = titleInput.value.trim() || "Weekly Challenge";
-    challenge.category = categoryInput.value.trim() || "Athletics";
-    challenge.intro = introInput.value.trim();
-  }
-
-  syncInputs();
-  renderBuilder();
-
-  [titleInput, categoryInput, introInput].forEach((input) => {
-    input.addEventListener("input", () => {
-      captureSettings();
-      renderEditorPreview();
-    });
-  });
-
-  document.querySelector(".builder-toolbar").addEventListener("click", (event) => {
-    const type = event.target.dataset.addType;
-    if (!type) return;
-    challenge.questions.push({
-      id: `q${Date.now()}`,
-      type,
-      title: `New ${type} question`,
-      points: type === "file" ? 0 : 5,
-      required: true,
-      options: ["Option 1", "Option 2", "Option 3"],
-      answer: type === "checkbox" ? ["Option 1"] : "Option 1",
-      image: "",
-      source: "Add a short clue that helps readers without revealing the answer."
-    });
-    renderBuilder();
-  });
-
-  editorList.addEventListener("input", (event) => {
-    const card = event.target.closest(".editor-question");
-    if (!card) return;
-    const questionIndex = Number(card.dataset.index);
-    const question = challenge.questions[questionIndex];
-    const field = event.target.dataset.field;
-    if (field === "options") {
-      question.options = event.target.value.split(",").map((item) => item.trim()).filter(Boolean);
-    } else if (field === "answer" && question.type === "checkbox") {
-      question.answer = event.target.value.split(",").map((item) => item.trim()).filter(Boolean);
-    } else if (field === "points") {
-      question.points = Number(event.target.value || 0);
-    } else if (field === "image") {
-      const value = event.target.value.trim();
-      const otherImages = challenge.questions.filter((item, index) => index !== questionIndex && item.image).length;
-      if (value && otherImages >= 2) {
-        event.target.value = question.image || "";
-        event.target.setCustomValidity("A challenge can include images on a maximum of two questions.");
-        event.target.reportValidity();
-        return;
-      }
-      event.target.setCustomValidity("");
-      question.image = value;
-    } else {
-      question[field] = event.target.value;
-    }
-    renderEditorPreview();
-  });
-
-  editorList.addEventListener("click", (event) => {
-    const index = event.target.dataset.remove;
-    if (index === undefined) return;
-    challenge.questions.splice(Number(index), 1);
-    renderBuilder();
-  });
-
-  document.querySelector("#load-sample").addEventListener("click", () => {
-    challenge = JSON.parse(JSON.stringify(sampleChallenge));
-    syncInputs();
-    renderBuilder();
-  });
-
-  document.querySelector("#save-challenge").addEventListener("click", () => {
-    captureSettings();
-    saveChallenge(challenge);
-    const button = document.querySelector("#save-challenge");
-    button.textContent = "Saved";
-    setTimeout(() => {
-      button.textContent = "Save draft";
-    }, 1400);
-  });
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   setupTickerLoop();
   setupTickerElevation();
   setupMobileMenu();
   renderReaderPage();
-  renderEditorPage();
 });

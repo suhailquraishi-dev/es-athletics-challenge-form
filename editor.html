@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Editor workspace for creating EssentiallySports newsletter challenge forms.">
+    <meta name="robots" content="noindex,nofollow,noarchive">
     <link rel="icon" href="assets/es-rounded-logo.png" type="image/png">
     <title>Editor | EssentiallySports Athletics Challenge</title>
     <link rel="stylesheet" href="styles.css">
@@ -45,61 +46,98 @@
       </div>
     </header>
 
-    <main>
-      <section class="editor-layout">
-        <section class="panel builder-panel" id="builder" aria-labelledby="builder-title">
-          <div class="section-head">
-            <div>
-              <span class="eyebrow">Editor workspace</span>
-              <h2 id="builder-title">Challenge settings</h2>
+    <main class="editor-main">
+      <section class="editor-login-shell" id="editor-login" aria-labelledby="editor-login-title">
+        <form class="panel editor-login-card" id="editor-login-form">
+          <span class="eyebrow">Editorial access</span>
+          <h1 id="editor-login-title">Challenge Editor</h1>
+          <p>Sign in to create drafts, publish a challenge, and get its reader link.</p>
+          <label for="editor-password">Editor password</label>
+          <input id="editor-password" name="password" type="password" autocomplete="current-password" required>
+          <input class="form-honeypot" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="primary-button" type="submit">Sign in</button>
+          <p class="editor-feedback" id="editor-login-error" role="alert"></p>
+        </form>
+      </section>
+
+      <section class="editor-workspace is-hidden" id="editor-workspace" aria-label="Challenge editor">
+        <header class="editor-command-bar">
+          <div class="editor-challenge-picker">
+            <label for="challenge-picker">Challenge</label>
+            <select id="challenge-picker" aria-label="Select challenge"></select>
+            <span class="editor-status-pill" id="editor-status">Draft</span>
+          </div>
+          <div class="editor-actions">
+            <button class="secondary-button" type="button" id="new-challenge">New challenge</button>
+            <button class="secondary-button is-hidden" type="button" id="duplicate-challenge">Duplicate as new</button>
+            <a class="secondary-button" href="index.html" target="_blank" rel="noopener">Reader view</a>
+            <button class="text-button" type="button" id="editor-logout">Log out</button>
+          </div>
+        </header>
+
+        <div class="editor-layout">
+          <section class="panel builder-panel" id="builder" aria-labelledby="builder-title">
+            <div class="section-head">
+              <div>
+                <span class="eyebrow">Editor workspace</span>
+                <h2 id="builder-title">Challenge settings</h2>
+              </div>
             </div>
-            <div class="editor-actions">
-              <a class="secondary-button" href="index.html">Reader view</a>
-              <button class="secondary-button" type="button" id="load-sample">Load sample</button>
-              <button class="primary-button" type="button" id="save-challenge">Save draft</button>
+
+            <p class="editor-lock-note is-hidden" id="editor-lock-note">Published challenges are locked to protect existing scores. Duplicate this challenge to make the next edition.</p>
+            <div class="builder-grid">
+              <label>Challenge slug<input id="edit-slug" type="text" maxlength="80" placeholder="athletics-weekly-2026-07-15"></label>
+              <label>Challenge title<input id="edit-title" type="text" maxlength="120" placeholder="Weekly Challenge"></label>
+              <label>Sport/category<input id="edit-category" type="text" maxlength="60" placeholder="Athletics"></label>
+              <label class="full-width">Intro copy<textarea id="edit-intro" rows="3" maxlength="500"></textarea></label>
             </div>
-          </div>
 
-          <div class="builder-grid">
-            <label>
-              Challenge title
-              <input id="edit-title" type="text" value="Weekly Challenge">
-            </label>
-            <label>
-              Sport/category
-              <input id="edit-category" type="text" value="Athletics">
-            </label>
-            <label class="full-width">
-              Intro copy
-              <textarea id="edit-intro" rows="3">Answer the questions from this week's Essentially Athletics stories and see your points instantly.</textarea>
-            </label>
-          </div>
+            <section class="editor-content-section" aria-labelledby="questions-editor-title">
+              <div class="editor-section-heading">
+                <div><span class="eyebrow">Form</span><h3 id="questions-editor-title">Questions</h3></div>
+                <div class="builder-toolbar" aria-label="Add question type">
+                  <button type="button" data-add-type="short">Short answer</button>
+                  <button type="button" data-add-type="paragraph">Paragraph</button>
+                  <button type="button" data-add-type="radio">Multiple choice</button>
+                  <button type="button" data-add-type="checkbox">Checkboxes</button>
+                  <button type="button" data-add-type="select">Dropdown</button>
+                  <button type="button" data-add-type="scale">Linear scale</button>
+                  <button type="button" data-add-type="date">Date</button>
+                  <button type="button" data-add-type="time">Time</button>
+                </div>
+              </div>
+              <div id="editor-question-list" class="editor-question-list"></div>
+            </section>
 
-          <div class="builder-toolbar" aria-label="Add question type">
-            <button type="button" data-add-type="short">Short answer</button>
-            <button type="button" data-add-type="paragraph">Paragraph</button>
-            <button type="button" data-add-type="radio">Multiple choice</button>
-            <button type="button" data-add-type="checkbox">Checkboxes</button>
-            <button type="button" data-add-type="select">Dropdown</button>
-            <button type="button" data-add-type="scale">Linear scale</button>
-            <button type="button" data-add-type="date">Date</button>
-            <button type="button" data-add-type="time">Time</button>
-            <button type="button" data-add-type="file">File upload</button>
-          </div>
+            <section class="editor-content-section" aria-labelledby="articles-editor-title">
+              <div class="editor-section-heading">
+                <div><span class="eyebrow">Reader context</span><h3 id="articles-editor-title">Source stories</h3></div>
+                <button class="secondary-button" type="button" id="add-article">Add story</button>
+              </div>
+              <div id="editor-article-list" class="editor-article-list"></div>
+            </section>
 
-          <div id="editor-question-list" class="editor-question-list"></div>
-        </section>
-
-        <aside class="panel editor-preview" id="preview" aria-labelledby="preview-title">
-          <div class="section-head compact">
-            <div>
-              <span class="eyebrow">Live preview</span>
-              <h2 id="preview-title">Reader form</h2>
+            <div class="editor-publish-bar">
+              <p class="editor-feedback" id="editor-feedback" role="status" aria-live="polite"></p>
+              <div class="editor-actions">
+                <button class="secondary-button" type="button" id="save-challenge">Save draft</button>
+                <button class="primary-button" type="button" id="publish-challenge">Publish challenge</button>
+              </div>
             </div>
-          </div>
-          <div id="editor-preview-list" class="question-list preview-list"></div>
-          <div class="draft-note">Saved drafts stay in this browser until backend storage is connected.</div>
-        </aside>
+
+            <div class="published-link is-hidden" id="published-link">
+              <label for="published-url">Reader link</label>
+              <div><input id="published-url" type="url" readonly><button class="secondary-button" type="button" id="copy-published-link">Copy link</button></div>
+            </div>
+          </section>
+
+          <aside class="panel editor-preview" id="preview" aria-labelledby="preview-title">
+            <div class="section-head compact">
+              <div><span class="eyebrow">Live preview</span><h2 id="preview-title">Reader form</h2></div>
+            </div>
+            <div id="editor-preview-list" class="question-list preview-list"></div>
+          </aside>
+        </div>
       </section>
     </main>
 
@@ -202,5 +240,6 @@
     </button>
 
     <script src="script.js"></script>
+    <script src="editor.js"></script>
   </body>
 </html>

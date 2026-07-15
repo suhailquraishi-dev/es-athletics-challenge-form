@@ -1,127 +1,68 @@
-# EssentiallySports Athletics Challenge - Project Context
+# ES Athletics Challenge: Project Context
 
-## 1. Product Summary
+Last updated: 15 July 2026
 
-This repository contains a static-first newsletter challenge product for EssentiallySports (ES). It is the third product in the same family as:
+## Product
 
-- ES Social Hub: https://www.essentiallysports.com/tennis/social-hub/
-- FrameUp: https://frameup.essentiallysports.com/login.html?redirect=index.html%23frames
-- Gamezone design reference: https://es-frontend-mddblr7sl-essentiallysports.vercel.app/es-gamezone-golf/
+This product replaces a weekly Google Form used by EssentiallySports newsletters. Readers review selected ES stories, answer scored questions, submit an email address, and immediately see their score. Editors use a separate protected page to create a draft, preview it, publish it, and copy the final reader link.
 
-The current launch category is **Athletics / Track and Field**. The public title is **Weekly Challenge**; the product does not yet have a separate brand name.
+The first category is Athletics. The product is designed to move under an EssentiallySports domain later without changing the public frontend contract.
 
-The core loop is:
+## Public Routes
 
-1. Newsletter editors select several ES stories.
-2. Editors create scored questions based on those stories.
-3. Newsletter readers enter an email address and answer the questions.
-4. The page validates required answers and reveals the score immediately.
-5. Readers see the underlying stories, current Athletics news, and the ES newsletter catalog.
+- `/index.html`: reader page; resolves the latest published challenge.
+- `/index.html?challenge=slug`: stable link to a specific published challenge.
+- `/editor.html`: noindexed, password-protected editorial workspace.
+- `/api/news?category=track-and-field`: current ES story feed.
+- `/api/challenges/current`: latest public challenge definition.
+- `/api/challenges/:slug`: public challenge definition by slug.
+- `/api/challenge-submissions`: validated reader submissions.
+- `/api/editor/session`: editor session state.
+- `/api/editor/login` and `/api/editor/logout`: editor authentication.
+- `/api/editor/challenges`: authenticated list, load, save, and publish operations.
 
-The intended reader is a newsletter subscriber, with particular attention to readers aged roughly 50-60. Clarity, comfortable target sizes, legible typography, predictable controls, and low visual noise are more important than novelty.
+## Design Source Of Truth
 
-## 2. Current Scope
+The UI is a child of EssentiallySports, not a standalone redesign.
 
-The current version is a frontend prototype with two pages:
+- Header, footer, colors, spacing rhythm, links, and component behavior follow `essentiallysports.com` and the ES Social Hub.
+- Acumin Pro Condensed Black is reserved for section and product display headings.
+- Roboto Condensed Bold is used for editorial titles and compact headline UI.
+- Roboto is used for fields, answers, help text, and body copy.
+- Primary blue is `#0A7DFA`.
+- Reader question cards use a quiet pale editorial tint, light blue-gray stroke, rounded corners, and no shadow.
+- Controls target clear scanning and comfortable hit areas for newsletter readers, including readers aged 50-60.
+- Mobile story modules use horizontal scrolling; desktop/tablet news modules remain sticky where space permits.
+- Only command buttons receive blue CTA hover behavior.
 
-- `/index.html`: reader challenge, score reveal, story cards, Top Stories, and Our Newsletters.
-- `/editor.html`: browser-local challenge builder and live preview.
+Brand and font assets are local under `/assets`; no external font dependency is required.
 
-It exposes these stable same-origin server endpoints on Vercel:
+## Reader Data Flow
 
-- `/api/news?category=athletics`
-- `/api/news?category=track-and-field&mode=exclusive`
-- `/api/challenge-submissions`
+1. `script.js` reads the `challenge` query parameter, defaulting to `current`.
+2. The reader requests `/api/challenges/:slug`.
+3. The Vercel function loads the stored challenge from Apps Script, validates it, removes every `answer` property, and returns the public shape.
+4. The browser renders questions, source stories, and the ES news rail.
+5. On submit, the browser sends only the email, challenge ID, selected values, and an invisible honeypot value.
+6. The Vercel function fetches the published challenge again, grades against the server-side answers, creates a submission ID, hashes the request IP for abuse control, and sends the server-derived result to Apps Script.
+7. Apps Script independently regrades the response, checks duplicate email and rate limits, and appends a readable row.
+8. The reader receives the score and the thank-you/podcast result state.
 
-The reader form submits through the Vercel adapter to a protected Google Apps Script writer bound to the response Sheet. No editor authentication, production database, production leaderboard, or email identity system is connected yet.
+Client-provided scores, titles, categories, timestamps, and answer keys are never trusted.
 
-## 3. Source of Truth for Design
+## Editor Workflow
 
-The main EssentiallySports website is the canonical design system:
+1. Open `/editor.html` and enter the editor password.
+2. Choose an existing draft or select **New challenge**.
+3. Set a unique slug, title, category, intro, questions, answers, hints, points, and source stories.
+4. Use the live preview to check the reader card structure.
+5. Select **Save draft** to make the draft available to other authenticated editors.
+6. Select **Publish challenge** to create the response tab and final reader URL.
+7. Use **Copy link** and place that URL in the newsletter.
 
-- https://www.essentiallysports.com/
-- https://www.essentiallysports.com/tennis/social-hub/
+Published challenges are immutable. This protects grading and response columns after readers begin submitting. Use **Duplicate as new** and a new slug for the next weekly edition.
 
-Do not redesign the product into a generic form builder or standalone SaaS interface. It must look like an ES child product. When a component exists on the ES website, inspect and match its typography, colors, spacing, borders, radii, interaction states, and responsive behavior.
-
-Original local ES design assets were studied from:
-
-`C:\Users\Suhail\Documents\Codex\For Showcase\essentiallysports-combined-optimized-netlify`
-
-Newsletter references supplied during design:
-
-- `Newsletter-LITE.pdf`
-- `ES Athletics.svg`
-- `Poll.png`
-- `design-layers.json`
-
-These reference files are not required to run the repository. The required brand assets and fonts have already been copied into `/assets`.
-
-### Typography
-
-Only these font families should be used:
-
-- **Acumin Pro Condensed Black**: section headings, question labels, tags, and strong ES display moments.
-- **Roboto Condensed**: article titles, news titles, video/editorial titles, and compact UI copy.
-- **Roboto**: body text, form fields, descriptions, hints, and supporting metadata.
-
-Local font files are loaded with `@font-face` from `/assets/fonts`. Do not replace them with system approximations or unrelated web fonts.
-
-### Core Visual Rules
-
-- ES blue is `#0A7DFA`.
-- The page background is a very light grey (`#F7F8FA`) so white cards remain distinguishable.
-- Question cards use a very light, calm newsletter tint; controls use restrained pale-yellow borders and states.
-- Question cards use a `1px` very light blue (`#E8F2F6`) stroke.
-- Question cards do not use a drop shadow; separation comes from the light-blue stroke and spacing.
-- Structural frame containers use an `11px` radius; controls, pills, tags, circular marks, and standalone media retain their component-specific geometry.
-- CTA buttons have no drop shadows.
-- Blue CTA hover treatment belongs to actual buttons, not article titles, footer links, option labels, or general text links.
-- Article/news titles remain visually stable on hover and selection: no underline and no blue color shift.
-- Avoid nested decorative cards, oversized marketing heroes, gradient ornaments, or generic dashboard styling.
-- Inner padding must be consistent on all sides of boxes, cards, tags, and controls.
-- Images and cards in the same grid should have consistent heights and alignment.
-- Category tags should reproduce ES article tags: Acumin condensed black, uppercase, ES blue border, and equal visual padding.
-
-## 4. Reader Experience
-
-### Header and Footer
-
-The header and footer are based directly on the ES website:
-
-- Desktop navigation: Latest, Sports, Newsletters, Think Tank, Case Studies.
-- ES logo and official social icons come from local assets.
-- Desktop navigation includes ES-style dropdown behavior.
-- Mobile uses a compact menu panel.
-- Footer includes the ES blue brand band, social icons, link columns, sports columns, legal links, and responsive stacking.
-- The rounded ES logo is used for the favicon and ES source indicators.
-
-There is no extra promotional banner above the navigation. Public editor links, points badges, and the old "Newsletter challenge" eyebrow were intentionally removed from the reader header.
-
-### Athletics Ticker
-
-The ticker sits immediately below the navigation and follows the ES Social Hub scoreboard pattern.
-
-- The left identity block uses the rounded ES icon and Athletics label.
-- Cards are labeled `Olympics / Medal Table`.
-- Gold, silver, and bronze indicators use medal-appropriate colors.
-- The ticker content is duplicated into two identical loops so the animation restarts seamlessly.
-- Hover pauses the animation; reduced-motion preferences disable unnecessary motion.
-- The ticker remains sticky below the live header height and gains the ES Social Hub elevation shadow only after the page is scrolled.
-
-**Current limitation:** medal values are static sample data in `index.html`. Live Yahoo Sports/Olympics ingestion has not been implemented.
-
-### Challenge Header
-
-- Athletics logo appears above the title as a logo, not as an eyebrow.
-- Public title is `Weekly Challenge`.
-- Logo, title, email field, and first question use a measured vertical rhythm, with a compact logo-to-title gap.
-- Email is required for scoring and is styled as a single outlined fieldset with its label embedded in the border.
-- Email input text and the scoring note share a centered baseline with equal horizontal inset, and the field spans the same width as the question cards.
-
-### Question Cards
-
-Supported reader question types:
+Supported types:
 
 - Short answer
 - Paragraph
@@ -131,259 +72,140 @@ Supported reader question types:
 - Linear scale
 - Date
 - Time
-- File upload
 
-Current sample challenge contains five scored questions worth 25 total points.
+File upload is intentionally excluded until ES provides controlled upload storage, malware scanning, retention rules, and access policy.
 
-Question card rules:
+## Google Sheets Layout
 
-- Calm spacing and strong readability for older readers.
-- Question number is an Acumin/ES label with restrained rounded corners; points are shown in a matching separate badge.
-- Options are large enough to tap but are reduced appropriately on phones.
-- Selected states are obvious without excessive saturation.
-- Text-field focus uses one subtle translucent blue ring rather than stacked outlines.
-- Dropdown trigger and open menu form one continuous control with joined corners.
-- A maximum of two question cards may include an image.
-- Question images, when used, are full width with limited height and rounded top corners.
-- The first sample question intentionally has no image.
-- The footer says `Hint:` and contains a clue; it must not display the article title as `Source:`.
-- The source divider is a single line, never a doubled border.
+Each published challenge gets one visible response tab named `Responses - <slug>`. The tab is intentionally similar to Google Forms:
 
-### Submission and Score
+1. Timestamp
+2. Email
+3. Score (out of the challenge total)
+4. Percentage
+5. One column per question
 
-The browser validates:
+The final submission ID column is hidden. Visible response tabs do not contain JSON, source URLs, user agents, IP addresses, challenge IDs, or answer keys.
 
-- Valid email address.
-- Completion of all required questions.
-- Custom dropdown state as well as native inputs.
+Two hidden tabs support the application:
 
-On valid submission, `script.js` calculates the score from the current question configuration and reveals:
+- `_Challenges`: draft/published definitions, answer keys, status, dates, and response-tab name.
+- `_RateLimits`: hashed abuse counters with short retention.
 
-- Score and total possible points.
-- Percentage-based progress meter.
-- A short result message.
-- A Gamezone-inspired completion header and score hierarchy.
-- A CTA explaining that results will be announced in the next day's ES Fancast episode.
+The first publish reuses the legacy `Sheet1` only when it has no response data. Existing data is never cleared automatically.
 
-The result intentionally omits a leaderboard. The score, answer values, challenge metadata, timestamp, and normalized email address are persisted through the protected Sheet bridge. Duplicate entries are prevented per challenge ID and email address.
+Default retention is 90 days for response rows and eight days for rate counters. `installMaintenanceTrigger` must be run once in Apps Script to schedule daily cleanup. Any change to response retention requires editorial/privacy approval.
 
-### Story Cards
+## Security Model
 
-The `Questions picked from these stories` section lists the ES articles used to construct the challenge.
+- Answer keys are absent from `script.js`, HTML, public challenge responses, and browser storage.
+- Grading occurs in both the Vercel server function and Apps Script.
+- Editor authentication uses a signed, HttpOnly, Secure, SameSite=Strict cookie with an eight-hour lifetime.
+- Login and publishing actions require same-origin requests.
+- Editor writes require the additional `x-es-editor-request` request header.
+- Login and submission abuse controls persist in the hidden Sheet tab.
+- Reader and editor payloads have strict size, count, string-length, type, and URL validation.
+- Story links must be on EssentiallySports domains.
+- Editorial images must be on EssentiallySports-controlled domains.
+- Spreadsheet formula injection is neutralized before cell writes.
+- Secrets and the Apps Script URL exist only in Vercel/Apps Script configuration.
+- `/editor.html` is noindex and no-store.
+- Vercel applies CSP, clickjacking protection, MIME sniffing protection, a strict referrer policy, and a restricted permissions policy.
 
-- Story titles are clickable and open the real ES article.
-- Cards use ES category tags, image treatment, title typography, author/date metadata, and `Read Full Story` CTA styling.
-- Card heights and image dimensions should remain aligned across each row.
-- On phones, the story cards become a horizontal, touch-scrollable rail with scroll snapping and a visible next-card peek instead of a long vertical list.
+This password gate is appropriate for the current small editorial team and static-first phase. Before a wider internal rollout, replace the shared password with ES SSO and role-based permissions.
 
-### Right News Rail
+## Environment Configuration
 
-The right rail contains:
-
-1. **Top Stories**: latest Athletics/Track and Field stories.
-2. **Our Newsletters**: the official ES newsletter index copied from the main homepage treatment.
-
-Top Stories behavior:
-
-- Requests up to 12 current stories.
-- Desktop and tablet show two full stories plus a faded half-preview of the third to signal additional updates.
-- On desktop and tablet, the combined Top Stories/Our Newsletters rail stays sticky beneath the ES header and remains internally scrollable when taller than the viewport.
-- `See more updates` scrolls the internal feed; at the end it changes to `Back to top`.
-- The internal scrollbar is visually hidden.
-- Mobile removes the vertical nested feed/fade and presents Top Stories as a horizontal snap carousel with a visible next-card peek.
-- The fade must be gradual, readable, and never create an abrupt white cut.
-
-Top Stories uses real thumbnails, clickable Roboto Condensed titles, rounded images, and the rounded ES logo in source metadata. It omits category tags for a cleaner scan.
-
-Our Newsletters behavior mirrors the ES homepage module:
-
-- Desktop and tablet use a vertical seven-sport index with 1px pale-blue separators.
-- The module uses the page's standard `11px` frame radius.
-- Its heading follows the same 30px desktop and 26px mobile scale as `Questions picked from these stories`.
-- Each newsletter mark links directly to its verified publication website and opens in a separate tab.
-- Newsletter links reproduce the ES homepage hover state with a `scale(1.05)` transform over `0.2s`, plus a restrained keyboard focus outline.
-- The NFL row stacks The Huddle, Chiefs Huddle, Cowboys Huddle, and Steelers Huddle.
-- Mobile converts the index to a horizontal, scrollbar-free strip with the sport label above each official newsletter mark.
-- The separate Explore block retains the ES copy and links to the newsletter hub.
-- The official newsletter marks and the View All Newsletters link are the module's only interactive elements.
-
-## 5. Editor Experience
-
-The editor is intentionally a lightweight static builder, not a complete CMS.
-
-Editors can:
-
-- Edit challenge title, category, and intro copy.
-- Add any supported question type.
-- Edit question, comma-separated options, correct answer, hint, image URL, and point value.
-- Remove questions.
-- Add images to no more than two questions.
-- Load the sample challenge.
-- See a live reader-form preview.
-- Save a draft in the current browser.
-
-The editor currently stores data in `localStorage` under:
-
-`es-athletics-challenge-draft-v2`
-
-The code also migrates older saved drafts:
-
-- Old long title becomes `Weekly Challenge`.
-- Removed sample question 6 stays removed.
-- Old source-article labels are converted to useful hints.
-- The removed first-question image stays removed.
-- More than two saved question images are trimmed to the two-image limit.
-
-**Current limitations:** there is no login, role management, collaboration, revision history, publishing workflow, server validation, or shared storage.
-
-## 6. News Data Flow
-
-### Latest Athletics Stories
-
-`fetchNews()` uses this order:
-
-1. Vercel Function `/api/news`.
-2. Direct ES WordPress REST request if the function does not return enough stories.
-3. Curated `backupNews` entries in `script.js` if both live paths fail.
-
-The shared news handler behind `/api/news` fetches the official ES category page and extracts ES article URLs, titles, dates, and nearby image URLs. It supports these category mappings:
-
-- athletics / track-and-field
-- golf
-- tennis
-- nascar
-- nba
-- nfl
-
-Latest-story responses use `no-store` so the rail is refreshed rather than treated as long-lived static content.
-
-### Legacy Exclusives Endpoint
-
-Exclusive mode remains available through `/api/news` but is no longer requested by the reader page after the newsletter module replaced the secondary rail feed.
-
-### Data Safety Rules
-
-- Keep all rendered external values escaped with `escapeHtml()`.
-- Keep story links on `https://www.essentiallysports.com/`.
-- External article links open with `target="_blank"` and `rel="noopener"`.
-- A failed live fetch must leave a polished populated fallback, not a broken or empty card.
-
-## 7. Repository Structure
+Required Vercel Production and Preview variables:
 
 ```text
-/
-|-- index.html                 Reader page and static ticker/footer structure
-|-- editor.html                Browser-local editor and live preview structure
-|-- styles.css                 ES tokens, responsive layout, and all component styles
-|-- script.js                  Challenge model, rendering, scoring, editor, news, menus
-|-- api/                       Vercel news and challenge-submission adapters
-|-- server/                    Shared validated submission core
-|-- netlify.toml               Legacy Netlify compatibility configuration
-|-- netlify/functions/news.js  Latest-news scraper and legacy exclusives endpoint
-|-- netlify/functions/challenge-submissions.js  Validated portable submission adapter
-|-- integrations/google-sheets/  Sheet-bound Apps Script writer and deployment guide
-|-- assets/
-|   |-- fonts/                 Acumin, Roboto Condensed, and Roboto files
-|   |-- newsletters/           Official ES newsletter SVG marks
-|   |-- social-icons/          Separate ES nav and footer icon sets
-|   |-- es-athletics.svg       Athletics newsletter logo
-|   |-- es-rounded-logo.png    Favicon and ES story/source mark
-|   |-- brand-logo-blue.svg    Header logo
-|   |-- brand-logo-white.svg   Footer logo
-|   `-- ...                    Supporting local image assets
-|-- README.md                  Short setup summary
-`-- PROJECT_CONTEXT.md         This handoff document
+GOOGLE_APPS_SCRIPT_URL
+SHEETS_WEBHOOK_SECRET
+EDITOR_ADMIN_PASSWORD
+EDITOR_SESSION_SECRET
+ABUSE_HASH_SECRET
 ```
 
-This is a dependency-free static project. There is no `package.json`, framework, bundler, or build step.
+`SUBMISSION_SECRET` in Apps Script properties must equal `SHEETS_WEBHOOK_SECRET`. Real values must never appear in Git, logs, screenshots, chat, or client JavaScript.
 
-## 8. Responsive and Accessibility Expectations
+## Deployment
 
-Required visual checks:
+Repository: `suhailquraishi-dev/es-athletics-challenge-form`
 
-- `1440x900`
-- `1280x720`
-- `390x844`
-- `360x800`
+Production host: Vercel
 
-The page must have no horizontal overflow, clipped text, overlapping controls, broken thumbnails, or mismatched card widths.
+Production URL: `https://es-athletics-challenge-form.vercel.app/`
 
-Accessibility behavior already present:
+Pushes to `main` deploy automatically. Netlify is not used. Before pushing:
 
-- Semantic form fields and fieldsets.
-- Visible focus states.
-- ARIA labels for navigation, ticker, controls, and result regions.
-- Keyboard-operable custom dropdown.
-- Escape and outside-click handling for menus.
-- `aria-invalid` on failed controls.
-- Reduced-motion support.
-- Minimum practical mobile touch targets.
+```text
+npm run check
+git diff --check
+```
 
-Future changes should preserve these behaviors and verify color contrast, focus order, screen-reader labels, and 200% zoom behavior.
+After Vercel reports Ready, verify the production reader, editor, API responses, security headers, and Sheet row layout.
 
-## 9. Git and Deployment
+## News And Ticker
 
-Canonical repository:
+The right rail requests at least ten current Track and Field stories through `/api/news`; static ES stories are retained only as a graceful fallback. The ticker is an Athletics-styled looping medal table inspired by the ES Social Hub. Its medal values are presentation data and are not part of challenge scoring.
 
-`https://github.com/suhailquraishi-dev/es-athletics-challenge-form.git`
+## Required Release QC
 
-Primary branch:
+Reader:
 
-`main`
+- `current` and a specific slug load successfully.
+- Public challenge JSON contains no answer keys.
+- Empty email and missing required answers show clear inline errors.
+- Correct, incorrect, checkbox-order, dropdown, text, and scale grading are server-derived.
+- Duplicate email returns the original score without adding a row.
+- Failure preserves the reader's selections.
+- Source titles and news titles remain clickable without unwanted underlines.
 
-Only this repository should be modified or pushed for this product.
+Editor:
 
-Vercel is the current preview host. The connected Vercel project publishes the repository root, serves functions from `/api`, and should deploy automatically after a push to `main`.
+- Unauthenticated APIs return 401.
+- Wrong-password and rate-limited states are generic and do not leak configuration.
+- Draft save survives another browser session.
+- Publish creates a final link and response tab.
+- Published content is locked and can be duplicated into a new slug.
+- Add, edit, reorder, remove, preview, and article controls work by keyboard and pointer.
 
-For a static-only local preview, serve the repository root on a local HTTP server. Exercise the Vercel Functions with Vercel Dev or a deployed preview rather than opening the HTML file directly.
+Visual:
 
-## 10. Quality-Control Checklist
+- Test `1440x900`, `1280x720`, `390x844`, and `360x800`.
+- No horizontal page scroll, clipping, overlap, broken images, hidden focus, or button-text overflow.
+- Navbar, ticker, sticky rail, question cards, source cards, newsletter module, score state, and footer align at each breakpoint.
 
-Before pushing UI changes:
+Security/leak scan:
 
-1. Confirm the header, ticker, reader form, story section, rail, and footer align at desktop and mobile sizes.
-2. Check empty submission shows email validation.
-3. Check missing required answers focus the correct native or custom control.
-4. Complete the sample challenge and confirm `25 / 25 points` can still be reached.
-5. Reset the form and confirm all native/custom controls clear.
-6. Verify editor add, edit, remove, load sample, save draft, and live preview behavior.
-7. Confirm only two question images are accepted.
-8. Confirm Top Stories has at least 10 merged stories when the live endpoint succeeds.
-9. Confirm article URLs and thumbnails resolve to real ES content.
-10. Confirm there is no horizontal scroll at supported viewport sizes.
-11. Scan for `TODO`, `lorem`, debug logging, localhost URLs, broken asset paths, and visible prototype/fallback wording.
-12. Run `git diff --check` and inspect the final diff before committing.
+- No real secret, Apps Script URL, answer key, email, localhost URL, debug statement, `TODO`, or stale Netlify/localStorage copy in the deployed files.
+- CSP allows required ES images/news requests and blocks unexpected hosts.
+- Editor HTML has noindex/no-store headers.
 
-## 11. Product Decisions Already Made
+## Repository Map
 
-- Athletics is the first category.
-- Reader and editor are separate pages.
-- Email, answers, and score are submitted through the server-only Google Sheets storage bridge.
-- Browser autofill must retain the email field's white background rather than introducing a separate tinted block inside the outlined control.
-- Scoring is instant and shown on the same page.
-- The reader sees article context and additional category news.
-- The public page follows ES Social Hub/editorial structure with some Gamezone challenge energy.
-- The newsletter visual language influences the question area, but ES remains the parent design system.
-- Question cards prioritize calm readability for a 50-60 audience.
-- Hints replace article-title source labels inside question cards.
-- The reader page does not expose editor navigation.
-- Top Stories uses real-time ES fetching with curated resilience.
-- The official Our Newsletters module replaces the former secondary Exclusives rail card.
-- Blue hover fills are reserved for real CTA buttons.
+```text
+index.html                         Reader page
+editor.html                        Protected editor structure
+script.js                          Reader UI, ES navigation, news, ticker
+editor.js                          Authenticated draft/publish editor
+styles.css                         ES-aligned responsive design system
+api/challenges/[slug].js           Public challenge API
+api/challenge-submissions.js       Reader submission adapter
+api/editor/*.js                    Editor session and challenge APIs
+api/news.js                        Current ES news adapter
+server/challenge-schema.js         Validation, public projection, grading
+server/challenge-submissions.js    Submission validation and server grading
+server/editor-session.js           Signed editor session and origin checks
+server/google-sheet-client.js      Server-only Apps Script client
+integrations/google-sheets/Code.gs Sheet storage, grading, tabs, retention
+tests/*.test.js                    Security and data-contract tests
+vercel.json                        Production headers and caching
+```
 
-## 12. Recommended Backend Roadmap
+## Remaining Production Decisions
 
-Connect backend functions one at a time, preserving the current frontend contract:
-
-1. **Challenge storage:** persist challenge metadata, articles, questions, answers, hints, points, and image references.
-2. **Editor authentication:** restrict editor routes and publishing actions to ES staff.
-3. **Draft/publish workflow:** separate drafts from published newsletter challenges.
-4. **Reader submissions:** monitor the active Sheet bridge, then migrate the stable `/api/challenge-submissions` contract to the ES production datastore.
-5. **Leaderboard:** replace illustrative names with privacy-aware rankings and anti-abuse controls.
-6. **Media upload:** replace freeform image URLs with controlled ES media selection/upload.
-7. **Live ticker:** connect a reliable Athletics/Olympics data provider and define refresh/cache behavior.
-8. **Analytics:** track challenge starts, completion rate, question drop-off, score distribution, and story click-throughs.
-9. **Operational safeguards:** rate limiting, validation, monitoring, error reporting, and content sanitization.
-10. **Multi-category support:** generalize the same product for Golf, Tennis, and other ES newsletters without breaking Athletics branding.
-
-Any backend work should keep the current public routes stable unless a migration plan is agreed first.
+- Confirm the formal response-retention period and reader consent language with ES privacy/legal owners.
+- Replace the shared editor password with ES SSO before broad internal access.
+- Decide whether the production ES backend will retain Google Sheets or migrate the stable `/api` contracts to a database.
+- Define a controlled file-upload service before adding that question type.
