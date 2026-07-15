@@ -499,7 +499,7 @@ main {
   padding: clamp(22px, 4vw, 34px);
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 13px;
   background: #fff;
   color: var(--ink);
   box-shadow: var(--shadow);
@@ -581,7 +581,7 @@ h3 {
   display: grid;
   gap: 12px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 11px;
   padding: 24px;
   background: #073869;
   color: #fff;
@@ -643,7 +643,7 @@ h3 {
   gap: 1px;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 11px;
   background: var(--line);
   margin-bottom: 22px;
 }
@@ -695,7 +695,7 @@ h3 {
 .panel {
   min-width: 0;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 11px;
   background: var(--paper);
   box-shadow: var(--shadow);
 }
@@ -718,7 +718,7 @@ h3 {
 .challenge-panel {
   overflow: hidden;
   padding: 0 0 24px;
-  border-radius: 8px;
+  border-radius: 11px;
   background: #fff;
 }
 
@@ -898,7 +898,7 @@ h3 {
   margin: 0 0 28px;
   padding: 0;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 11px;
   background: #fff;
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
@@ -1014,7 +1014,7 @@ textarea:focus {
 
 .question-card {
   border: 1px solid #e8f2f6;
-  border-radius: 8px;
+  border-radius: 11px;
   padding: 22px 24px 24px;
   background: #fffbed;
   color: #112841;
@@ -1051,7 +1051,7 @@ textarea:focus {
   height: 190px;
   margin: 0;
   overflow: hidden;
-  border-radius: 8px 8px 0 0;
+  border-radius: 11px 11px 0 0;
   background: #f1f3f5;
 }
 
@@ -1509,7 +1509,7 @@ textarea:focus {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  border-radius: 6px;
+  border-radius: 9px;
   padding: 20px 22px;
   background: #f0f7ff;
 }
@@ -1567,7 +1567,7 @@ textarea:focus {
   flex-direction: column;
   overflow: hidden;
   border: 0;
-  border-radius: 8px;
+  border-radius: 11px;
   padding: 12px;
   background: #fff;
   box-shadow: none;
@@ -1576,7 +1576,7 @@ textarea:focus {
 .source-card-image {
   display: block;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 11px;
 }
 
 .source-card img {
@@ -1714,7 +1714,7 @@ textarea:focus {
 
 .newsletters-card {
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 11px;
   padding: 40px 0;
   background: #fff;
   color: #181616;
@@ -1850,14 +1850,14 @@ textarea:focus {
 .rail-card {
   overflow: hidden;
   border: 1px solid var(--line-soft);
-  border-radius: 8px;
+  border-radius: 11px;
   background: #fff;
   box-shadow: none;
 }
 
 .top-stories {
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 11px;
   background-clip: padding-box;
 }
 
@@ -2164,7 +2164,7 @@ textarea:focus {
   margin: 24px 0 18px;
   padding: clamp(24px, 4vw, 44px);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 11px;
   background: #fff;
   box-shadow: var(--shadow);
 }
@@ -2214,7 +2214,7 @@ textarea:focus {
   margin-bottom: 18px;
   padding: 12px;
   border: 1px solid var(--line-soft);
-  border-radius: 8px;
+  border-radius: 11px;
   background: var(--canvas-soft);
 }
 
@@ -2228,7 +2228,7 @@ textarea:focus {
   display: grid;
   gap: 12px;
   border: 1px solid var(--line-soft);
-  border-radius: 8px;
+  border-radius: 11px;
   padding: 14px;
   background: #fff;
 }
@@ -2939,7 +2939,7 @@ body {
   position: fixed;
   top: 74px;
   z-index: 5001;
-  border-radius: 8px;
+  border-radius: 11px;
   background: #fff;
   color: #141414;
 }
@@ -3591,7 +3591,7 @@ body {
     gap: 10px;
     align-items: stretch;
     border: 1px solid #e8f2f6;
-    border-radius: 8px;
+    border-radius: 11px;
     padding: 10px;
     background: #fff;
     scroll-snap-align: start;

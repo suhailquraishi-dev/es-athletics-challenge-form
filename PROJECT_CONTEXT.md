@@ -73,7 +73,7 @@ Local font files are loaded with `@font-face` from `/assets/fonts`. Do not repla
 - Question cards use a very light, calm newsletter tint; controls use restrained pale-yellow borders and states.
 - Question cards use a `1px` very light blue (`#E8F2F6`) stroke.
 - Question cards do not use a drop shadow; separation comes from the light-blue stroke and spacing.
-- Cards and images retain rounded corners, generally no more than `8px` unless a control intentionally uses a larger radius.
+- Structural frame containers use an `11px` radius; controls, pills, tags, circular marks, and standalone media retain their component-specific geometry.
 - CTA buttons have no drop shadows.
 - Blue CTA hover treatment belongs to actual buttons, not article titles, footer links, option labels, or general text links.
 - Article/news titles remain visually stable on hover and selection: no underline and no blue color shift.
@@ -197,7 +197,7 @@ Top Stories uses real thumbnails, clickable Roboto Condensed titles, rounded ima
 Our Newsletters behavior mirrors the ES homepage module:
 
 - Desktop and tablet use a vertical seven-sport index with 1px pale-blue separators.
-- The module uses the page's standard 8px outer corner radius.
+- The module uses the page's standard `11px` frame radius.
 - Its heading follows the same 30px desktop and 26px mobile scale as `Questions picked from these stories`.
 - Each newsletter mark links directly to its verified publication website and opens in a separate tab.
 - Newsletter links reproduce the ES homepage hover state with a `scale(1.05)` transform over `0.2s`, plus a restrained keyboard focus outline.
