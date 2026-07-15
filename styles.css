@@ -67,6 +67,10 @@
   --font-title: "Acumin Pro Condensed Black";
 }
 
+.is-hidden {
+  display: none !important;
+}
+
 * {
   box-sizing: border-box;
 }
