@@ -891,16 +891,16 @@ function syncNewsFeedHeight() {
     list?.style.removeProperty("--news-feed-height");
     return;
   }
-  const fourthStory = list?.children[3];
-  if (!list || !fourthStory) {
+  const thirdStory = list?.children[2];
+  if (!list || !thirdStory) {
     list?.style.removeProperty("--news-feed-height");
     return;
   }
 
   const listRect = list.getBoundingClientRect();
-  const fourthRect = fourthStory.getBoundingClientRect();
-  const previewHeight = Math.min(130, Math.max(110, fourthRect.height * 0.5));
-  list.style.setProperty("--news-feed-height", `${Math.ceil(fourthRect.top - listRect.top + previewHeight)}px`);
+  const thirdRect = thirdStory.getBoundingClientRect();
+  const previewHeight = Math.min(90, Math.max(64, thirdRect.height * 0.5));
+  list.style.setProperty("--news-feed-height", `${Math.ceil(thirdRect.top - listRect.top + previewHeight)}px`);
 }
 
 function renderNews(items) {
@@ -909,7 +909,7 @@ function renderNews(items) {
   const button = document.querySelector("#news-more-button");
   list.scrollTop = 0;
   list.scrollLeft = 0;
-  shell?.classList.toggle("has-more-stories", items.length > 3);
+  shell?.classList.toggle("has-more-stories", items.length > 2);
   button?.classList.remove("is-return");
   if (button) button.querySelector("span").textContent = "See more updates";
   list.innerHTML = items.map((item) => `

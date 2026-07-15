@@ -185,7 +185,7 @@ The right rail contains:
 Top Stories behavior:
 
 - Requests up to 12 current stories.
-- Desktop and tablet show three full stories plus a faded preview of the fourth.
+- Desktop and tablet show two full stories plus a faded half-preview of the third to signal additional updates.
 - On desktop and tablet, the combined Top Stories/Our Newsletters rail stays sticky beneath the ES header and remains internally scrollable when taller than the viewport.
 - `See more updates` scrolls the internal feed; at the end it changes to `Back to top`.
 - The internal scrollbar is visually hidden.
