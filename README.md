@@ -12,3 +12,7 @@ See [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) for the full product brief, design 
 ## Netlify
 
 The site is static. Netlify can publish the repository root directly.
+
+## Google Sheets
+
+A staged, server-only response bridge is available at `/api/challenge-submissions`. Complete the one-time Google deployment before connecting the public form. See [integrations/google-sheets/README.md](integrations/google-sheets/README.md).

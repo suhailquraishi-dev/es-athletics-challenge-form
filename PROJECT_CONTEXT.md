@@ -27,12 +27,13 @@ The current version is a frontend prototype with two pages:
 - `/index.html`: reader challenge, score reveal, story cards, Top Stories, and Our Newsletters.
 - `/editor.html`: browser-local challenge builder and live preview.
 
-It also exposes one Netlify Function:
+It exposes these Netlify Functions:
 
 - `/.netlify/functions/news?category=athletics`
 - `/.netlify/functions/news?category=track-and-field&mode=exclusive`
+- `/.netlify/functions/challenge-submissions` through the stable `/api/challenge-submissions` route
 
-No authentication, database, server-side submission storage, production leaderboard, or email identity system is connected yet.
+The Google Sheets submission adapter and sheet-bound writer are staged but the public form is not connected until the Google web-app deployment URL and Netlify secrets are configured. No editor authentication, production database, production leaderboard, or email identity system is connected yet.
 
 ## 3. Source of Truth for Design
 
@@ -277,6 +278,8 @@ Exclusive mode remains available in the Netlify Function but is no longer reques
 |-- script.js                  Challenge model, rendering, scoring, editor, news, menus
 |-- netlify.toml               Static publish and Functions configuration
 |-- netlify/functions/news.js  Latest-news scraper and legacy exclusives endpoint
+|-- netlify/functions/challenge-submissions.js  Validated portable submission adapter
+|-- integrations/google-sheets/  Sheet-bound Apps Script writer and deployment guide
 |-- assets/
 |   |-- fonts/                 Acumin, Roboto Condensed, and Roboto files
 |   |-- newsletters/           Official ES newsletter SVG marks
@@ -353,7 +356,7 @@ Before pushing UI changes:
 
 - Athletics is the first category.
 - Reader and editor are separate pages.
-- Email is collected in the reader form but not yet stored.
+- Email is collected in the reader form; the server-only Google Sheets storage bridge is staged and awaits deployment activation.
 - Browser autofill must retain the email field's white background rather than introducing a separate tinted block inside the outlined control.
 - Scoring is instant and shown on the same page.
 - The reader sees article context and additional category news.
@@ -373,7 +376,7 @@ Connect backend functions one at a time, preserving the current frontend contrac
 1. **Challenge storage:** persist challenge metadata, articles, questions, answers, hints, points, and image references.
 2. **Editor authentication:** restrict editor routes and publishing actions to ES staff.
 3. **Draft/publish workflow:** separate drafts from published newsletter challenges.
-4. **Reader submissions:** store email, answers, score, challenge ID, and submission timestamp securely.
+4. **Reader submissions:** activate and monitor the staged Sheet bridge, then migrate the stable `/api/challenge-submissions` contract to the ES production datastore.
 5. **Leaderboard:** replace illustrative names with privacy-aware rankings and anti-abuse controls.
 6. **Media upload:** replace freeform image URLs with controlled ES media selection/upload.
 7. **Live ticker:** connect a reliable Athletics/Olympics data provider and define refresh/cache behavior.
