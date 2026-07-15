@@ -1704,6 +1704,7 @@ textarea:focus {
 
 .newsletters-card {
   overflow: hidden;
+  border-radius: 8px;
   padding: 40px 0;
   background: #fff;
   color: #181616;
@@ -1714,9 +1715,9 @@ textarea:focus {
   padding: 0 24px;
   color: #181616;
   font-family: "Acumin Pro Condensed Black", var(--font-title);
-  font-size: 48px;
+  font-size: 30px;
   font-weight: 900;
-  line-height: 0.9;
+  line-height: 1;
 }
 
 .newsletter-list {
@@ -1758,6 +1759,12 @@ textarea:focus {
   width: auto;
   max-width: 100%;
   height: 34px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.newsletter-badges img:hover {
+  transform: scale(1.05);
 }
 
 .newsletter-separator {
@@ -1823,6 +1830,12 @@ textarea:focus {
   border-radius: 8px;
   background: #fff;
   box-shadow: none;
+}
+
+.top-stories {
+  overflow: hidden;
+  border-radius: 8px;
+  background-clip: padding-box;
 }
 
 .rail-card-title {
@@ -3461,8 +3474,8 @@ body {
 
   .newsletters-card > h2 {
     padding: 0 16px;
-    font-size: 36px;
-    line-height: 0.9;
+    font-size: 26px;
+    line-height: 1;
   }
 
   .newsletter-list {
