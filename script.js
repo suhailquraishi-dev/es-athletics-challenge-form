@@ -175,36 +175,6 @@ const backupNews = [
   }
 ];
 
-const backupExclusives = [
-  {
-    tag: "Track & Field",
-    title: "EXCLUSIVE Sam Hurley Shuts Down Money Talk and Shares Honest Take on NIL Growth in Track and Field",
-    url: "https://www.essentiallysports.com/olympics-track-and-field-news-exclusive-sam-hurley-shuts-down-money-talk-and-shares-honest-take-on-nil-growth-in-track-and-field/",
-    date: "Nov 16, 2025",
-    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/image-78-1.png",
-    author: "Krushna Prasad Pattnaik",
-    exclusive: true
-  },
-  {
-    tag: "Track & Field",
-    title: "EXCLUSIVE: Carl Lewis Gets Real on Enhanced Games as Fred Kerley & More Sign Up",
-    url: "https://www.essentiallysports.com/olympics-track-and-field-news-exclusive-carl-lewis-gets-real-on-enhanced-games-as-fred-kerley-more-sign-up/",
-    date: "Oct 13, 2025",
-    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/Exclusive13_10.jpg",
-    author: "Rahul Goutam Hoom",
-    exclusive: true
-  },
-  {
-    tag: "Track & Field",
-    title: "EXCLUSIVE: Nick Mayhugh Talks Struggles and Sacrifices Behind Track and Field Career",
-    url: "https://www.essentiallysports.com/olympics-track-and-field-news-exclusive-nick-mayhugh-throws-victim-card-away-to-reveal-struggles-and-sacrifices-behind-track-and-field-career/",
-    date: "Sep 17, 2025",
-    image: "https://image-cdn.essentiallysports.com/wp-content/uploads/imago1049359885.jpg",
-    author: "Rahul Goutam Hoom",
-    exclusive: true
-  }
-];
-
 const sampleChallenge = {
   title: "Weekly Challenge",
   category: "Athletics",
@@ -515,7 +485,6 @@ function renderReaderPage() {
   renderSources(challenge.articles);
   setupNewsScroller();
   fetchNews(challenge.category || "Athletics");
-  fetchExclusives();
 
   document.querySelector("#refresh-news")?.addEventListener("click", () => fetchNews(challenge.category || "Athletics"));
   document.querySelector("#reset-form").addEventListener("click", () => {
@@ -932,59 +901,6 @@ function renderNews(items) {
     </article>
   `).join("");
   requestAnimationFrame(syncNewsFeedHeight);
-}
-
-async function fetchExclusives() {
-  const list = document.querySelector("#exclusive-list");
-  const status = document.querySelector("#exclusive-status");
-  if (!list || !status) return;
-
-  renderExclusives(backupExclusives);
-  status.textContent = "Latest Athletics exclusives";
-
-  try {
-    const response = await fetch("/.netlify/functions/news?category=track-and-field&mode=exclusive");
-    if (!response.ok) return;
-    const payload = await response.json();
-    if (!Array.isArray(payload.stories) || payload.stories.length === 0) return;
-    const merged = [...payload.stories, ...backupExclusives].filter((story, index, stories) => (
-      stories.findIndex((candidate) => candidate.url === story.url) === index
-    ));
-    renderExclusives(merged.slice(0, 3));
-  } catch (error) {
-    // Curated ES exclusives remain visible when the live feed is unavailable.
-  }
-}
-
-function renderExclusives(items) {
-  const list = document.querySelector("#exclusive-list");
-  if (!list) return;
-
-  list.innerHTML = items.map((item) => {
-    const title = String(item.title || "EssentiallySports exclusive").replace(/^exclusive:?\s*/i, "");
-    return `
-      <article>
-        <a class="trending-thumb" href="${escapeHtml(item.url)}" target="_blank" rel="noopener" aria-label="Read ${escapeHtml(title)}">
-          <img src="${escapeHtml(item.image || "assets/workspace-card-newsletter-assets.webp")}" alt="" loading="lazy" decoding="async">
-        </a>
-        <div>
-          <div class="rail-tag-row">
-            <span class="rail-story-tag">${escapeHtml(item.tag || "Track & Field")}</span>
-            <span class="rail-story-tag is-exclusive">Exclusive</span>
-          </div>
-          <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(title)}</a>
-          <span class="news-source"><img src="assets/es-rounded-logo.png" alt="">${escapeHtml(item.author || "EssentiallySports")} · ${escapeHtml(formatStoryDate(item.date))}</span>
-        </div>
-      </article>
-    `;
-  }).join("");
-}
-
-function formatStoryDate(value) {
-  if (!value) return "EssentiallySports";
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return String(value);
-  return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 function renderEditorPage() {

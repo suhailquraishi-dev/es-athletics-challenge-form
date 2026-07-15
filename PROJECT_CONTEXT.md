@@ -16,7 +16,7 @@ The core loop is:
 2. Editors create scored questions based on those stories.
 3. Newsletter readers enter an email address and answer the questions.
 4. The page validates required answers and reveals the score immediately.
-5. Readers see the underlying stories, current Athletics news, and ES exclusives.
+5. Readers see the underlying stories, current Athletics news, and the ES newsletter catalog.
 
 The intended reader is a newsletter subscriber, with particular attention to readers aged roughly 50-60. Clarity, comfortable target sizes, legible typography, predictable controls, and low visual noise are more important than novelty.
 
@@ -24,7 +24,7 @@ The intended reader is a newsletter subscriber, with particular attention to rea
 
 The current version is a frontend prototype with two pages:
 
-- `/index.html`: reader challenge, score reveal, story cards, Top Stories, and Exclusives.
+- `/index.html`: reader challenge, score reveal, story cards, Top Stories, and Our Newsletters.
 - `/editor.html`: browser-local challenge builder and live preview.
 
 It also exposes one Netlify Function:
@@ -179,19 +179,27 @@ The `Questions picked from these stories` section lists the ES articles used to 
 The right rail contains:
 
 1. **Top Stories**: latest Athletics/Track and Field stories.
-2. **Exclusives**: ES Athletics-related exclusive stories.
+2. **Our Newsletters**: the official ES newsletter index copied from the main homepage treatment.
 
 Top Stories behavior:
 
 - Requests up to 12 current stories.
 - Desktop and tablet show three full stories plus a faded preview of the fourth.
-- On desktop and tablet, the combined Top Stories/Exclusives rail stays sticky beneath the ES header and remains internally scrollable when taller than the viewport.
+- On desktop and tablet, the combined Top Stories/Our Newsletters rail stays sticky beneath the ES header and remains internally scrollable when taller than the viewport.
 - `See more updates` scrolls the internal feed; at the end it changes to `Back to top`.
 - The internal scrollbar is visually hidden.
 - Mobile removes the vertical nested feed/fade and presents Top Stories as a horizontal snap carousel with a visible next-card peek.
 - The fade must be gradual, readable, and never create an abrupt white cut.
 
-Rail cards use real thumbnails, clickable Roboto Condensed titles, rounded images, and the rounded ES logo in source metadata. Top Stories omits category tags for a cleaner scan; Exclusives retains its category and Exclusive labels.
+Top Stories uses real thumbnails, clickable Roboto Condensed titles, rounded images, and the rounded ES logo in source metadata. It omits category tags for a cleaner scan.
+
+Our Newsletters behavior mirrors the ES homepage module:
+
+- Desktop and tablet use a vertical seven-sport index with 1px pale-blue separators.
+- The NFL row stacks The Huddle, Chiefs Huddle, Cowboys Huddle, and Steelers Huddle.
+- Mobile converts the index to a horizontal, scrollbar-free strip with the sport label above each official newsletter mark.
+- The separate Explore block retains the ES copy and links to the newsletter hub.
+- Newsletter marks are static brand identifiers with no invented hover or selected states; only the View All Newsletters link is interactive.
 
 ## 5. Editor Experience
 
@@ -243,11 +251,9 @@ The Netlify Function fetches the official ES category page and extracts ES artic
 
 Latest-story responses use `no-store` so the rail is refreshed rather than treated as long-lived static content.
 
-### Exclusives
+### Legacy Exclusives Endpoint
 
-Exclusive mode queries the ES staging WordPress API for the exclusive category, filters to Track and Field/Athletics-related titles, and returns up to three stories. Curated ES exclusives remain visible if the live request fails.
-
-On mobile, Exclusives uses the same horizontal snap-card pattern as Top Stories and the source-story rail.
+Exclusive mode remains available in the Netlify Function but is no longer requested by the reader page after the newsletter module replaced the secondary rail feed.
 
 ### Data Safety Rules
 
@@ -265,9 +271,10 @@ On mobile, Exclusives uses the same horizontal snap-card pattern as Top Stories 
 |-- styles.css                 ES tokens, responsive layout, and all component styles
 |-- script.js                  Challenge model, rendering, scoring, editor, news, menus
 |-- netlify.toml               Static publish and Functions configuration
-|-- netlify/functions/news.js  Latest-news scraper and exclusives endpoint
+|-- netlify/functions/news.js  Latest-news scraper and legacy exclusives endpoint
 |-- assets/
 |   |-- fonts/                 Acumin, Roboto Condensed, and Roboto files
+|   |-- newsletters/           Official ES newsletter SVG marks
 |   |-- social-icons/          Separate ES nav and footer icon sets
 |   |-- es-athletics.svg       Athletics newsletter logo
 |   |-- es-rounded-logo.png    Favicon and ES story/source mark
@@ -351,7 +358,7 @@ Before pushing UI changes:
 - Hints replace article-title source labels inside question cards.
 - The reader page does not expose editor navigation.
 - Top Stories uses real-time ES fetching with curated resilience.
-- Exclusives replace unrelated YouTube content in the secondary rail card.
+- The official Our Newsletters module replaces the former secondary Exclusives rail card.
 - Blue hover fills are reserved for real CTA buttons.
 
 ## 12. Recommended Backend Roadmap
