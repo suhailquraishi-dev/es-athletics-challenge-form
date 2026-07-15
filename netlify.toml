@@ -7,3 +7,9 @@
   to = "/.netlify/functions/challenge-submissions"
   status = 200
   force = true
+
+[[redirects]]
+  from = "/api/news"
+  to = "/.netlify/functions/news"
+  status = 200
+  force = true

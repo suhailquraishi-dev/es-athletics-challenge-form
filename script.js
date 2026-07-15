@@ -176,6 +176,7 @@ const backupNews = [
 ];
 
 const sampleChallenge = {
+  id: "athletics-weekly-2026-07-15",
   title: "Weekly Challenge",
   category: "Athletics",
   intro: "Answer the questions from this week's Essentially Athletics stories and see your points instantly.",
@@ -193,6 +194,10 @@ function getChallenge() {
     }
     const challenge = JSON.parse(saved);
     let challengeChanged = false;
+    if (!challenge.id) {
+      challenge.id = sampleChallenge.id;
+      challengeChanged = true;
+    }
     if (challenge.title === "Essentially Athletics Weekly Challenge") {
       challenge.title = "Weekly Challenge";
       challengeChanged = true;
@@ -518,7 +523,7 @@ function renderReaderPage() {
     document.querySelector("#form-error").textContent = "";
   });
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const emailField = document.querySelector("#reader-email");
     const email = emailField.value.trim();
@@ -544,12 +549,62 @@ function renderReaderPage() {
 
     error.textContent = "";
     const score = calculateScore(form, challenge.questions);
-    showScore(score, totalPoints);
+    const submitButton = form.querySelector("button[type='submit']");
+    const originalButtonText = submitButton.textContent;
+    submitButton.disabled = true;
+    submitButton.setAttribute("aria-busy", "true");
+    submitButton.textContent = "Submitting...";
+
+    try {
+      const result = await submitChallenge({
+        email,
+        challenge,
+        score,
+        totalPoints,
+        answers: challenge.questions.map((question) => ({
+          id: question.id,
+          title: question.title,
+          type: question.type,
+          value: getFormValues(form, question)
+        })),
+        website: form.elements.website?.value || ""
+      });
+      showScore(result.score, result.totalPoints, result.duplicate);
+    } catch (submissionError) {
+      error.textContent = "We couldn't save your answers. Please try again; your selections are still here.";
+    } finally {
+      submitButton.disabled = false;
+      submitButton.removeAttribute("aria-busy");
+      submitButton.textContent = originalButtonText;
+    }
   });
 
   form.addEventListener("input", (event) => {
     event.target.removeAttribute?.("aria-invalid");
   });
+}
+
+async function submitChallenge({ email, challenge, score, totalPoints, answers, website }) {
+  const response = await fetch("/api/challenge-submissions", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      email,
+      challenge: {
+        id: challenge.id,
+        title: challenge.title,
+        category: challenge.category
+      },
+      score,
+      totalPoints,
+      answers,
+      website,
+      sourceUrl: window.location.href
+    })
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok || !result?.ok) throw new Error(result?.code || "SUBMISSION_FAILED");
+  return result;
 }
 
 function renderQuestion(question, index, editorPreview) {
@@ -786,7 +841,7 @@ function calculateScore(form, questions) {
   }, 0);
 }
 
-function showScore(score, totalPoints) {
+function showScore(score, totalPoints, duplicate = false) {
   const resultPanel = document.querySelector("#result-panel");
   const percent = totalPoints ? Math.round((score / totalPoints) * 100) : 0;
   const scoreMeter = document.querySelector("#score-meter");
@@ -794,8 +849,9 @@ function showScore(score, totalPoints) {
   document.querySelector("#score-meter-fill").style.width = `${percent}%`;
   scoreMeter.setAttribute("aria-valuemax", String(totalPoints));
   scoreMeter.setAttribute("aria-valuenow", String(score));
-  document.querySelector("#score-message").textContent =
-    percent >= 80
+  document.querySelector("#score-message").textContent = duplicate
+    ? "We already received an entry for this email. Your original score remains recorded."
+    : percent >= 80
       ? "Great read. You were locked in on this week's biggest athletics stories."
       : "Your answers are in. Thanks for taking on this week's athletics challenge.";
   resultPanel.classList.remove("is-hidden");
@@ -812,7 +868,7 @@ async function fetchNews(category) {
 
   const searchTerm = category.toLowerCase() === "athletics" ? "track and field" : category;
   const functionCategory = category.toLowerCase() === "athletics" ? "track-and-field" : category.toLowerCase();
-  const functionEndpoint = `/.netlify/functions/news?category=${encodeURIComponent(functionCategory)}`;
+  const functionEndpoint = `/api/news?category=${encodeURIComponent(functionCategory)}`;
   const endpoint = `https://www.essentiallysports.com/wp-json/wp/v2/posts?search=${encodeURIComponent(searchTerm)}&per_page=12&_embed=1`;
   try {
     const functionResponse = await fetch(`${functionEndpoint}&limit=12&ts=${Date.now()}`, { cache: "no-store" });

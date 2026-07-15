@@ -41,9 +41,15 @@ function doPost(event) {
     if (!sheet) throw new Error("Configured sheet tab was not found");
     ensureHeaders(sheet);
 
-    const duplicateId = findDuplicateSubmission(sheet, submission.challengeId, submission.email);
-    if (duplicateId) {
-      return jsonOutput({ ok: true, duplicate: true, submissionId: duplicateId });
+    const duplicate = findDuplicateSubmission(sheet, submission.challengeId, submission.email);
+    if (duplicate) {
+      return jsonOutput({
+        ok: true,
+        duplicate: true,
+        submissionId: duplicate.submissionId,
+        score: duplicate.score,
+        totalPoints: duplicate.totalPoints
+      });
     }
 
     const percentage = submission.totalPoints > 0
@@ -106,12 +112,16 @@ function findDuplicateSubmission(sheet, challengeId, email) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return "";
 
-  const values = sheet.getRange(2, 1, lastRow - 1, 6).getDisplayValues();
+  const values = sheet.getRange(2, 1, lastRow - 1, 9).getDisplayValues();
   const normalizedEmail = String(email).trim().toLowerCase();
   const match = values.find((row) => (
     row[2] === String(challengeId) && String(row[5]).trim().toLowerCase() === normalizedEmail
   ));
-  return match ? match[0] : "";
+  return match ? {
+    submissionId: match[0],
+    score: Number(match[6]),
+    totalPoints: Number(match[7])
+  } : null;
 }
 
 function safeCell(value) {

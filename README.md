@@ -9,10 +9,10 @@ See [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) for the full product brief, design 
 - `index.html` - reader challenge form with instant score, source articles, and Athletics news rail.
 - `editor.html` - lightweight editor view for creating Google Forms-style questions and saving a browser-local draft.
 
-## Netlify
+## Hosting
 
-The site is static. Netlify can publish the repository root directly.
+Vercel is the current preview host. It publishes the repository root and serves the stable `/api/news` and `/api/challenge-submissions` endpoints from `/api`.
 
 ## Google Sheets
 
-A staged, server-only response bridge is available at `/api/challenge-submissions`. Complete the one-time Google deployment before connecting the public form. See [integrations/google-sheets/README.md](integrations/google-sheets/README.md).
+Reader responses are sent through the server-only `/api/challenge-submissions` bridge. See [integrations/google-sheets/README.md](integrations/google-sheets/README.md) for the Google writer and Vercel environment setup.

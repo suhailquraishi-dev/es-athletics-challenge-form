@@ -27,13 +27,13 @@ The current version is a frontend prototype with two pages:
 - `/index.html`: reader challenge, score reveal, story cards, Top Stories, and Our Newsletters.
 - `/editor.html`: browser-local challenge builder and live preview.
 
-It exposes these Netlify Functions:
+It exposes these stable same-origin server endpoints on Vercel:
 
-- `/.netlify/functions/news?category=athletics`
-- `/.netlify/functions/news?category=track-and-field&mode=exclusive`
-- `/.netlify/functions/challenge-submissions` through the stable `/api/challenge-submissions` route
+- `/api/news?category=athletics`
+- `/api/news?category=track-and-field&mode=exclusive`
+- `/api/challenge-submissions`
 
-The Google Sheets submission adapter and sheet-bound writer are staged but the public form is not connected until the Google web-app deployment URL and Netlify secrets are configured. No editor authentication, production database, production leaderboard, or email identity system is connected yet.
+The reader form submits through the Vercel adapter to a protected Google Apps Script writer bound to the response Sheet. No editor authentication, production database, production leaderboard, or email identity system is connected yet.
 
 ## 3. Source of Truth for Design
 
@@ -165,7 +165,7 @@ On valid submission, `script.js` calculates the score from the current question 
 - A Gamezone-inspired completion header and score hierarchy.
 - A CTA explaining that results will be announced in the next day's ES Fancast episode.
 
-The result intentionally omits a leaderboard. The score is not persisted remotely, and the email address is not submitted to a backend.
+The result intentionally omits a leaderboard. The score, answer values, challenge metadata, timestamp, and normalized email address are persisted through the protected Sheet bridge. Duplicate entries are prevented per challenge ID and email address.
 
 ### Story Cards
 
@@ -242,11 +242,11 @@ The code also migrates older saved drafts:
 
 `fetchNews()` uses this order:
 
-1. Netlify Function `/.netlify/functions/news`.
+1. Vercel Function `/api/news`.
 2. Direct ES WordPress REST request if the function does not return enough stories.
 3. Curated `backupNews` entries in `script.js` if both live paths fail.
 
-The Netlify Function fetches the official ES category page and extracts ES article URLs, titles, dates, and nearby image URLs. It supports these category mappings:
+The shared news handler behind `/api/news` fetches the official ES category page and extracts ES article URLs, titles, dates, and nearby image URLs. It supports these category mappings:
 
 - athletics / track-and-field
 - golf
@@ -259,7 +259,7 @@ Latest-story responses use `no-store` so the rail is refreshed rather than treat
 
 ### Legacy Exclusives Endpoint
 
-Exclusive mode remains available in the Netlify Function but is no longer requested by the reader page after the newsletter module replaced the secondary rail feed.
+Exclusive mode remains available through `/api/news` but is no longer requested by the reader page after the newsletter module replaced the secondary rail feed.
 
 ### Data Safety Rules
 
@@ -276,7 +276,9 @@ Exclusive mode remains available in the Netlify Function but is no longer reques
 |-- editor.html                Browser-local editor and live preview structure
 |-- styles.css                 ES tokens, responsive layout, and all component styles
 |-- script.js                  Challenge model, rendering, scoring, editor, news, menus
-|-- netlify.toml               Static publish and Functions configuration
+|-- api/                       Vercel news and challenge-submission adapters
+|-- server/                    Shared validated submission core
+|-- netlify.toml               Legacy Netlify compatibility configuration
 |-- netlify/functions/news.js  Latest-news scraper and legacy exclusives endpoint
 |-- netlify/functions/challenge-submissions.js  Validated portable submission adapter
 |-- integrations/google-sheets/  Sheet-bound Apps Script writer and deployment guide
@@ -331,9 +333,9 @@ Primary branch:
 
 Only this repository should be modified or pushed for this product.
 
-Netlify configuration publishes the repository root and serves functions from `netlify/functions`. The connected Netlify site should deploy automatically after a push to `main`.
+Vercel is the current preview host. The connected Vercel project publishes the repository root, serves functions from `/api`, and should deploy automatically after a push to `main`.
 
-For a static-only local preview, serve the repository root on a local HTTP server. To exercise the Netlify Function locally, use Netlify Dev or a deployed Netlify preview rather than opening the HTML file directly.
+For a static-only local preview, serve the repository root on a local HTTP server. Exercise the Vercel Functions with Vercel Dev or a deployed preview rather than opening the HTML file directly.
 
 ## 10. Quality-Control Checklist
 
@@ -356,7 +358,7 @@ Before pushing UI changes:
 
 - Athletics is the first category.
 - Reader and editor are separate pages.
-- Email is collected in the reader form; the server-only Google Sheets storage bridge is staged and awaits deployment activation.
+- Email, answers, and score are submitted through the server-only Google Sheets storage bridge.
 - Browser autofill must retain the email field's white background rather than introducing a separate tinted block inside the outlined control.
 - Scoring is instant and shown on the same page.
 - The reader sees article context and additional category news.
@@ -376,7 +378,7 @@ Connect backend functions one at a time, preserving the current frontend contrac
 1. **Challenge storage:** persist challenge metadata, articles, questions, answers, hints, points, and image references.
 2. **Editor authentication:** restrict editor routes and publishing actions to ES staff.
 3. **Draft/publish workflow:** separate drafts from published newsletter challenges.
-4. **Reader submissions:** activate and monitor the staged Sheet bridge, then migrate the stable `/api/challenge-submissions` contract to the ES production datastore.
+4. **Reader submissions:** monitor the active Sheet bridge, then migrate the stable `/api/challenge-submissions` contract to the ES production datastore.
 5. **Leaderboard:** replace illustrative names with privacy-aware rankings and anti-abuse controls.
 6. **Media upload:** replace freeform image URLs with controlled ES media selection/upload.
 7. **Live ticker:** connect a reliable Athletics/Olympics data provider and define refresh/cache behavior.

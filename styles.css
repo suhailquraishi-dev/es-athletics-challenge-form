@@ -1406,6 +1406,20 @@ textarea:focus {
   font-weight: 800;
 }
 
+.submission-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.primary-button[aria-busy="true"] {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .result-panel {
   overflow: hidden;
   padding: 0;
