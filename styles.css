@@ -1754,17 +1754,30 @@ textarea:focus {
   gap: 12px;
 }
 
+.newsletter-badge {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+
+.newsletter-badge:hover,
+.newsletter-badge:focus-visible {
+  transform: scale(1.05);
+}
+
+.newsletter-badge:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
 .newsletter-badges img {
   display: block;
   width: auto;
   max-width: 100%;
   height: 34px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.newsletter-badges img:hover {
-  transform: scale(1.05);
 }
 
 .newsletter-separator {

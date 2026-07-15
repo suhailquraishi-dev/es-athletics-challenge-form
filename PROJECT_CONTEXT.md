@@ -198,11 +198,12 @@ Our Newsletters behavior mirrors the ES homepage module:
 - Desktop and tablet use a vertical seven-sport index with 1px pale-blue separators.
 - The module uses the page's standard 8px outer corner radius.
 - Its heading follows the same 30px desktop and 26px mobile scale as `Questions picked from these stories`.
-- Newsletter marks reproduce the ES homepage hover state: pointer cursor and a `scale(1.05)` transform over `0.2s`.
+- Each newsletter mark links directly to its verified publication website and opens in a separate tab.
+- Newsletter links reproduce the ES homepage hover state with a `scale(1.05)` transform over `0.2s`, plus a restrained keyboard focus outline.
 - The NFL row stacks The Huddle, Chiefs Huddle, Cowboys Huddle, and Steelers Huddle.
 - Mobile converts the index to a horizontal, scrollbar-free strip with the sport label above each official newsletter mark.
 - The separate Explore block retains the ES copy and links to the newsletter hub.
-- Newsletter marks are static brand identifiers with no invented hover or selected states; only the View All Newsletters link is interactive.
+- The official newsletter marks and the View All Newsletters link are the module's only interactive elements.
 
 ## 5. Editor Experience
 
