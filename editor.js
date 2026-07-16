@@ -25,6 +25,11 @@
   const previewList = document.querySelector("#editor-preview-list");
   const publishedLink = document.querySelector("#published-link");
   const publishedUrl = document.querySelector("#published-url");
+  const tabButtons = Array.from(document.querySelectorAll("[data-editor-tab]"));
+  const tabPanels = Array.from(document.querySelectorAll("[data-editor-panel]"));
+  const addQuestionToggle = document.querySelector("#add-question-toggle");
+  const addQuestionMenu = document.querySelector("#add-question-menu");
+  const previewToggle = document.querySelector("#toggle-editor-preview");
   const settings = {
     slug: document.querySelector("#edit-slug"),
     title: document.querySelector("#edit-title"),
@@ -36,6 +41,9 @@
   let challengeStatus = "draft";
   let summaries = [];
   let dirty = false;
+  let activeQuestionIndex = 0;
+  let activeEditorTab = "questions";
+  let draggedQuestionIndex = null;
 
   async function request(path, options = {}) {
     const response = await fetch(path, {
@@ -148,6 +156,7 @@
     };
     challengeStatus = status || "draft";
     dirty = false;
+    activeQuestionIndex = Math.min(activeQuestionIndex, Math.max(0, challenge.questions.length - 1));
     settings.slug.value = challenge.slug;
     settings.title.value = challenge.title || "";
     settings.category.value = challenge.category || "";
@@ -159,6 +168,7 @@
     renderQuestions();
     renderArticles();
     renderPreview();
+    setEditorTab(activeEditorTab);
     updatePublishState();
   }
 
@@ -168,33 +178,50 @@
       return;
     }
     questionList.innerHTML = challenge.questions.map((question, index) => {
+      const active = index === activeQuestionIndex;
+      const typeLabel = QUESTION_TYPES.find(([value]) => value === question.type)?.[1] || "Question";
       const choiceFields = CHOICE_TYPES.has(question.type) ? `
-        <label class="full-width">Options, one per line<textarea data-field="options" rows="3">${escapeHtml((question.options || []).join("\n"))}</textarea></label>
+        <label class="full-width"><span>Options, one per line</span><textarea data-field="options" rows="3">${escapeHtml((question.options || []).join("\n"))}</textarea></label>
       ` : "";
       const answerHelp = question.type === "checkbox" ? "Correct answers, one per line" : "Correct answer";
       const answerField = question.type === "paragraph" ? "" : `
-        <label class="full-width">${answerHelp}<textarea data-field="answer" rows="2">${escapeHtml(Array.isArray(question.answer) ? question.answer.join("\n") : question.answer || "")}</textarea></label>
+        <label class="full-width"><span>${answerHelp}</span><textarea data-field="answer" rows="2">${escapeHtml(Array.isArray(question.answer) ? question.answer.join("\n") : question.answer || "")}</textarea></label>
       `;
       return `
-        <article class="editor-question" data-index="${index}">
-          <div class="editor-question-head">
-            <strong>Question ${index + 1}</strong>
-            <div class="editor-card-actions">
-              <button type="button" data-action="up" aria-label="Move question up" ${index === 0 ? "disabled" : ""}>&uarr;</button>
-              <button type="button" data-action="down" aria-label="Move question down" ${index === challenge.questions.length - 1 ? "disabled" : ""}>&darr;</button>
-              <button class="danger-button" type="button" data-action="remove">Remove</button>
-            </div>
+        <article class="editor-question${active ? " is-active" : ""}" data-index="${index}">
+          <div class="editor-question-summary-row">
+            <button class="editor-drag-handle" type="button" draggable="true" aria-label="Drag Question ${index + 1} to reorder" title="Drag to reorder">&#8597;</button>
+            <button class="editor-question-summary" type="button" data-action="activate" aria-expanded="${active}">
+              <span class="editor-question-index">Question ${index + 1}</span>
+              <strong>${escapeHtml(question.title || "Untitled question")}</strong>
+              <span class="editor-question-summary-meta">${escapeHtml(typeLabel)} &middot; ${Number(question.points || 0)} pts${question.required !== false ? " &middot; Required" : ""}</span>
+            </button>
           </div>
-          <div class="editor-card-grid">
-            <label>Question type<select data-field="type">${QUESTION_TYPES.map(([value, label]) => `<option value="${value}" ${value === question.type ? "selected" : ""}>${label}</option>`).join("")}</select></label>
-            <label>Points<input data-field="points" type="number" min="0" max="100" value="${escapeHtml(question.points || 0)}"></label>
-            <label class="full-width">Question<input data-field="title" maxlength="300" value="${escapeHtml(question.title)}"></label>
+          ${active ? `
+          <div class="editor-question-body">
+            <div class="editor-card-actions" aria-label="Question actions">
+              <button type="button" data-action="up" aria-label="Move question up" title="Move up" ${index === 0 ? "disabled" : ""}>&uarr;</button>
+              <button type="button" data-action="down" aria-label="Move question down" title="Move down" ${index === challenge.questions.length - 1 ? "disabled" : ""}>&darr;</button>
+              <button type="button" data-action="duplicate">Duplicate</button>
+              <button class="danger-button" type="button" data-action="remove">Delete</button>
+            </div>
+            <div class="editor-card-grid">
+            <label class="full-width"><span>Question</span><input data-field="title" maxlength="300" value="${escapeHtml(question.title)}"></label>
+            <label><span>Question type</span><select data-field="type">${QUESTION_TYPES.map(([value, label]) => `<option value="${value}" ${value === question.type ? "selected" : ""}>${label}</option>`).join("")}</select></label>
+            <label><span>Points</span><input data-field="points" type="number" min="0" max="100" value="${escapeHtml(question.points || 0)}"></label>
             ${choiceFields}
             ${answerField}
-            <label class="full-width">Hint<input data-field="source" maxlength="300" value="${escapeHtml(question.source || "")}" placeholder="A useful clue that does not reveal the answer"></label>
-            <label class="full-width">Image URL <span>(optional, maximum two questions)</span><input data-field="image" type="url" value="${escapeHtml(question.image || "")}" placeholder="https://..."></label>
             <label class="editor-required-toggle"><input data-field="required" type="checkbox" ${question.required !== false ? "checked" : ""}> Required</label>
+            <details class="editor-more-options full-width">
+              <summary>More options</summary>
+              <div class="editor-more-options-grid">
+                <label><span>Hint</span><input data-field="source" maxlength="300" value="${escapeHtml(question.source || "")}" placeholder="A useful clue that does not reveal the answer"></label>
+                <label><span>Image URL (optional, maximum two questions)</span><input data-field="image" type="url" value="${escapeHtml(question.image || "")}" placeholder="https://..."></label>
+              </div>
+            </details>
+            </div>
           </div>
+          ` : ""}
         </article>
       `;
     }).join("");
@@ -225,6 +252,27 @@
       ? challenge.questions.map((question, index) => renderQuestion(question, index, true)).join("")
       : `<p class="editor-empty-state">Questions will appear here.</p>`;
     setupSimpleSelects(previewList);
+    previewList.children[activeQuestionIndex]?.classList.add("is-preview-active");
+  }
+
+  function setEditorTab(name) {
+    activeEditorTab = ["questions", "stories", "settings"].includes(name) ? name : "questions";
+    tabButtons.forEach((button) => {
+      const active = button.dataset.editorTab === activeEditorTab;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-selected", String(active));
+      button.tabIndex = active ? 0 : -1;
+    });
+    tabPanels.forEach((panel) => {
+      const active = panel.dataset.editorPanel === activeEditorTab;
+      panel.hidden = !active;
+      panel.classList.toggle("is-active", active);
+    });
+  }
+
+  function closeAddQuestionMenu() {
+    addQuestionMenu.hidden = true;
+    addQuestionToggle.setAttribute("aria-expanded", "false");
   }
 
   function updatePublishState() {
@@ -236,8 +284,11 @@
     document.querySelector("#save-challenge").disabled = published;
     document.querySelector("#publish-challenge").disabled = published;
     document.querySelector("#builder").classList.toggle("is-published", published);
-    document.querySelectorAll("#builder input:not(#published-url), #builder textarea, #builder select, .builder-toolbar button, #add-article, .editor-question button, .editor-article button")
+    document.querySelectorAll("#builder input:not(#published-url), #builder textarea, #builder select, .builder-toolbar button, #add-article, .editor-question button:not([data-action='activate']), .editor-article button")
       .forEach((control) => { control.disabled = published; });
+    questionList.querySelectorAll("[draggable='true']").forEach((handle) => {
+      handle.draggable = !published;
+    });
     if (published) {
       publishedUrl.value = readerUrl(challenge.slug);
       publishedLink.classList.remove("is-hidden");
@@ -323,6 +374,21 @@
     if (picker.value) loadChallenge(picker.value);
   });
 
+  tabButtons.forEach((button, index) => {
+    button.addEventListener("click", () => setEditorTab(button.dataset.editorTab));
+    button.addEventListener("keydown", (event) => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      const nextIndex = event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? tabButtons.length - 1
+          : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabButtons.length) % tabButtons.length;
+      setEditorTab(tabButtons[nextIndex].dataset.editorTab);
+      tabButtons[nextIndex].focus();
+    });
+  });
+
   Object.entries(settings).forEach(([field, input]) => {
     input.addEventListener("input", () => {
       challenge[field] = input.value;
@@ -331,13 +397,37 @@
     });
   });
 
+  addQuestionToggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const opening = addQuestionMenu.hidden;
+    addQuestionMenu.hidden = !opening;
+    addQuestionToggle.setAttribute("aria-expanded", String(opening));
+    if (opening) addQuestionMenu.querySelector("button")?.focus();
+  });
+
   document.querySelector(".builder-toolbar").addEventListener("click", (event) => {
     const type = event.target.dataset.addType;
     if (!type) return;
     challenge.questions.push(newQuestion(type));
+    activeQuestionIndex = challenge.questions.length - 1;
     markDirty();
+    closeAddQuestionMenu();
+    setEditorTab("questions");
     renderQuestions();
     renderPreview();
+  });
+
+  addQuestionMenu.addEventListener("keydown", (event) => {
+    const items = Array.from(addQuestionMenu.querySelectorAll("[role='menuitem']"));
+    const index = items.indexOf(document.activeElement);
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeAddQuestionMenu();
+      addQuestionToggle.focus();
+    } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      items[(index + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length].focus();
+    }
   });
 
   questionList.addEventListener("input", (event) => {
@@ -377,16 +467,78 @@
   });
 
   questionList.addEventListener("click", (event) => {
-    const action = event.target.dataset.action;
+    const actionControl = event.target.closest("[data-action]");
+    const action = actionControl?.dataset.action;
     if (!action) return;
-    const card = event.target.closest(".editor-question");
+    const card = actionControl.closest(".editor-question");
     const index = Number(card.dataset.index);
-    if (action === "remove") challenge.questions.splice(index, 1);
-    if (action === "up" && index > 0) [challenge.questions[index - 1], challenge.questions[index]] = [challenge.questions[index], challenge.questions[index - 1]];
-    if (action === "down" && index < challenge.questions.length - 1) [challenge.questions[index + 1], challenge.questions[index]] = [challenge.questions[index], challenge.questions[index + 1]];
+    if (action === "activate") {
+      activeQuestionIndex = index;
+      renderQuestions();
+      renderPreview();
+      updatePublishState();
+      return;
+    }
+    if (action === "remove") {
+      challenge.questions.splice(index, 1);
+      activeQuestionIndex = Math.min(index, Math.max(0, challenge.questions.length - 1));
+    }
+    if (action === "duplicate") {
+      const copy = JSON.parse(JSON.stringify(challenge.questions[index]));
+      copy.id = `q${Date.now()}${Math.floor(Math.random() * 100)}`;
+      challenge.questions.splice(index + 1, 0, copy);
+      activeQuestionIndex = index + 1;
+    }
+    if (action === "up" && index > 0) {
+      [challenge.questions[index - 1], challenge.questions[index]] = [challenge.questions[index], challenge.questions[index - 1]];
+      activeQuestionIndex = index - 1;
+    }
+    if (action === "down" && index < challenge.questions.length - 1) {
+      [challenge.questions[index + 1], challenge.questions[index]] = [challenge.questions[index], challenge.questions[index + 1]];
+      activeQuestionIndex = index + 1;
+    }
     markDirty();
     renderQuestions();
     renderPreview();
+  });
+
+  questionList.addEventListener("dragstart", (event) => {
+    const handle = event.target.closest(".editor-drag-handle");
+    if (!handle || challengeStatus === "published") return event.preventDefault();
+    const card = handle.closest(".editor-question");
+    draggedQuestionIndex = Number(card.dataset.index);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", String(draggedQuestionIndex));
+    card.classList.add("is-dragging");
+  });
+
+  questionList.addEventListener("dragover", (event) => {
+    if (draggedQuestionIndex === null) return;
+    const card = event.target.closest(".editor-question");
+    if (!card) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    questionList.querySelectorAll(".is-drag-target").forEach((item) => item.classList.remove("is-drag-target"));
+    card.classList.add("is-drag-target");
+  });
+
+  questionList.addEventListener("drop", (event) => {
+    const card = event.target.closest(".editor-question");
+    if (!card || draggedQuestionIndex === null) return;
+    event.preventDefault();
+    const targetIndex = Number(card.dataset.index);
+    const [moved] = challenge.questions.splice(draggedQuestionIndex, 1);
+    challenge.questions.splice(targetIndex, 0, moved);
+    activeQuestionIndex = targetIndex;
+    draggedQuestionIndex = null;
+    markDirty();
+    renderQuestions();
+    renderPreview();
+  });
+
+  questionList.addEventListener("dragend", () => {
+    draggedQuestionIndex = null;
+    questionList.querySelectorAll(".is-dragging, .is-drag-target").forEach((item) => item.classList.remove("is-dragging", "is-drag-target"));
   });
 
   document.querySelector("#add-article").addEventListener("click", () => {
@@ -411,6 +563,7 @@
   });
 
   document.querySelector("#new-challenge").addEventListener("click", () => {
+    activeQuestionIndex = 0;
     setChallenge(createBlankChallenge(), "draft");
     picker.innerHTML = `<option value="">New unsaved challenge</option>` + picker.innerHTML;
     picker.value = "";
@@ -418,6 +571,7 @@
   });
 
   document.querySelector("#duplicate-challenge").addEventListener("click", () => {
+    activeQuestionIndex = 0;
     setChallenge(createBlankChallenge(challenge), "draft");
     picker.innerHTML = `<option value="">New unsaved challenge</option>` + picker.innerHTML;
     picker.value = "";
@@ -430,6 +584,16 @@
   document.querySelector("#copy-published-link").addEventListener("click", async () => {
     await navigator.clipboard.writeText(publishedUrl.value);
     setFeedback("Reader link copied.", "success");
+  });
+
+  previewToggle.addEventListener("click", () => {
+    const open = workspace.classList.toggle("is-preview-open");
+    previewToggle.setAttribute("aria-expanded", String(open));
+    previewToggle.textContent = open ? "Close preview" : "Preview";
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".builder-toolbar")) closeAddQuestionMenu();
   });
 
   document.querySelector("#editor-logout").addEventListener("click", async () => {

@@ -1,6 +1,6 @@
 # ES Athletics Challenge: Project Context
 
-Last updated: 15 July 2026
+Last updated: 16 July 2026
 
 ## Product
 
@@ -30,7 +30,10 @@ The UI is a child of EssentiallySports, not a standalone redesign.
 - Roboto Condensed Bold is used for editorial titles and compact headline UI.
 - Roboto is used for fields, answers, help text, and body copy.
 - Primary blue is `#0A7DFA`.
-- Reader question cards use a quiet pale editorial tint, light blue-gray stroke, rounded corners, and no shadow.
+- The reader uses one shared white challenge canvas. Questions are separated by one light-grey rule rather than individual outer cards.
+- Question metadata, answer controls, focus, and selected states are neutral; ES blue is reserved for links and genuine command buttons.
+- Answer rows are 48-52px on desktop and 46px on phone, with visible radio/checkbox indicators and restrained 8px corners.
+- The form header includes challenge metadata, estimated completion time, a live answered count, and a slim progress indicator.
 - Controls target clear scanning and comfortable hit areas for newsletter readers, including readers aged 50-60.
 - Mobile story modules use horizontal scrolling; desktop/tablet news modules remain sticky where space permits.
 - Only command buttons receive blue CTA hover behavior.
@@ -53,12 +56,15 @@ Client-provided scores, titles, categories, timestamps, and answer keys are neve
 ## Editor Workflow
 
 1. Open `/editor.html` and enter the editor password.
-2. Choose an existing draft or select **New challenge**.
-3. Set a unique slug, title, category, intro, questions, answers, hints, points, and source stories.
-4. Use the live preview to check the reader card structure.
-5. Select **Save draft** to make the draft available to other authenticated editors.
-6. Select **Publish challenge** to create the response tab and final reader URL.
-7. Use **Copy link** and place that URL in the newsletter.
+2. Choose an existing draft or select **New challenge** from the sticky command bar.
+3. Use the **Questions**, **Source Stories**, and **Settings** workspace tabs.
+4. Edit one expanded question at a time. Inactive questions collapse to their number, title, type, points, and required state.
+5. Set the question type, points, options, correct answer, and required state; keep hints and image URLs under **More options**.
+6. Reorder with drag-and-drop or the keyboard-accessible Move Up and Move Down buttons. Use the single **Add question** menu for all eight supported types.
+7. Use the sticky live preview on desktop or the preview toggle on tablet and phone.
+8. Select **Save draft** to make the draft available to other authenticated editors.
+9. Select **Publish challenge** to create the response tab and final reader URL.
+10. Use **Copy link** and place that URL in the newsletter.
 
 Published challenges are immutable. This protects grading and response columns after readers begin submitting. Use **Duplicate as new** and a new slug for the next weekly edition.
 
@@ -172,9 +178,9 @@ Editor:
 
 Visual:
 
-- Test `1440x900`, `1280x720`, `390x844`, and `360x800`.
+- Test `1440x900`, `1280x720`, `768x1024`, `390x844`, and `360x800`.
 - No horizontal page scroll, clipping, overlap, broken images, hidden focus, or button-text overflow.
-- Navbar, ticker, sticky rail, question cards, source cards, newsletter module, score state, and footer align at each breakpoint.
+- Navbar, ticker, shared question canvas, sticky rail, horizontal mobile rails, source cards, newsletter module, score state, and footer align at each breakpoint.
 
 Security/leak scan:
 

@@ -149,13 +149,25 @@
             <div class="section-head">
               <div>
                 <h1 id="challenge-title">Weekly Challenge</h1>
+                <p class="challenge-intro" id="challenge-intro">Answer this week's Athletics questions and see your score instantly.</p>
               </div>
             </div>
-            <div class="progress-strip" aria-hidden="true">
-              <span></span>
-              <span></span>
-              <span></span>
-              <span></span>
+            <div class="challenge-overview">
+              <div class="challenge-facts" aria-label="Challenge details">
+                <span><strong id="question-count">0</strong> questions</span>
+                <span><strong id="total-points">0</strong> points</span>
+                <span>About <strong id="estimated-time">0</strong> min</span>
+              </div>
+              <div class="reader-progress">
+                <div class="reader-progress-copy">
+                  <strong id="reader-progress-label">0 of 0 answered</strong>
+                  <span id="reader-progress-percent">0%</span>
+                </div>
+                <div class="reader-progress-track" id="reader-progress" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
+                  <span id="reader-progress-fill"></span>
+                </div>
+              </div>
+              <p class="form-error" id="form-error" role="alert" tabindex="-1"></p>
             </div>
 
             <form id="challenge-form" novalidate>
@@ -174,7 +186,6 @@
                 <button class="primary-button" type="submit">Submit answers</button>
                 <button class="secondary-button" type="button" id="reset-form">Reset</button>
               </div>
-              <p class="form-error" id="form-error" role="alert"></p>
             </form>
           </section>
 

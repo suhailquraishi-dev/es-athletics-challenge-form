@@ -393,11 +393,18 @@ async function renderReaderPage() {
   const totalPoints = getTotalPoints(challenge.questions);
   const totalPointsEl = document.querySelector("#total-points");
   const challengeTitleEl = document.querySelector("#challenge-title");
+  const challengeIntroEl = document.querySelector("#challenge-intro");
+  const questionCountEl = document.querySelector("#question-count");
+  const estimatedTimeEl = document.querySelector("#estimated-time");
   if (totalPointsEl) totalPointsEl.textContent = totalPoints;
   if (challengeTitleEl) challengeTitleEl.textContent = challenge.title;
+  if (challengeIntroEl) challengeIntroEl.textContent = challenge.intro || "Answer this week's questions and see your score instantly.";
+  if (questionCountEl) questionCountEl.textContent = challenge.questions.length;
+  if (estimatedTimeEl) estimatedTimeEl.textContent = Math.max(2, Math.ceil(challenge.questions.length * 0.6));
 
   questionList.innerHTML = challenge.questions.map((question, index) => renderQuestion(question, index, false)).join("");
   setupSimpleSelects(questionList);
+  updateReaderProgress(form, challenge.questions);
   renderSources(challenge.articles);
   setupNewsScroller();
   fetchNews(challenge.category || "Athletics");
@@ -408,8 +415,10 @@ async function renderReaderPage() {
     form.reset();
     resetSimpleSelects(form);
     form.querySelectorAll("[aria-invalid='true']").forEach((field) => field.removeAttribute("aria-invalid"));
+    form.querySelectorAll(".is-invalid").forEach((field) => field.classList.remove("is-invalid"));
     document.querySelector("#result-panel").classList.add("is-hidden");
     document.querySelector("#form-error").textContent = "";
+    updateReaderProgress(form, challenge.questions);
   });
 
   form.addEventListener("submit", async (event) => {
@@ -417,16 +426,22 @@ async function renderReaderPage() {
     const emailField = document.querySelector("#reader-email");
     const email = emailField.value.trim();
     const error = document.querySelector("#form-error");
+    clearQuestionValidation(form);
     if (!email || !emailField.checkValidity()) {
       error.textContent = "Enter a valid email ID before submitting.";
       emailField.setAttribute("aria-invalid", "true");
+      emailField.closest(".email-field")?.classList.add("is-invalid");
       emailField.focus();
       return;
     }
 
-    const missing = challenge.questions.find((question) => question.required && !hasAnswer(form, question));
-    if (missing) {
-      error.textContent = "Complete all required questions before submitting.";
+    const missingQuestions = challenge.questions.filter((question) => question.required && !hasAnswer(form, question));
+    if (missingQuestions.length) {
+      missingQuestions.forEach((question) => {
+        form.querySelector(`[data-question-id="${CSS.escape(question.id)}"]`)?.classList.add("is-invalid");
+      });
+      const missing = missingQuestions[0];
+      error.textContent = `${missingQuestions.length} required ${missingQuestions.length === 1 ? "question is" : "questions are"} incomplete.`;
       const missingField = Array.from(form.elements).find((field) => field.name === missing.id);
       const missingSelect = Array.from(form.querySelectorAll(".simple-select"))
         .find((select) => select.dataset.selectName === missing.id);
@@ -464,6 +479,13 @@ async function renderReaderPage() {
 
   form.addEventListener("input", (event) => {
     event.target.removeAttribute?.("aria-invalid");
+    if (event.target === document.querySelector("#reader-email")) {
+      event.target.closest(".email-field")?.classList.remove("is-invalid");
+    }
+    const questionCard = event.target.closest?.(".question-card");
+    const question = challenge.questions.find((item) => item.id === questionCard?.dataset.questionId);
+    if (question && hasAnswer(form, question)) questionCard.classList.remove("is-invalid");
+    updateReaderProgress(form, challenge.questions);
   });
 }
 
@@ -495,6 +517,7 @@ function renderQuestion(question, index, editorPreview) {
     <div class="question-meta">
       <strong>Question ${index + 1}</strong>
       <span class="question-points">${points} pts</span>
+      ${question.required ? '<span class="visually-hidden">Required</span>' : ""}
     </div>
   `;
   let control = "";
@@ -537,7 +560,7 @@ function renderQuestion(question, index, editorPreview) {
   }
 
   return `
-    <article class="question-card${image ? " has-question-image" : ""}" role="group" aria-labelledby="question-title-${index}">
+    <article class="question-card${image ? " has-question-image" : ""}" data-question-id="${name}" role="group" aria-labelledby="question-title-${index}">
       ${image ? `<figure class="question-media"><img src="${escapeHtml(image)}" alt="Related to ${escapeHtml(question.title)}" loading="lazy" decoding="async"></figure>` : ""}
       <div class="question-card-content">
         <div class="question-header">
@@ -547,7 +570,7 @@ function renderQuestion(question, index, editorPreview) {
           </div>
         </div>
         ${control}
-        ${editorPreview ? "" : `<div class="question-meta question-source">${source}</div>`}
+        ${editorPreview ? "" : `<p class="question-error" role="alert">Please answer this question.</p><div class="question-meta question-source">${source}</div>`}
       </div>
     </article>
   `;
@@ -697,9 +720,32 @@ function getFormValues(form, question) {
   if (question.type === "checkbox") {
     return fields.filter((field) => field.checked).map((field) => field.value);
   }
-  const checked = fields.find((field) => field.checked);
-  if (checked) return checked.value;
+  if (question.type === "radio" || question.type === "scale") {
+    return fields.find((field) => field.checked)?.value || "";
+  }
   return fields[0]?.value || "";
+}
+
+function clearQuestionValidation(form) {
+  form.querySelectorAll("[aria-invalid='true']").forEach((field) => field.removeAttribute("aria-invalid"));
+  form.querySelectorAll(".is-invalid").forEach((field) => field.classList.remove("is-invalid"));
+}
+
+function updateReaderProgress(form, questions) {
+  const answered = questions.filter((question) => hasAnswer(form, question)).length;
+  const total = questions.length;
+  const percent = total ? Math.round((answered / total) * 100) : 0;
+  const label = document.querySelector("#reader-progress-label");
+  const percentLabel = document.querySelector("#reader-progress-percent");
+  const progress = document.querySelector("#reader-progress");
+  const fill = document.querySelector("#reader-progress-fill");
+  if (label) label.textContent = `${answered} of ${total} answered`;
+  if (percentLabel) percentLabel.textContent = `${percent}%`;
+  if (progress) {
+    progress.setAttribute("aria-valuemax", String(total));
+    progress.setAttribute("aria-valuenow", String(answered));
+  }
+  if (fill) fill.style.width = `${percent}%`;
 }
 
 function showScore(score, totalPoints, duplicate = false) {
@@ -716,7 +762,9 @@ function showScore(score, totalPoints, duplicate = false) {
       ? "Great read. You were locked in on this week's biggest athletics stories."
       : "Your answers are in. Thanks for taking on this week's athletics challenge.";
   resultPanel.classList.remove("is-hidden");
+  resultPanel.setAttribute("tabindex", "-1");
   resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  resultPanel.focus({ preventScroll: true });
 }
 
 async function fetchNews(category) {
