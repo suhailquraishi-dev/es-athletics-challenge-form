@@ -94,7 +94,7 @@ Two hidden tabs support the application:
 
 The first publish reuses the legacy `Sheet1` only when it has no response data. Existing data is never cleared automatically.
 
-Default retention is 90 days for response rows and eight days for rate counters. `installMaintenanceTrigger` must be run once in Apps Script to schedule daily cleanup. Any change to response retention requires editorial/privacy approval.
+Default retention is 90 days for response rows and eight days for rate counters. The daily time-based `runMaintenance` trigger was installed and verified in Apps Script on July 16, 2026. Re-run `installMaintenanceTrigger` only if the trigger is removed or the Apps Script project is replaced. Any change to response retention requires editorial/privacy approval.
 
 ## Security Model
 
