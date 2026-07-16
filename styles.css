@@ -4090,6 +4090,11 @@ body {
   border-top: 1px solid #e5e7eb;
 }
 
+#challenge-form .question-source {
+  padding-top: 0;
+  border-top: 0;
+}
+
 #challenge-form .question-card.has-question-image .question-card-content {
   padding: 0;
 }
