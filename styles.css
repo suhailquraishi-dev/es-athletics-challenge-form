@@ -4146,50 +4146,11 @@ body {
   margin-bottom: 8px;
 }
 
-.challenge-intro {
-  max-width: 650px;
-  margin: 0;
-  color: #526174;
-  font-size: 16px;
-  line-height: 24px;
-}
-
 .challenge-overview {
   margin: 0 28px 24px;
   padding: 16px 0 18px;
   border-top: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
-}
-
-.challenge-facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 22px;
-  margin-bottom: 15px;
-  color: #596579;
-  font-size: 14px;
-  line-height: 20px;
-}
-
-.challenge-facts span {
-  position: relative;
-}
-
-.challenge-facts span + span::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -12px;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #a2aab5;
-  transform: translateY(-50%);
-}
-
-.challenge-facts strong {
-  color: #111;
-  font-weight: 700;
 }
 
 .reader-progress-copy {
@@ -5164,24 +5125,9 @@ body {
     line-height: 1;
   }
 
-  .challenge-intro {
-    font-size: 15px;
-    line-height: 22px;
-  }
-
   .challenge-overview {
     margin: 0 18px 20px;
     padding: 14px 0 16px;
-  }
-
-  .challenge-facts {
-    gap: 6px 18px;
-    margin-bottom: 13px;
-    font-size: 13px;
-  }
-
-  .challenge-facts span + span::before {
-    left: -10px;
   }
 
   .challenge-panel > form {

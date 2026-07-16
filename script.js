@@ -391,16 +391,8 @@ async function renderReaderPage() {
   }
 
   const totalPoints = getTotalPoints(challenge.questions);
-  const totalPointsEl = document.querySelector("#total-points");
   const challengeTitleEl = document.querySelector("#challenge-title");
-  const challengeIntroEl = document.querySelector("#challenge-intro");
-  const questionCountEl = document.querySelector("#question-count");
-  const estimatedTimeEl = document.querySelector("#estimated-time");
-  if (totalPointsEl) totalPointsEl.textContent = totalPoints;
   if (challengeTitleEl) challengeTitleEl.textContent = challenge.title;
-  if (challengeIntroEl) challengeIntroEl.textContent = challenge.intro || "Answer this week's questions and see your score instantly.";
-  if (questionCountEl) questionCountEl.textContent = challenge.questions.length;
-  if (estimatedTimeEl) estimatedTimeEl.textContent = Math.max(2, Math.ceil(challenge.questions.length * 0.6));
 
   questionList.innerHTML = challenge.questions.map((question, index) => renderQuestion(question, index, false)).join("");
   setupSimpleSelects(questionList);
