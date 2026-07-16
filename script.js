@@ -808,49 +808,38 @@ function stripTags(value) {
 }
 
 function mergeStories(primary, secondary) {
-  const urls = new Set();
-  const titles = new Set();
-  const images = new Set();
-
-  return [...primary, ...secondary].filter((story) => {
-    const url = normalize(story.url).replace(/[?#].*$/, "").replace(/\/$/, "");
-    const title = normalize(story.title).replace(/[^a-z0-9]+/g, " ").trim();
-    const image = normalize(story.image).replace(/[?#].*$/, "");
-    const isDuplicate = (url && urls.has(url)) || (title && titles.has(title)) || (image && images.has(image));
-
-    if (isDuplicate) return false;
-    if (url) urls.add(url);
-    if (title) titles.add(title);
-    if (image) images.add(image);
-    return true;
-  });
+  return [...primary, ...secondary].filter((story, index, stories) => (
+    stories.findIndex((candidate) => candidate.url === story.url) === index
+  ));
 }
 
 function setupNewsScroller() {
-  const shell = document.querySelector("#news-feed-shell");
   const list = document.querySelector("#news-list");
   const button = document.querySelector("#news-more-button");
-  if (!shell || !list || !button) return;
+  if (!list || !button) return;
 
   const label = button.querySelector("span");
-  const setExpanded = (expanded) => {
-    shell.classList.toggle("is-expanded", expanded);
-    button.classList.toggle("is-return", expanded);
-    button.setAttribute("aria-expanded", String(expanded));
-    label.textContent = expanded ? "Show fewer" : "See more updates";
-    if (!expanded) requestAnimationFrame(syncNewsFeedHeight);
+  const updateControl = () => {
+    const isAtEnd = list.scrollTop + list.clientHeight >= list.scrollHeight - 8;
+    button.classList.toggle("is-return", isAtEnd);
+    label.textContent = isAtEnd ? "Back to top" : "See more updates";
   };
 
   button.addEventListener("click", () => {
-    setExpanded(!shell.classList.contains("is-expanded"));
+    const isAtEnd = list.scrollTop + list.clientHeight >= list.scrollHeight - 8;
+    list.scrollTo({
+      top: isAtEnd ? 0 : Math.min(list.scrollHeight, list.scrollTop + Math.round(list.clientHeight * 0.72)),
+      behavior: "smooth"
+    });
   });
 
+  list.addEventListener("scroll", updateControl, { passive: true });
   let resizeFrame;
   window.addEventListener("resize", () => {
     cancelAnimationFrame(resizeFrame);
     resizeFrame = requestAnimationFrame(syncNewsFeedHeight);
   }, { passive: true });
-  setExpanded(false);
+  updateControl();
 }
 
 function syncNewsFeedHeight() {
@@ -867,7 +856,7 @@ function syncNewsFeedHeight() {
 
   const listRect = list.getBoundingClientRect();
   const thirdRect = thirdStory.getBoundingClientRect();
-  const previewHeight = Math.min(94, Math.max(78, thirdRect.height * 0.62));
+  const previewHeight = Math.min(90, Math.max(64, thirdRect.height * 0.5));
   list.style.setProperty("--news-feed-height", `${Math.ceil(thirdRect.top - listRect.top + previewHeight)}px`);
 }
 
@@ -878,32 +867,19 @@ function renderNews(items) {
   list.scrollTop = 0;
   list.scrollLeft = 0;
   shell?.classList.toggle("has-more-stories", items.length > 2);
-  shell?.classList.remove("is-expanded");
   button?.classList.remove("is-return");
-  if (button) {
-    button.setAttribute("aria-expanded", "false");
-    button.querySelector("span").textContent = "See more updates";
-  }
+  if (button) button.querySelector("span").textContent = "See more updates";
   list.innerHTML = items.map((item) => `
     <article class="news-item">
       <a class="news-thumb" href="${escapeHtml(item.url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(item.title)}">
         <img src="${escapeHtml(item.image || "assets/workspace-card-newsletter-assets.webp")}" alt="" loading="lazy" decoding="async">
       </a>
-      <div class="news-item-body">
-        <span class="news-category">${escapeHtml(item.tag || "Athletics")}</span>
-        <a class="news-headline" href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a>
+      <div>
+        <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a>
         <span class="news-source"><img src="assets/es-rounded-logo.png" alt="">${escapeHtml(item.date)}</span>
       </div>
     </article>
   `).join("");
-
-  list.querySelectorAll(".news-thumb img").forEach((image) => {
-    image.addEventListener("error", () => {
-      image.src = "assets/workspace-card-newsletter-assets.webp";
-    }, { once: true });
-  });
-  syncNewsFeedHeight();
-  document.fonts?.ready.then(syncNewsFeedHeight);
   requestAnimationFrame(syncNewsFeedHeight);
 }
 
