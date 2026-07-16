@@ -1761,7 +1761,7 @@ textarea:focus {
 .newsletters-card {
   overflow: hidden;
   border-radius: 11px;
-  padding: 40px 0;
+  padding: 24px 0 32px;
   background: #fff;
   color: #181616;
 }
@@ -1780,7 +1780,7 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 13px;
-  margin-top: 40px;
+  margin-top: 28px;
   padding: 0 24px;
 }
 
@@ -1993,7 +1993,16 @@ textarea:focus {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 18px 18px 1px;
+  padding: 24px 24px 18px;
+}
+
+.top-stories .rail-card-head h2 {
+  color: #181616;
+  font-family: "Acumin Pro Condensed Black", var(--font-title);
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: none;
 }
 
 .rail-card .icon-button {
@@ -2082,8 +2091,10 @@ textarea:focus {
 }
 
 .news-more-button:hover,
-.news-more-button:focus-visible {
-  color: var(--blue);
+.news-more-button:focus-visible,
+.news-more-button:active,
+.news-more-button.is-return {
+  color: #1a1a1a;
 }
 
 .news-more-button:focus-visible {
@@ -3916,7 +3927,7 @@ body {
     min-width: 0;
     max-width: none;
     margin-left: -11px;
-    padding: 40px 0;
+    padding: 24px 0 32px;
   }
 
   .newsletters-card > h2 {
@@ -3929,7 +3940,7 @@ body {
     width: calc(100% - 16px);
     flex-direction: row;
     gap: 16px;
-    margin-top: 42px;
+    margin-top: 28px;
     overflow-x: auto;
     overflow-y: hidden;
     padding: 0 0 0 16px;
@@ -4053,5 +4064,61 @@ body {
     padding: 8px 14px;
     font-size: 16px;
     line-height: 24px;
+  }
+}
+
+/* Reader questions share one quiet surface instead of separate framed cards. */
+#challenge-form .question-list {
+  gap: 0;
+}
+
+#challenge-form .question-card,
+#challenge-form .question-card.has-question-image {
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  padding: 30px 0;
+  background: transparent;
+}
+
+#challenge-form .question-card:first-child,
+#challenge-form .question-card.has-question-image:first-child {
+  padding-top: 4px;
+}
+
+#challenge-form .question-card + .question-card {
+  border-top: 1px solid #e5e7eb;
+}
+
+#challenge-form .question-card.has-question-image .question-card-content {
+  padding: 0;
+}
+
+#challenge-form .question-media {
+  margin: 0 0 22px;
+  border-radius: 8px;
+}
+
+@media (max-width: 680px) {
+  .top-stories .rail-card-head h2 {
+    font-size: 26px;
+  }
+
+  #challenge-form .question-card,
+  #challenge-form .question-card.has-question-image,
+  #challenge-form .question-card.has-question-image .question-card-content {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  #challenge-form .question-card,
+  #challenge-form .question-card.has-question-image {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+
+  #challenge-form .question-card:first-child,
+  #challenge-form .question-card.has-question-image:first-child {
+    padding-top: 2px;
   }
 }
