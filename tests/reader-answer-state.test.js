@@ -8,7 +8,7 @@ const context = {
   document: { addEventListener() {} }
 };
 vm.createContext(context);
-vm.runInContext(`${source}\nthis.__readerTest = { getFormValues, hasAnswer };`, context);
+vm.runInContext(`${source}\nthis.__readerTest = { getFormValues, hasAnswer, mergeStories };`, context);
 
 function formWith(elements) {
   return { elements };
@@ -50,4 +50,17 @@ test("returns every checked checkbox value", () => {
   ]);
 
   assert.deepEqual(Array.from(context.__readerTest.getFormValues(form, question)), ["First option", "Third option"]);
+});
+
+test("deduplicates news stories by URL, normalized title, and image", () => {
+  const stories = context.__readerTest.mergeStories([
+    { title: "First Story", url: "https://example.com/first/", image: "https://images.example/first.jpg" },
+    { title: "Second Story", url: "https://example.com/second", image: "https://images.example/second.jpg" }
+  ], [
+    { title: "First Story", url: "https://example.com/first?ref=feed", image: "https://images.example/new.jpg" },
+    { title: "Different headline", url: "https://example.com/third", image: "https://images.example/second.jpg?size=large" },
+    { title: "Third Story", url: "https://example.com/fourth", image: "https://images.example/fourth.jpg" }
+  ]);
+
+  assert.deepEqual(Array.from(stories, (story) => story.title), ["First Story", "Second Story", "Third Story"]);
 });
