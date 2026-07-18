@@ -222,9 +222,7 @@ function setupTrackedLinks() {
   document.addEventListener("click", (event) => {
     const link = event.target.closest?.("a");
     if (!link) return;
-    if (link.id === "newsletter-result-cta") {
-      trackEvent("challenge_newsletter_cta", { destination: "essentially-athletics" });
-    } else if (link.closest(".source-card")) {
+    if (link.closest(".source-card")) {
       trackEvent("challenge_source_story_click");
     } else if (link.closest(".news-item")) {
       trackEvent("challenge_top_story_click");
@@ -1146,16 +1144,22 @@ function setupNewsScroller() {
   const shell = document.querySelector("#news-feed-shell");
   if (!list || !button || !shell || button.dataset.newsControlReady) return;
   button.dataset.newsControlReady = "true";
-  button.setAttribute("aria-expanded", "false");
 
   const label = button.querySelector("span");
+  const syncButton = () => {
+    const atEnd = list.scrollTop + list.clientHeight >= list.scrollHeight - 4;
+    button.classList.toggle("is-return", atEnd);
+    label.textContent = atEnd ? "Back to top" : "See more updates";
+  };
+
   button.addEventListener("click", () => {
-    const expanded = shell.classList.toggle("is-expanded");
-    button.classList.toggle("is-return", expanded);
-    button.setAttribute("aria-expanded", String(expanded));
-    label.textContent = expanded ? "Show fewer updates" : "See more updates";
-    if (!expanded) document.querySelector(".top-stories")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const atEnd = list.scrollTop + list.clientHeight >= list.scrollHeight - 4;
+    list.scrollTo({
+      top: atEnd ? 0 : list.scrollTop + Math.max(180, list.clientHeight * 0.72),
+      behavior: "smooth"
+    });
   });
+  list.addEventListener("scroll", syncButton, { passive: true });
 
   let resizeFrame;
   window.addEventListener("resize", () => {
@@ -1188,11 +1192,9 @@ function renderNews(items) {
   const button = document.querySelector("#news-more-button");
   list.scrollTop = 0;
   list.scrollLeft = 0;
-  shell?.classList.remove("is-expanded");
   shell?.classList.toggle("has-more-stories", items.length > 2);
   button?.classList.remove("is-return");
   if (button) {
-    button.setAttribute("aria-expanded", "false");
     button.querySelector("span").textContent = "See more updates";
   }
   list.innerHTML = items.map((item) => `

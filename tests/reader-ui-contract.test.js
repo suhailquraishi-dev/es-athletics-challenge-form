@@ -11,7 +11,7 @@ test("reader confirmation contains no public score UI", () => {
   assert.doesNotMatch(html, /score-line|score-meter|Your score|Score revealed/i);
   assert.doesNotMatch(readerScript, /showScore|totalPoints|result\.score/i);
   assert.match(html, /Results will be announced in tomorrow's Essentially Athletics newsletter/);
-  assert.match(html, /Subscribe to Essentially Athletics/);
+  assert.doesNotMatch(html, /result-actions|newsletter-result-cta|Read the stories/);
 });
 
 test("reader defines five host-controlled ad placements and no editor ads", () => {
