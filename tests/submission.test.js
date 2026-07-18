@@ -39,11 +39,34 @@ test("ignores a forged client score and grades on the server", async () => {
     }
   });
   assert.equal(result.statusCode, 201);
-  assert.equal(result.body.score, 5);
+  assert.equal(result.body.score, undefined);
+  assert.equal(result.body.totalPoints, undefined);
   assert.equal(calls[1].body.submission.score, 5);
   assert.equal(calls[1].body.submission.totalPoints, 10);
   assert.equal(calls[1].body.submission.sourceUrl, undefined);
   assert.equal(calls[1].body.submission.userAgent, undefined);
+});
+
+test("does not expose a stored duplicate score to the reader", async () => {
+  const calls = [];
+  const result = await handleSubmissionRequest({
+    method: "POST",
+    headers: { "x-forwarded-for": "203.0.113.12" },
+    env,
+    fetchImpl: mockFetch([
+      { ok: true, status: "published", challenge },
+      { ok: true, duplicate: true, score: 10, totalPoints: 10, submissionId: "existing" }
+    ], calls),
+    body: {
+      email: "reader@example.com",
+      challenge: { id: challenge.slug },
+      answers: [{ id: "q1", value: "Alex" }, { id: "q2", value: ["Alex", "Jordan"] }]
+    }
+  });
+
+  assert.equal(result.statusCode, 200);
+  assert.deepEqual(result.body, { ok: true, duplicate: true, submissionId: "existing" });
+  assert.equal(calls[1].body.submission.score, 10);
 });
 
 test("returns a field error before calling storage for an invalid email", async () => {

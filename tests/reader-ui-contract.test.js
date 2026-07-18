@@ -1,0 +1,42 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+
+const html = fs.readFileSync("index.html", "utf8");
+const readerScript = fs.readFileSync("script.js", "utf8");
+const editorHtml = fs.readFileSync("editor.html", "utf8");
+const editorScript = fs.readFileSync("editor.js", "utf8");
+
+test("reader confirmation contains no public score UI", () => {
+  assert.doesNotMatch(html, /score-line|score-meter|Your score|Score revealed/i);
+  assert.doesNotMatch(readerScript, /showScore|totalPoints|result\.score/i);
+  assert.match(html, /Results will be announced in tomorrow's Essentially Athletics newsletter/);
+  assert.match(html, /Subscribe to Essentially Athletics/);
+});
+
+test("reader defines five host-controlled ad placements and no editor ads", () => {
+  const keys = ["challenge_q2", "challenge_q4", "challenge_end", "challenge_sidebar", "challenge_eof"];
+  keys.forEach((key) => assert.match(`${html}\n${readerScript}`, new RegExp(key)));
+  assert.match(readerScript, /debugAds/);
+  assert.match(readerScript, /ES_AD_CONFIG/);
+  assert.doesNotMatch(editorHtml, /es-ad-slot|debugAds|ES_AD_CONFIG/);
+});
+
+test("host ads are consent-gated, lazy-loaded, and collapse explicit no-fill", () => {
+  assert.match(readerScript, /adConsentGranted/);
+  assert.match(readerScript, /IntersectionObserver/);
+  assert.match(readerScript, /rootMargin:\s*"800px 0px"/);
+  assert.match(readerScript, /result\?\.filled === false/);
+});
+
+test("mobile editorial rails expose accessible carousel controls", () => {
+  assert.match(html, /aria-label="Previous top stories"/);
+  assert.match(html, /aria-label="Next top stories"/);
+  assert.match(html, /aria-label="Previous newsletters"/);
+  assert.match(html, /aria-label="Next newsletters"/);
+});
+
+test("editor explains text-question scoring behavior", () => {
+  assert.match(editorScript, /wording must otherwise match the answer key/);
+  assert.match(editorScript, /award their points for any non-empty response/);
+});

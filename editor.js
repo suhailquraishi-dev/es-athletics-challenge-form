@@ -187,6 +187,11 @@
       const answerField = question.type === "paragraph" ? "" : `
         <label class="full-width"><span>${answerHelp}</span><textarea data-field="answer" rows="2">${escapeHtml(Array.isArray(question.answer) ? question.answer.join("\n") : question.answer || "")}</textarea></label>
       `;
+      const scoringNote = question.type === "short"
+        ? "Short answers ignore capitalization and surrounding spaces, but the wording must otherwise match the answer key."
+        : question.type === "paragraph"
+          ? "Paragraph questions award their points for any non-empty response."
+          : "";
       return `
         <article class="editor-question${active ? " is-active" : ""}" data-index="${index}">
           <div class="editor-question-summary-row">
@@ -211,6 +216,7 @@
             <label><span>Points</span><input data-field="points" type="number" min="0" max="100" value="${escapeHtml(question.points || 0)}"></label>
             ${choiceFields}
             ${answerField}
+            ${scoringNote ? `<p class="editor-scoring-note full-width" role="note"><strong>Scoring:</strong> ${scoringNote}</p>` : ""}
             <label class="editor-required-toggle"><input data-field="required" type="checkbox" ${question.required !== false ? "checked" : ""}> Required</label>
             <details class="editor-more-options full-width">
               <summary>More options</summary>

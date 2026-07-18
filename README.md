@@ -8,8 +8,9 @@ An EssentiallySports newsletter challenge product with a public reader form and 
 - `/index.html?challenge=challenge-slug` loads a specific published challenge.
 - `/editor.html` is the password-protected draft and publish workspace.
 - `/api/news` returns current ES Athletics stories.
+- `/api/athletics-ticker` returns cached Yahoo medal data or current ES Athletics headlines.
 - `/api/challenges/[slug]` returns a public challenge without answer keys.
-- `/api/challenge-submissions` grades and records a reader response on the server.
+- `/api/challenge-submissions` privately grades and records a reader response without exposing scores to the browser.
 
 ## Commands
 

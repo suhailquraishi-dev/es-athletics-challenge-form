@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="EssentiallySports Athletics newsletter challenge with instant scoring, source reads, and the latest track and field stories.">
+    <meta name="description" content="EssentiallySports Athletics newsletter challenge with weekly questions, source reads, and the latest track and field stories.">
     <link rel="icon" href="assets/es-rounded-logo.png" type="image/png">
     <title>EssentiallySports Athletics Challenge</title>
     <link rel="stylesheet" href="styles.css">
@@ -45,98 +45,22 @@
       </div>
     </header>
 
-    <section class="score-ticker" aria-label="Athletics Olympics medal ticker">
+    <section class="score-ticker" aria-label="Athletics updates">
       <div class="ticker-title">
-        <img src="assets/es-rounded-logo.png" alt="EssentiallySports">
-        <div><span>Athletics<i class="ticker-live-dot" aria-hidden="true"></i></span></div>
+        <img src="assets/es-rounded-logo.png" alt="" width="48" height="48">
+        <div>
+          <span>Athletics</span>
+          <small id="ticker-freshness">Updating...</small>
+        </div>
       </div>
       <div class="ticker-window">
-        <div class="ticker-track">
-          <div class="ticker-loop">
-            <article class="ticker-card medal-ticker-card">
-              <div class="ticker-match">
-                <span class="ticker-meta">Olympics / Medal Table</span>
-                <div class="ticker-row"><span class="ticker-country">Norway</span></div>
-                <div class="ticker-row"><span class="ticker-country">United States</span></div>
-              </div>
-              <div class="ticker-score" aria-label="Norway and United States medals">
-                <span class="score-set"><small>G</small><b class="is-winning-score">18</b><b class="is-losing-score">12</b></span>
-                <span class="score-set"><small>S</small><b>12</b><b>12</b></span>
-                <span class="score-set"><small>B</small><b class="is-winning-score">11</b><b class="is-losing-score">9</b></span>
-                <span class="score-set score-total"><small>Total</small><b class="is-winning-score">41</b><b class="is-losing-score">33</b></span>
-              </div>
-            </article>
-            <article class="ticker-card medal-ticker-card">
-              <div class="ticker-match">
-                <span class="ticker-meta">Olympics / Medal Table</span>
-                <div class="ticker-row"><span class="ticker-country">Netherlands</span></div>
-                <div class="ticker-row"><span class="ticker-country">Italy</span></div>
-              </div>
-              <div class="ticker-score" aria-label="Netherlands and Italy medals">
-                <span class="score-set"><small>G</small><b>10</b><b>10</b></span>
-                <span class="score-set"><small>S</small><b class="is-winning-score">7</b><b class="is-losing-score">6</b></span>
-                <span class="score-set"><small>B</small><b class="is-losing-score">3</b><b class="is-winning-score">14</b></span>
-                <span class="score-set score-total"><small>Total</small><b class="is-losing-score">20</b><b class="is-winning-score">30</b></span>
-              </div>
-            </article>
-            <article class="ticker-card medal-ticker-card">
-              <div class="ticker-match">
-                <span class="ticker-meta">Olympics / Medal Table</span>
-                <div class="ticker-row"><span class="ticker-country">Germany</span></div>
-                <div class="ticker-row"><span class="ticker-country">France</span></div>
-              </div>
-              <div class="ticker-score" aria-label="Germany and France medals">
-                <span class="score-set"><small>G</small><b>8</b><b>8</b></span>
-                <span class="score-set"><small>S</small><b class="is-winning-score">10</b><b class="is-losing-score">9</b></span>
-                <span class="score-set"><small>B</small><b class="is-winning-score">8</b><b class="is-losing-score">6</b></span>
-                <span class="score-set score-total"><small>Total</small><b class="is-winning-score">26</b><b class="is-losing-score">23</b></span>
-              </div>
-            </article>
-          </div>
-          <div class="ticker-loop" aria-hidden="true">
-            <article class="ticker-card medal-ticker-card">
-              <div class="ticker-match">
-                <span class="ticker-meta">Olympics / Medal Table</span>
-                <div class="ticker-row"><span class="ticker-country">Norway</span></div>
-                <div class="ticker-row"><span class="ticker-country">United States</span></div>
-              </div>
-              <div class="ticker-score">
-                <span class="score-set"><small>G</small><b class="is-winning-score">18</b><b class="is-losing-score">12</b></span>
-                <span class="score-set"><small>S</small><b>12</b><b>12</b></span>
-                <span class="score-set"><small>B</small><b class="is-winning-score">11</b><b class="is-losing-score">9</b></span>
-                <span class="score-set score-total"><small>Total</small><b class="is-winning-score">41</b><b class="is-losing-score">33</b></span>
-              </div>
-            </article>
-            <article class="ticker-card medal-ticker-card">
-              <div class="ticker-match">
-                <span class="ticker-meta">Olympics / Medal Table</span>
-                <div class="ticker-row"><span class="ticker-country">Netherlands</span></div>
-                <div class="ticker-row"><span class="ticker-country">Italy</span></div>
-              </div>
-              <div class="ticker-score">
-                <span class="score-set"><small>G</small><b>10</b><b>10</b></span>
-                <span class="score-set"><small>S</small><b class="is-winning-score">7</b><b class="is-losing-score">6</b></span>
-                <span class="score-set"><small>B</small><b class="is-losing-score">3</b><b class="is-winning-score">14</b></span>
-                <span class="score-set score-total"><small>Total</small><b class="is-losing-score">20</b><b class="is-winning-score">30</b></span>
-              </div>
-            </article>
-            <article class="ticker-card medal-ticker-card">
-              <div class="ticker-match">
-                <span class="ticker-meta">Olympics / Medal Table</span>
-                <div class="ticker-row"><span class="ticker-country">Germany</span></div>
-                <div class="ticker-row"><span class="ticker-country">France</span></div>
-              </div>
-              <div class="ticker-score">
-                <span class="score-set"><small>G</small><b>8</b><b>8</b></span>
-                <span class="score-set"><small>S</small><b class="is-winning-score">10</b><b class="is-losing-score">9</b></span>
-                <span class="score-set"><small>B</small><b class="is-winning-score">8</b><b class="is-losing-score">6</b></span>
-                <span class="score-set score-total"><small>Total</small><b class="is-winning-score">26</b><b class="is-losing-score">23</b></span>
-              </div>
-            </article>
+        <div class="ticker-track" id="ticker-track">
+          <div class="ticker-loop" id="ticker-loop">
+            <article class="ticker-card ticker-loading" role="status">Loading Athletics updates...</article>
           </div>
         </div>
-        <span class="visually-hidden">Medal data sourced from Yahoo Sports Olympics.</span>
       </div>
+      <span class="visually-hidden" id="ticker-source">Loading the latest Athletics data.</span>
     </section>
 
     <main>
@@ -176,6 +100,11 @@
 
               <div id="question-list" class="question-list"></div>
 
+              <div class="form-completion-summary" aria-live="polite">
+                <strong id="submit-progress-label">0 of 0 questions answered</strong>
+                <span id="submit-progress-status">Complete the required questions to submit.</span>
+              </div>
+
               <div class="form-actions">
                 <button class="primary-button" type="submit">Submit answers</button>
                 <button class="secondary-button" type="button" id="reset-form">Reset</button>
@@ -183,41 +112,19 @@
             </form>
           </section>
 
-          <section class="panel result-panel is-hidden" id="result-panel" aria-live="polite">
-            <header class="result-header">
-              <div>
-                <span class="result-kicker">Weekly Challenge</span>
-                <h2>Thanks for playing!</h2>
-              </div>
-              <span class="result-badge">Score revealed</span>
-            </header>
-
+          <section class="panel result-panel is-hidden" id="result-panel" aria-live="polite" aria-labelledby="result-title">
             <div class="result-body">
-              <div class="result-summary">
-                <div class="result-score-block">
-                  <span>Your score</span>
-                  <strong id="score-line">0 / 30</strong>
-                  <small>points</small>
-                </div>
-                <p id="score-message">Your answers are in for this week's challenge.</p>
-              </div>
-
-              <div class="score-meter" id="score-meter" role="progressbar" aria-label="Challenge score" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0">
-                <span id="score-meter-fill"></span>
-              </div>
-
-              <div class="podcast-result-callout">
-                <div class="podcast-result-copy">
-                  <span class="podcast-date">Tomorrow</span>
-                  <div>
-                    <h3>Results announced on the podcast</h3>
-                    <p>Hear the challenge results in tomorrow's episode of ES Fancast.</p>
-                  </div>
-                </div>
-                <a class="podcast-result-cta" href="https://www.essentiallysports.com/es-fancast/">Visit ES Fancast <span aria-hidden="true">&#8594;</span></a>
+              <span class="result-kicker">Entry received</span>
+              <h2 id="result-title">Thank you for taking the Weekly Challenge.</h2>
+              <p id="result-message">Your entry has been recorded. Results will be announced in tomorrow's Essentially Athletics newsletter.</p>
+              <div class="result-actions">
+                <a class="primary-button" id="newsletter-result-cta" href="https://essentiallyathletics.beehiiv.com/" target="_blank" rel="noopener">Subscribe to Essentially Athletics</a>
+                <a class="result-story-link" href="#sources">Read the stories <span aria-hidden="true">&#8595;</span></a>
               </div>
             </div>
           </section>
+
+          <aside class="es-ad-slot es-ad-slot--main" data-ad-key="challenge_end" aria-label="Advertisement" hidden></aside>
 
           <section id="sources" class="sources-panel" aria-labelledby="sources-title">
             <div class="section-head feed-section-head">
@@ -225,12 +132,18 @@
             </div>
             <div class="source-grid" id="source-list" tabindex="0" aria-label="Stories used for this challenge"></div>
           </section>
+
+          <aside class="es-ad-slot es-ad-slot--main" data-ad-key="challenge_eof" aria-label="Advertisement" hidden></aside>
         </div>
 
         <aside class="news-rail" aria-labelledby="news-title">
           <section class="rail-card top-stories" aria-labelledby="news-title">
             <div class="rail-card-head">
               <h2 id="news-title">Top Stories</h2>
+              <div class="rail-scroll-controls" aria-label="Top Stories carousel controls">
+                <button type="button" data-scroll-target="news-list" data-scroll-direction="-1" aria-label="Previous top stories">&#8592;</button>
+                <button type="button" data-scroll-target="news-list" data-scroll-direction="1" aria-label="Next top stories">&#8594;</button>
+              </div>
             </div>
             <div class="visually-hidden" id="news-status" aria-live="polite">Fetching from EssentiallySports...</div>
             <div class="news-feed-shell" id="news-feed-shell">
@@ -244,10 +157,16 @@
             </div>
           </section>
 
+          <aside class="es-ad-slot es-ad-slot--rail" data-ad-key="challenge_sidebar" aria-label="Advertisement" hidden></aside>
+
           <section class="newsletters-card" aria-labelledby="newsletters-title">
             <h2 id="newsletters-title">Our Newsletters</h2>
+            <div class="rail-scroll-controls newsletter-scroll-controls" aria-label="Newsletter carousel controls">
+              <button type="button" data-scroll-target="newsletter-list" data-scroll-direction="-1" aria-label="Previous newsletters">&#8592;</button>
+              <button type="button" data-scroll-target="newsletter-list" data-scroll-direction="1" aria-label="Next newsletters">&#8594;</button>
+            </div>
 
-            <div class="newsletter-list" tabindex="0" aria-label="EssentiallySports newsletters by sport">
+            <div class="newsletter-list" id="newsletter-list" tabindex="0" aria-label="EssentiallySports newsletters by sport">
               <div class="newsletter-row">
                 <span class="newsletter-category">NASCAR</span>
                 <div class="newsletter-badges">

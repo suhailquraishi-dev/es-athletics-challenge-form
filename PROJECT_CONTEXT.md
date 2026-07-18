@@ -1,10 +1,10 @@
 # ES Athletics Challenge: Project Context
 
-Last updated: 16 July 2026
+Last updated: 18 July 2026
 
 ## Product
 
-This product replaces a weekly Google Form used by EssentiallySports newsletters. Readers review selected ES stories, answer scored questions, submit an email address, and immediately see their score. Editors use a separate protected page to create a draft, preview it, publish it, and copy the final reader link.
+This product replaces a weekly Google Form used by EssentiallySports newsletters. Readers review selected ES stories, answer scored questions, and submit an email address. Scores remain private for the editorial team and results are announced in the following day's Essentially Athletics newsletter. Editors use a separate protected page to create a draft, preview it, publish it, and copy the final reader link.
 
 The first category is Athletics. The product is designed to move under an EssentiallySports domain later without changing the public frontend contract.
 
@@ -14,6 +14,7 @@ The first category is Athletics. The product is designed to move under an Essent
 - `/index.html?challenge=slug`: stable link to a specific published challenge.
 - `/editor.html`: noindexed, password-protected editorial workspace.
 - `/api/news?category=track-and-field`: current ES story feed.
+- `/api/athletics-ticker`: cached Yahoo Olympics medal data with a current ES headline fallback.
 - `/api/challenges/current`: latest public challenge definition.
 - `/api/challenges/:slug`: public challenge definition by slug.
 - `/api/challenge-submissions`: validated reader submissions.
@@ -33,7 +34,7 @@ The UI is a child of EssentiallySports, not a standalone redesign.
 - The reader uses one shared white challenge canvas. Questions are separated by one light-grey rule rather than individual outer cards.
 - Question metadata, answer controls, focus, and selected states are neutral; ES blue is reserved for links and genuine command buttons.
 - Answer rows are 48-52px on desktop and 46px on phone, with visible radio/checkbox indicators and restrained 8px corners.
-- The form header includes challenge metadata, estimated completion time, a live answered count, and a slim progress indicator.
+- The form includes a live answered count and slim progress indicator at the top, plus a completion summary above Submit.
 - Controls target clear scanning and comfortable hit areas for newsletter readers, including readers aged 50-60.
 - Mobile story modules use horizontal scrolling; desktop/tablet news modules remain sticky where space permits.
 - Only command buttons receive blue CTA hover behavior.
@@ -49,7 +50,7 @@ Brand and font assets are local under `/assets`; no external font dependency is 
 5. On submit, the browser sends only the email, challenge ID, selected values, and an invisible honeypot value.
 6. The Vercel function fetches the published challenge again, grades against the server-side answers, creates a submission ID, hashes the request IP for abuse control, and sends the server-derived result to Apps Script.
 7. Apps Script independently regrades the response, checks duplicate email and rate limits, and appends a readable row.
-8. The reader receives the score and the thank-you/podcast result state.
+8. The reader receives only submission status and a newsletter confirmation state. Scores and totals stay server-side and in the response Sheet.
 
 Client-provided scores, titles, categories, timestamps, and answer keys are never trusted.
 
@@ -153,7 +154,13 @@ After Vercel reports Ready, verify the production reader, editor, API responses,
 
 ## News And Ticker
 
-The right rail requests at least ten current Track and Field stories through `/api/news`; static ES stories are retained only as a graceful fallback. The ticker is an Athletics-styled looping medal table inspired by the ES Social Hub. Its medal values are presentation data and are not part of challenge scoring.
+The right rail requests at least ten current Track and Field stories through `/api/news`; static ES stories are retained only as a graceful fallback. `/api/athletics-ticker` attempts to extract the Yahoo Olympics medal table and returns source, status, and timestamp metadata. Completed standings are explicitly labelled as final rather than presented as live. When medal data is unavailable, it returns current ES Track and Field headlines; when both sources fail, the reader shows an honest unavailable state instead of old medal values.
+
+## Advertising Integration
+
+Five logical placements exist on desktop/tablet: after Questions 2 and 4, after the form, in the desktop rail, and after source stories. Mobile omits the rail placement. Each placement matches the ES 280px real-estate shell and remains hidden by default.
+
+The standalone Vercel deployment does not load advertising vendors. `?debugAds=1` renders labelled placeholders for QC. On the ES domain, the host supplies `window.ES_AD_CONFIG` with environment, category, consent, and logical slot mappings, plus `window.ESAds.display()`. Eligible inventory is queued by `IntersectionObserver` before it reaches the viewport; an explicit host no-fill response collapses its reserved shell. The implementation delegates to the existing ES Google Ad Manager/Marfeel/Monti stack rather than loading GPT, Prebid, Amazon APS, or consent scripts a second time.
 
 ## Required Release QC
 
@@ -163,7 +170,7 @@ Reader:
 - Public challenge JSON contains no answer keys.
 - Empty email and missing required answers show clear inline errors.
 - Correct, incorrect, checkbox-order, dropdown, text, and scale grading are server-derived.
-- Duplicate email returns the original score without adding a row.
+- Duplicate email returns submission status without exposing the original score or adding a row.
 - Failure preserves the reader's selections.
 - Source titles and news titles remain clickable without unwanted underlines.
 
@@ -180,7 +187,7 @@ Visual:
 
 - Test `1440x900`, `1280x720`, `768x1024`, `390x844`, and `360x800`.
 - No horizontal page scroll, clipping, overlap, broken images, hidden focus, or button-text overflow.
-- Navbar, ticker, shared question canvas, sticky rail, horizontal mobile rails, source cards, newsletter module, score state, and footer align at each breakpoint.
+- Navbar, ticker, shared question canvas, sticky rail, horizontal mobile rails, source cards, newsletter confirmation, ad shells, and footer align at each breakpoint.
 
 Security/leak scan:
 
@@ -193,15 +200,17 @@ Security/leak scan:
 ```text
 index.html                         Reader page
 editor.html                        Protected editor structure
-script.js                          Reader UI, ES navigation, news, ticker
+script.js                          Reader UI, navigation, ticker, ads, analytics
 editor.js                          Authenticated draft/publish editor
 styles.css                         ES-aligned responsive design system
 api/challenges/[slug].js           Public challenge API
 api/challenge-submissions.js       Reader submission adapter
 api/editor/*.js                    Editor session and challenge APIs
 api/news.js                        Current ES news adapter
+api/athletics-ticker.js            Cached medals/current ES ticker adapter
 server/challenge-schema.js         Validation, public projection, grading
 server/challenge-submissions.js    Submission validation and server grading
+server/athletics-ticker.js         Ticker source parsing and fallback logic
 server/editor-session.js           Signed editor session and origin checks
 server/google-sheet-client.js      Server-only Apps Script client
 integrations/google-sheets/Code.gs Sheet storage, grading, tabs, retention
@@ -213,5 +222,6 @@ vercel.json                        Production headers and caching
 
 - Confirm the formal response-retention period and reader consent language with ES privacy/legal owners.
 - Replace the shared editor password with ES SSO before broad internal access.
+- Obtain final GAM slot paths and consent-wrapper details from ES Ad Ops before enabling ads on the ES domain.
 - Decide whether the production ES backend will retain Google Sheets or migrate the stable `/api` contracts to a database.
 - Define a controlled file-upload service before adding that question type.

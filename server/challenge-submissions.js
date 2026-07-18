@@ -28,7 +28,7 @@ async function handleSubmissionRequest({ method, body, headers = {}, env = proce
   }
 
   if (payload?.website) {
-    return response(202, { ok: true, duplicate: false, score: 0, totalPoints: 0 });
+    return response(202, { ok: true, duplicate: false });
   }
 
   const validation = validateReaderPayload(payload);
@@ -69,9 +69,7 @@ async function handleSubmissionRequest({ method, body, headers = {}, env = proce
     return response(sheetResult.duplicate ? 200 : 201, {
       ok: true,
       duplicate: Boolean(sheetResult.duplicate),
-      submissionId: sheetResult.submissionId || submission.submissionId,
-      score: finiteOrFallback(sheetResult.score, submission.score),
-      totalPoints: finiteOrFallback(sheetResult.totalPoints, submission.totalPoints)
+      submissionId: sheetResult.submissionId || submission.submissionId
     });
   } catch (error) {
     if (error.code === "CHALLENGE_NOT_FOUND") {
@@ -122,11 +120,6 @@ function normalizeBody(body) {
   if (Buffer.isBuffer(body)) return body.toString("utf8");
   if (typeof body === "string") return body;
   return JSON.stringify(body || {});
-}
-
-function finiteOrFallback(value, fallback) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : fallback;
 }
 
 function response(statusCode, body, extraHeaders = {}) {

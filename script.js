@@ -123,8 +123,287 @@ function normalize(value) {
   return String(value ?? "").trim().toLowerCase();
 }
 
-function getTotalPoints(questions) {
-  return questions.reduce((sum, question) => sum + Number(question.points || 0), 0);
+function formatTickerFreshness(value) {
+  const timestamp = Date.parse(value || "");
+  if (!Number.isFinite(timestamp)) return "Updated recently";
+  const minutes = Math.max(0, Math.round((Date.now() - timestamp) / 60000));
+  if (minutes < 2) return "Updated now";
+  if (minutes < 60) return `Updated ${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `Updated ${hours}h ago`;
+  return `Updated ${Math.round(hours / 24)}d ago`;
+}
+
+function medalValueClass(first, second) {
+  if (Number(first) === Number(second)) return "";
+  return Number(first) > Number(second) ? "is-winning-score" : "is-losing-score";
+}
+
+function renderMedalTicker(items, label) {
+  const pairs = [];
+  for (let index = 0; index < items.length; index += 2) {
+    if (items[index + 1]) pairs.push([items[index], items[index + 1]]);
+  }
+  return pairs.map(([first, second]) => `
+    <article class="ticker-card medal-ticker-card">
+      <div class="ticker-match">
+        <span class="ticker-meta">${escapeHtml(label || "Olympics / Medal Table")}</span>
+        <div class="ticker-row"><span class="ticker-country">${escapeHtml(first.country)}</span></div>
+        <div class="ticker-row"><span class="ticker-country">${escapeHtml(second.country)}</span></div>
+      </div>
+      <div class="ticker-score" aria-label="${escapeHtml(first.country)} and ${escapeHtml(second.country)} medals">
+        ${[["G", "gold"], ["S", "silver"], ["B", "bronze"], ["Total", "total"]].map(([shortLabel, key]) => `
+          <span class="score-set${key === "total" ? " score-total" : ""}">
+            <small>${shortLabel}</small>
+            <b class="${medalValueClass(first[key], second[key])}">${Number(first[key]) || 0}</b>
+            <b class="${medalValueClass(second[key], first[key])}">${Number(second[key]) || 0}</b>
+          </span>
+        `).join("")}
+      </div>
+    </article>
+  `).join("");
+}
+
+function renderHeadlineTicker(items) {
+  return items.map((item) => `
+    <article class="ticker-card ticker-headline-card">
+      <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">
+        <span class="ticker-meta">${escapeHtml(item.tag || "Athletics")} / ${escapeHtml(item.date || "Latest")}</span>
+        <strong>${escapeHtml(item.title)}</strong>
+      </a>
+    </article>
+  `).join("");
+}
+
+async function loadAthleticsTicker() {
+  const loop = document.querySelector("#ticker-loop");
+  const freshness = document.querySelector("#ticker-freshness");
+  const source = document.querySelector("#ticker-source");
+  if (!loop) return;
+
+  try {
+    const response = await fetch("/api/athletics-ticker?v=20260718", { headers: { accept: "application/json" } });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok || !Array.isArray(payload?.items) || !payload.items.length) throw new Error("TICKER_UNAVAILABLE");
+    loop.innerHTML = payload.mode === "medals"
+      ? renderMedalTicker(payload.items, payload.label)
+      : renderHeadlineTicker(payload.items);
+    const freshnessLabel = payload.status === "final" ? "Final standings" : formatTickerFreshness(payload.updatedAt);
+    freshness.textContent = `${payload.mode === "medals" ? "Yahoo Sports" : "ES headlines"} - ${freshnessLabel}`;
+    source.textContent = `Athletics ticker sourced from ${payload.sourceName || "EssentiallySports"}. ${freshnessLabel}.`;
+  } catch (error) {
+    loop.innerHTML = `<article class="ticker-card ticker-unavailable">Athletics updates are temporarily unavailable.</article>`;
+    freshness.textContent = "Updates unavailable";
+    source.textContent = "Athletics updates are temporarily unavailable.";
+  }
+  setupTickerLoop();
+}
+
+function analyticsAllowed() {
+  if (window.ES_ANALYTICS_CONSENT === true) return true;
+  try {
+    return window.ES_ANALYTICS?.hasConsent?.() === true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function trackEvent(name, details = {}) {
+  if (!analyticsAllowed()) return;
+  const payload = { event: name, ...details };
+  if (typeof window.ES_ANALYTICS?.track === "function") {
+    window.ES_ANALYTICS.track(name, details);
+  } else if (Array.isArray(window.dataLayer)) {
+    window.dataLayer.push(payload);
+  }
+}
+
+function setupTrackedLinks() {
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest?.("a");
+    if (!link) return;
+    if (link.id === "newsletter-result-cta") {
+      trackEvent("challenge_newsletter_cta", { destination: "essentially-athletics" });
+    } else if (link.closest(".source-card")) {
+      trackEvent("challenge_source_story_click");
+    } else if (link.closest(".news-item")) {
+      trackEvent("challenge_top_story_click");
+    }
+  });
+}
+
+function syncHorizontalScrollControls() {
+  document.querySelectorAll("[data-scroll-target]").forEach((button) => {
+    const target = document.getElementById(button.dataset.scrollTarget);
+    if (!target) return;
+    const direction = Number(button.dataset.scrollDirection);
+    button.disabled = direction < 0
+      ? target.scrollLeft <= 2
+      : target.scrollLeft + target.clientWidth >= target.scrollWidth - 2;
+  });
+}
+
+function setupHorizontalScrollControls() {
+  document.querySelectorAll("[data-scroll-target]").forEach((button) => {
+    const target = document.getElementById(button.dataset.scrollTarget);
+    if (!target) return;
+    button.addEventListener("click", () => {
+      target.scrollBy({
+        left: Number(button.dataset.scrollDirection) * Math.max(240, target.clientWidth * 0.82),
+        behavior: "smooth"
+      });
+    });
+    target.addEventListener("scroll", syncHorizontalScrollControls, { passive: true });
+  });
+  window.addEventListener("resize", syncHorizontalScrollControls, { passive: true });
+  requestAnimationFrame(syncHorizontalScrollControls);
+}
+
+function setupWebVitalTracking() {
+  if (!("PerformanceObserver" in window)) return;
+  const metrics = { cls: 0, lcp: 0, inp: 0 };
+  const observe = (type, handler) => {
+    try {
+      const observer = new PerformanceObserver((list) => list.getEntries().forEach(handler));
+      observer.observe({ type, buffered: true });
+    } catch (error) {
+      // Older browsers simply skip unsupported performance entry types.
+    }
+  };
+  observe("layout-shift", (entry) => {
+    if (!entry.hadRecentInput) metrics.cls += entry.value;
+  });
+  observe("largest-contentful-paint", (entry) => {
+    metrics.lcp = Math.max(metrics.lcp, entry.startTime);
+  });
+  observe("event", (entry) => {
+    metrics.inp = Math.max(metrics.inp, entry.duration || 0);
+  });
+  window.addEventListener("pagehide", () => {
+    trackEvent("challenge_web_vitals", {
+      cls: Number(metrics.cls.toFixed(3)),
+      lcp: Math.round(metrics.lcp),
+      inp: Math.round(metrics.inp)
+    });
+  }, { once: true });
+}
+
+async function adConsentGranted(config) {
+  if (config.consentGranted === true || window.ES_AD_CONSENT === true) return true;
+  try {
+    return await window.ESAds?.hasConsent?.() === true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function renderAdShell(slot, logicalKey, debug = false) {
+  slot.hidden = false;
+  slot.classList.toggle("is-debug", debug);
+  slot.innerHTML = `
+    <span class="es-ad-label">Advertisement</span>
+    <div class="es-ad-body" id="es-ad-${escapeHtml(logicalKey)}">
+      ${debug ? `<span class="es-ad-debug">ES ad placement: ${escapeHtml(logicalKey)}</span>` : ""}
+    </div>
+  `;
+}
+
+let adObserver;
+
+function resetAdSlot(slot) {
+  if (slot.dataset.adInitialized && typeof window.ESAds?.destroy === "function") {
+    window.ESAds.destroy({
+      container: slot.querySelector(".es-ad-body"),
+      logicalKey: slot.dataset.adInitialized
+    });
+  }
+  adObserver?.unobserve(slot);
+  delete slot.dataset.adInitialized;
+  delete slot.dataset.adQueued;
+  slot.classList.remove("is-debug");
+  slot.replaceChildren();
+}
+
+async function requestHostAd(slot, request) {
+  if (slot.dataset.adInitialized !== request.logicalKey) return;
+  delete slot.dataset.adQueued;
+  try {
+    const result = await window.ESAds.display(request);
+    if (result === false || result?.filled === false) {
+      resetAdSlot(slot);
+      slot.hidden = true;
+    }
+  } catch (error) {
+    resetAdSlot(slot);
+    slot.hidden = true;
+  }
+}
+
+function queueHostAd(slot, request) {
+  slot._esAdRequest = request;
+  slot.dataset.adQueued = "true";
+  if (!("IntersectionObserver" in window)) {
+    requestHostAd(slot, request);
+    return;
+  }
+  if (!adObserver) {
+    adObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const queuedSlot = entry.target;
+        adObserver.unobserve(queuedSlot);
+        if (queuedSlot._esAdRequest) requestHostAd(queuedSlot, queuedSlot._esAdRequest);
+      });
+    }, { rootMargin: "800px 0px" });
+  }
+  adObserver.observe(slot);
+}
+
+async function setupAds() {
+  const debug = new URLSearchParams(window.location.search).get("debugAds") === "1";
+  const config = window.ES_AD_CONFIG || {};
+  const mobile = window.matchMedia("(max-width: 680px)").matches;
+  const suffix = mobile ? "m" : "d";
+  const consent = debug ? false : await adConsentGranted(config);
+
+  document.querySelectorAll(".es-ad-slot").forEach((slot) => {
+    const key = slot.dataset.adKey;
+    const logicalKey = `${key}_${suffix}`;
+    if (slot.classList.contains("es-ad-slot--rail") && mobile) {
+      resetAdSlot(slot);
+      slot.hidden = true;
+      return;
+    }
+    if (debug) {
+      if (slot.dataset.adInitialized === logicalKey && slot.classList.contains("is-debug")) return;
+      resetAdSlot(slot);
+      renderAdShell(slot, logicalKey, true);
+      slot.dataset.adInitialized = logicalKey;
+      return;
+    }
+    if (!config.enabled || !consent || typeof window.ESAds?.display !== "function") {
+      resetAdSlot(slot);
+      slot.hidden = true;
+      return;
+    }
+    if (slot.dataset.adInitialized === logicalKey) return;
+    const slotPath = config.slots?.[logicalKey] || config.slots?.[key];
+    if (!slotPath) {
+      resetAdSlot(slot);
+      slot.hidden = true;
+      return;
+    }
+    resetAdSlot(slot);
+    renderAdShell(slot, logicalKey);
+    slot.dataset.adInitialized = logicalKey;
+    queueHostAd(slot, {
+      container: slot.querySelector(".es-ad-body"),
+      logicalKey,
+      slotPath,
+      category: config.category || "track-and-field",
+      environment: config.environment || "production"
+    });
+  });
 }
 
 function setupTickerLoop() {
@@ -150,6 +429,7 @@ function setupTickerLoop() {
     const clonesNeeded = Math.max(1, Math.ceil(windowWidth / loopWidth));
     for (let index = 0; index < clonesNeeded; index += 1) {
       const clone = firstLoop.cloneNode(true);
+      clone.removeAttribute("id");
       clone.setAttribute("aria-hidden", "true");
       track.append(clone);
     }
@@ -387,20 +667,30 @@ async function renderReaderPage() {
     renderSources(seedArticles);
     setupNewsScroller();
     fetchNews("Athletics");
+    setupAds();
     return;
   }
 
-  const totalPoints = getTotalPoints(challenge.questions);
   const challengeTitleEl = document.querySelector("#challenge-title");
   if (challengeTitleEl) challengeTitleEl.textContent = challenge.title;
 
-  questionList.innerHTML = challenge.questions.map((question, index) => renderQuestion(question, index, false)).join("");
+  questionList.innerHTML = renderQuestionSequence(challenge.questions);
   setupSimpleSelects(questionList);
   updateReaderProgress(form, challenge.questions);
   renderSources(challenge.articles);
   setupNewsScroller();
   fetchNews(challenge.category || "Athletics");
+  setupAds();
   submitButton.disabled = false;
+  trackEvent("challenge_view", {
+    challengeId: challenge.slug || challenge.id,
+    category: challenge.category || "Athletics",
+    questionCount: challenge.questions.length
+  });
+
+  let submissionComplete = false;
+  let trackedFirstAnswer = false;
+  let trackedCompletion = false;
 
   document.querySelector("#refresh-news")?.addEventListener("click", () => fetchNews(challenge.category || "Athletics"));
   document.querySelector("#reset-form").addEventListener("click", () => {
@@ -410,6 +700,9 @@ async function renderReaderPage() {
     form.querySelectorAll(".is-invalid").forEach((field) => field.classList.remove("is-invalid"));
     document.querySelector("#result-panel").classList.add("is-hidden");
     document.querySelector("#form-error").textContent = "";
+    submissionComplete = false;
+    submitButton.disabled = false;
+    submitButton.textContent = "Submit answers";
     updateReaderProgress(form, challenge.questions);
   });
 
@@ -420,9 +713,10 @@ async function renderReaderPage() {
     const error = document.querySelector("#form-error");
     clearQuestionValidation(form);
     if (!email || !emailField.checkValidity()) {
-      error.textContent = "Enter a valid email ID before submitting.";
+      error.textContent = "Enter a valid email address to continue.";
       emailField.setAttribute("aria-invalid", "true");
       emailField.closest(".email-field")?.classList.add("is-invalid");
+      trackEvent("challenge_validation_error", { field: "email" });
       emailField.focus();
       return;
     }
@@ -430,15 +724,18 @@ async function renderReaderPage() {
     const missingQuestions = challenge.questions.filter((question) => question.required && !hasAnswer(form, question));
     if (missingQuestions.length) {
       missingQuestions.forEach((question) => {
-        form.querySelector(`[data-question-id="${CSS.escape(question.id)}"]`)?.classList.add("is-invalid");
+        const card = form.querySelector(`[data-question-id="${CSS.escape(question.id)}"]`);
+        card?.classList.add("is-invalid");
+        card?.setAttribute("aria-invalid", "true");
       });
       const missing = missingQuestions[0];
-      error.textContent = `${missingQuestions.length} required ${missingQuestions.length === 1 ? "question is" : "questions are"} incomplete.`;
+      error.textContent = `Answer ${missingQuestions.length} required ${missingQuestions.length === 1 ? "question" : "questions"} before submitting.`;
       const missingField = Array.from(form.elements).find((field) => field.name === missing.id);
       const missingSelect = Array.from(form.querySelectorAll(".simple-select"))
         .find((select) => select.dataset.selectName === missing.id);
       const invalidControl = missingSelect?.querySelector(".simple-select-trigger") || missingField;
       invalidControl?.setAttribute("aria-invalid", "true");
+      trackEvent("challenge_validation_error", { field: "required-question", count: missingQuestions.length });
       invalidControl?.focus();
       return;
     }
@@ -459,13 +756,17 @@ async function renderReaderPage() {
         })),
         website: form.elements.website?.value || ""
       });
-      showScore(result.score, result.totalPoints, result.duplicate);
+      submissionComplete = true;
+      showConfirmation(result.duplicate);
+      submitButton.textContent = "Entry submitted";
+      trackEvent("challenge_submission_success", { duplicate: Boolean(result.duplicate) });
     } catch (submissionError) {
       error.textContent = "We couldn't save your answers. Please try again; your selections are still here.";
+      trackEvent("challenge_submission_error");
     } finally {
-      submitButton.disabled = false;
+      submitButton.disabled = submissionComplete;
       submitButton.removeAttribute("aria-busy");
-      submitButton.textContent = originalButtonText;
+      if (!submissionComplete) submitButton.textContent = originalButtonText;
     }
   });
 
@@ -476,8 +777,19 @@ async function renderReaderPage() {
     }
     const questionCard = event.target.closest?.(".question-card");
     const question = challenge.questions.find((item) => item.id === questionCard?.dataset.questionId);
-    if (question && hasAnswer(form, question)) questionCard.classList.remove("is-invalid");
-    updateReaderProgress(form, challenge.questions);
+    if (question && hasAnswer(form, question)) {
+      questionCard.classList.remove("is-invalid");
+      questionCard.removeAttribute("aria-invalid");
+    }
+    const progress = updateReaderProgress(form, challenge.questions);
+    if (!trackedFirstAnswer && progress.answered > 0) {
+      trackedFirstAnswer = true;
+      trackEvent("challenge_first_answer", { challengeId: challenge.slug || challenge.id });
+    }
+    if (!trackedCompletion && progress.answered === progress.total) {
+      trackedCompletion = true;
+      trackEvent("challenge_answers_complete", { questionCount: progress.total });
+    }
   });
 }
 
@@ -505,11 +817,13 @@ function renderQuestion(question, index, editorPreview) {
   const required = question.required ? "required" : "";
   const source = question.source ? `<span><strong>Hint:</strong> ${escapeHtml(question.source)}</span>` : "<span></span>";
   const image = String(question.image || "").trim();
+  const errorId = `question-error-${index}`;
+  const sourceId = `question-source-${index}`;
   const meta = `
     <div class="question-meta">
       <strong>Question ${index + 1}</strong>
       <span class="question-points">${points} pts</span>
-      ${question.required ? '<span class="visually-hidden">Required</span>' : ""}
+      ${question.required ? '<span class="visually-hidden">Required question</span>' : ""}
     </div>
   `;
   let control = "";
@@ -552,20 +866,29 @@ function renderQuestion(question, index, editorPreview) {
   }
 
   return `
-    <article class="question-card${image ? " has-question-image" : ""}" data-question-id="${name}" role="group" aria-labelledby="question-title-${index}">
-      ${image ? `<figure class="question-media"><img src="${escapeHtml(image)}" alt="Related to ${escapeHtml(question.title)}" loading="lazy" decoding="async"></figure>` : ""}
+    <article class="question-card${image ? " has-question-image" : ""}" data-question-id="${name}" role="group" aria-labelledby="question-title-${index}"${editorPreview ? "" : ` aria-describedby="${errorId} ${sourceId}"`}${question.required ? ' aria-required="true"' : ""}>
+      ${image ? `<figure class="question-media"><img src="${escapeHtml(image)}" alt="Related to ${escapeHtml(question.title)}" width="800" height="450" loading="lazy" decoding="async"></figure>` : ""}
       <div class="question-card-content">
         <div class="question-header">
           <div class="question-heading">
             ${meta}
-            <h3 id="question-title-${index}">${escapeHtml(question.title)}</h3>
+            <h2 id="question-title-${index}">${escapeHtml(question.title)}</h2>
           </div>
         </div>
         ${control}
-        ${editorPreview ? "" : `<p class="question-error" role="alert">Please answer this question.</p><div class="question-meta question-source">${source}</div>`}
+        ${editorPreview ? "" : `<p class="question-error" id="${errorId}" role="alert">Choose an answer to continue.</p><div class="question-meta question-source" id="${sourceId}">${source}</div>`}
       </div>
     </article>
   `;
+}
+
+function renderQuestionSequence(questions) {
+  return questions.map((question, index) => {
+    const questionMarkup = renderQuestion(question, index, false);
+    const adKey = index === 1 ? "challenge_q2" : index === 3 ? "challenge_q4" : "";
+    if (!adKey) return questionMarkup;
+    return `${questionMarkup}<aside class="es-ad-slot es-ad-slot--main es-ad-slot--in-form" data-ad-key="${adKey}" aria-label="Advertisement" hidden></aside>`;
+  }).join("");
 }
 
 function setupSimpleSelects(root) {
@@ -685,7 +1008,7 @@ function renderSources(articles) {
   sourceList.innerHTML = articles.map((article, index) => `
     <article class="source-card">
       <a class="source-card-image" href="${escapeHtml(article.url)}" target="_blank" rel="noopener">
-        <img src="${escapeHtml(article.image || sourceImages[index % sourceImages.length])}" alt="${escapeHtml(article.title)}" loading="lazy" decoding="async">
+        <img src="${escapeHtml(article.image || sourceImages[index % sourceImages.length])}" alt="${escapeHtml(article.title)}" width="800" height="450" loading="lazy" decoding="async">
       </a>
       <div class="source-card-body">
         <span class="source-tag">${escapeHtml(article.tag)}</span>
@@ -731,28 +1054,32 @@ function updateReaderProgress(form, questions) {
   const percentLabel = document.querySelector("#reader-progress-percent");
   const progress = document.querySelector("#reader-progress");
   const fill = document.querySelector("#reader-progress-fill");
+  const submitLabel = document.querySelector("#submit-progress-label");
+  const submitStatus = document.querySelector("#submit-progress-status");
   if (label) label.textContent = `${answered} of ${total} answered`;
   if (percentLabel) percentLabel.textContent = `${percent}%`;
+  if (submitLabel) submitLabel.textContent = `${answered} of ${total} questions answered`;
+  if (submitStatus) {
+    submitStatus.textContent = answered === total
+      ? "All questions are answered. Your entry is ready."
+      : `${total - answered} ${total - answered === 1 ? "question" : "questions"} remaining.`;
+  }
   if (progress) {
     progress.setAttribute("aria-valuemax", String(total));
     progress.setAttribute("aria-valuenow", String(answered));
   }
   if (fill) fill.style.width = `${percent}%`;
+  return { answered, total, percent };
 }
 
-function showScore(score, totalPoints, duplicate = false) {
+function showConfirmation(duplicate = false) {
   const resultPanel = document.querySelector("#result-panel");
-  const percent = totalPoints ? Math.round((score / totalPoints) * 100) : 0;
-  const scoreMeter = document.querySelector("#score-meter");
-  document.querySelector("#score-line").textContent = `${score} / ${totalPoints}`;
-  document.querySelector("#score-meter-fill").style.width = `${percent}%`;
-  scoreMeter.setAttribute("aria-valuemax", String(totalPoints));
-  scoreMeter.setAttribute("aria-valuenow", String(score));
-  document.querySelector("#score-message").textContent = duplicate
-    ? "We already received an entry for this email. Your original score remains recorded."
-    : percent >= 80
-      ? "Great read. You were locked in on this week's biggest athletics stories."
-      : "Your answers are in. Thanks for taking on this week's athletics challenge.";
+  document.querySelector("#result-title").textContent = duplicate
+    ? "You are already entered in this Weekly Challenge."
+    : "Thank you for taking the Weekly Challenge.";
+  document.querySelector("#result-message").textContent = duplicate
+    ? "We already have an entry for this email. Watch tomorrow's Essentially Athletics newsletter for the results."
+    : "Your entry has been recorded. Results will be announced in tomorrow's Essentially Athletics newsletter.";
   resultPanel.classList.remove("is-hidden");
   resultPanel.setAttribute("tabindex", "-1");
   resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -816,30 +1143,25 @@ function mergeStories(primary, secondary) {
 function setupNewsScroller() {
   const list = document.querySelector("#news-list");
   const button = document.querySelector("#news-more-button");
-  if (!list || !button) return;
+  const shell = document.querySelector("#news-feed-shell");
+  if (!list || !button || !shell || button.dataset.newsControlReady) return;
+  button.dataset.newsControlReady = "true";
+  button.setAttribute("aria-expanded", "false");
 
   const label = button.querySelector("span");
-  const updateControl = () => {
-    const isAtEnd = list.scrollTop + list.clientHeight >= list.scrollHeight - 8;
-    button.classList.toggle("is-return", isAtEnd);
-    label.textContent = isAtEnd ? "Back to top" : "See more updates";
-  };
-
   button.addEventListener("click", () => {
-    const isAtEnd = list.scrollTop + list.clientHeight >= list.scrollHeight - 8;
-    list.scrollTo({
-      top: isAtEnd ? 0 : Math.min(list.scrollHeight, list.scrollTop + Math.round(list.clientHeight * 0.72)),
-      behavior: "smooth"
-    });
+    const expanded = shell.classList.toggle("is-expanded");
+    button.classList.toggle("is-return", expanded);
+    button.setAttribute("aria-expanded", String(expanded));
+    label.textContent = expanded ? "Show fewer updates" : "See more updates";
+    if (!expanded) document.querySelector(".top-stories")?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
-  list.addEventListener("scroll", updateControl, { passive: true });
   let resizeFrame;
   window.addEventListener("resize", () => {
     cancelAnimationFrame(resizeFrame);
     resizeFrame = requestAnimationFrame(syncNewsFeedHeight);
   }, { passive: true });
-  updateControl();
 }
 
 function syncNewsFeedHeight() {
@@ -866,13 +1188,17 @@ function renderNews(items) {
   const button = document.querySelector("#news-more-button");
   list.scrollTop = 0;
   list.scrollLeft = 0;
+  shell?.classList.remove("is-expanded");
   shell?.classList.toggle("has-more-stories", items.length > 2);
   button?.classList.remove("is-return");
-  if (button) button.querySelector("span").textContent = "See more updates";
+  if (button) {
+    button.setAttribute("aria-expanded", "false");
+    button.querySelector("span").textContent = "See more updates";
+  }
   list.innerHTML = items.map((item) => `
     <article class="news-item">
       <a class="news-thumb" href="${escapeHtml(item.url)}" target="_blank" rel="noopener" aria-label="${escapeHtml(item.title)}">
-        <img src="${escapeHtml(item.image || "assets/workspace-card-newsletter-assets.webp")}" alt="" loading="lazy" decoding="async">
+        <img src="${escapeHtml(item.image || "assets/workspace-card-newsletter-assets.webp")}" alt="" width="320" height="180" loading="lazy" decoding="async">
       </a>
       <div>
         <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a>
@@ -880,12 +1206,19 @@ function renderNews(items) {
       </div>
     </article>
   `).join("");
-  requestAnimationFrame(syncNewsFeedHeight);
+  requestAnimationFrame(() => {
+    syncNewsFeedHeight();
+    syncHorizontalScrollControls();
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  setupTickerLoop();
   setupTickerElevation();
   setupMobileMenu();
+  setupTrackedLinks();
+  setupHorizontalScrollControls();
+  setupWebVitalTracking();
+  loadAthleticsTicker();
   renderReaderPage();
+  window.addEventListener("es:ads-ready", setupAds);
 });
