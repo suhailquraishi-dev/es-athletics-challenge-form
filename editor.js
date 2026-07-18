@@ -2,14 +2,13 @@
   const QUESTION_TYPES = [
     ["short", "Short answer"],
     ["paragraph", "Paragraph"],
-    ["radio", "Multiple choice"],
-    ["checkbox", "Checkboxes"],
+    ["radio", "Single choice"],
     ["select", "Dropdown"],
     ["scale", "Linear scale"],
     ["date", "Date"],
     ["time", "Time"]
   ];
-  const CHOICE_TYPES = new Set(["radio", "checkbox", "select"]);
+  const CHOICE_TYPES = new Set(["radio", "select"]);
 
   const loginShell = document.querySelector("#editor-login");
   const workspace = document.querySelector("#editor-workspace");
@@ -110,10 +109,45 @@
       points: 5,
       required: true,
       options: hasChoices ? ["Option 1", "Option 2", "Option 3"] : [],
-      answer: type === "checkbox" ? ["Option 1"] : type === "paragraph" ? "" : hasChoices ? "Option 1" : "",
+      answer: type === "paragraph" ? "" : hasChoices ? "Option 1" : "",
       image: "",
       source: ""
     };
+  }
+
+  function migrateLegacyCheckboxQuestion(question) {
+    if (question?.type !== "checkbox") return question;
+    const correctAnswers = Array.isArray(question.answer) ? question.answer.filter(Boolean) : [];
+    const groupSize = Math.max(1, correctAnswers.length);
+    const correctOption = correctAnswers.join(" & ");
+    const distractors = buildCombinations(question.options || [], groupSize)
+      .map((items) => items.join(" & "))
+      .filter((option) => option && option !== correctOption)
+      .slice(0, 3);
+    const options = [...distractors];
+    options.splice(Math.min(1, options.length), 0, correctOption);
+    return {
+      ...question,
+      type: "radio",
+      title: /^which athletes\b/i.test(question.title)
+        ? question.title.replace(/^which athletes\b/i, "Which pair of athletes")
+        : question.title,
+      options: options.filter(Boolean),
+      answer: correctOption
+    };
+  }
+
+  function buildCombinations(items, size, start = 0, current = [], result = []) {
+    if (current.length === size) {
+      result.push([...current]);
+      return result;
+    }
+    for (let index = start; index <= items.length - (size - current.length); index += 1) {
+      current.push(items[index]);
+      buildCombinations(items, size, index + 1, current, result);
+      current.pop();
+    }
+    return result;
   }
 
   async function loadChallengeList(preferredSlug) {
@@ -152,7 +186,9 @@
       slug: nextChallenge.slug || nextChallenge.id || "",
       id: nextChallenge.slug || nextChallenge.id || "",
       articles: Array.isArray(nextChallenge.articles) ? nextChallenge.articles : [],
-      questions: Array.isArray(nextChallenge.questions) ? nextChallenge.questions : []
+      questions: Array.isArray(nextChallenge.questions)
+        ? nextChallenge.questions.map(migrateLegacyCheckboxQuestion)
+        : []
     };
     challengeStatus = status || "draft";
     dirty = false;
@@ -183,9 +219,8 @@
       const choiceFields = CHOICE_TYPES.has(question.type) ? `
         <label class="full-width"><span>Options, one per line</span><textarea data-field="options" rows="3">${escapeHtml((question.options || []).join("\n"))}</textarea></label>
       ` : "";
-      const answerHelp = question.type === "checkbox" ? "Correct answers, one per line" : "Correct answer";
       const answerField = question.type === "paragraph" ? "" : `
-        <label class="full-width"><span>${answerHelp}</span><textarea data-field="answer" rows="2">${escapeHtml(Array.isArray(question.answer) ? question.answer.join("\n") : question.answer || "")}</textarea></label>
+        <label class="full-width"><span>Correct answer</span><textarea data-field="answer" rows="2">${escapeHtml(Array.isArray(question.answer) ? question.answer.join("\n") : question.answer || "")}</textarea></label>
       `;
       const scoringNote = question.type === "short"
         ? "Short answers ignore capitalization and surrounding spaces, but the wording must otherwise match the answer key."
@@ -444,8 +479,6 @@
     if (!field) return;
     if (field === "options") {
       question.options = event.target.value.split("\n").map((item) => item.trim()).filter(Boolean);
-    } else if (field === "answer" && question.type === "checkbox") {
-      question.answer = event.target.value.split("\n").map((item) => item.trim()).filter(Boolean);
     } else if (field === "points") {
       question.points = Number(event.target.value || 0);
     } else if (field === "required") {
@@ -464,7 +497,7 @@
     question.type = event.target.value;
     if (CHOICE_TYPES.has(question.type) && (!question.options || question.options.length < 2)) {
       question.options = ["Option 1", "Option 2", "Option 3"];
-      question.answer = question.type === "checkbox" ? ["Option 1"] : "Option 1";
+      question.answer = "Option 1";
     }
     if (question.type === "paragraph") question.answer = "";
     markDirty();

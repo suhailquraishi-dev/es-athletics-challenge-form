@@ -27,7 +27,10 @@ module.exports = async function handler(request, response) {
       return json(response, 403, { ok: false, code: "REQUEST_REJECTED" });
     }
     const action = request.body?.action === "publish" ? "publishChallenge" : "saveChallenge";
-    const validation = validateAndNormalizeChallenge(request.body?.challenge, { requireAnswers: true });
+    const validation = validateAndNormalizeChallenge(request.body?.challenge, {
+      requireAnswers: true,
+      allowLegacyCheckbox: false
+    });
     if (!validation.ok) {
       return json(response, 400, { ok: false, code: "INVALID_CHALLENGE", fields: validation.errors });
     }

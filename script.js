@@ -832,7 +832,7 @@ function renderQuestion(question, index, editorPreview) {
     `).join("")}</div>`;
   } else if (question.type === "checkbox") {
     control = `<div class="option-list">${(question.options || []).map((option) => `
-      <label><input type="checkbox" name="${name}" value="${escapeHtml(option)}"> <span>${escapeHtml(option)}</span></label>
+      <label><input type="radio" name="${name}" value="${escapeHtml(option)}" ${required}> <span>${escapeHtml(option)}</span></label>
     `).join("")}</div>`;
   } else if (question.type === "select") {
     const listId = `question-select-${index}`;

@@ -1,7 +1,7 @@
 const ALLOWED_TYPES = new Set(["short", "paragraph", "radio", "checkbox", "select", "scale", "date", "time"]);
 const CHOICE_TYPES = new Set(["radio", "checkbox", "select"]);
 
-function validateAndNormalizeChallenge(input, { requireAnswers = true } = {}) {
+function validateAndNormalizeChallenge(input, { requireAnswers = true, allowLegacyCheckbox = true } = {}) {
   const errors = [];
   if (!input || typeof input !== "object" || Array.isArray(input)) {
     return { ok: false, errors: ["challenge"] };
@@ -35,6 +35,7 @@ function validateAndNormalizeChallenge(input, { requireAnswers = true } = {}) {
     if (!id || seenIds.has(id)) errors.push(`questions.${index}.id`);
     if (id) seenIds.add(id);
     if (!ALLOWED_TYPES.has(type)) errors.push(`questions.${index}.type`);
+    if (type === "checkbox" && !allowLegacyCheckbox) errors.push(`questions.${index}.type`);
     if (!questionTitle) errors.push(`questions.${index}.title`);
     if (CHOICE_TYPES.has(type) && options.length < 2) errors.push(`questions.${index}.options`);
     if (type === "checkbox" && Array.isArray(answer) && answer.some((item) => !options.includes(item))) {
@@ -93,7 +94,11 @@ function validateAndNormalizeChallenge(input, { requireAnswers = true } = {}) {
 function toPublicChallenge(challenge) {
   return {
     ...challenge,
-    questions: challenge.questions.map(({ answer, ...question }) => question)
+    questions: challenge.questions.map((question) => {
+      if (question.type === "checkbox") return legacyCheckboxToSingleChoice(question);
+      const { answer, ...publicQuestion } = question;
+      return publicQuestion;
+    })
   };
 }
 
@@ -123,11 +128,48 @@ function gradeChallenge(challenge, submittedAnswers) {
 
 function isCorrectAnswer(value, expected, type) {
   if (type === "checkbox") {
-    if (!Array.isArray(value) || !Array.isArray(expected)) return false;
-    return value.map(normalizeText).sort().join("|") === expected.map(normalizeText).sort().join("|");
+    if (!Array.isArray(expected)) return false;
+    if (Array.isArray(value)) {
+      return value.map(normalizeText).sort().join("|") === expected.map(normalizeText).sort().join("|");
+    }
+    return normalizeText(value) === normalizeText(formatChoiceGroup(expected));
   }
   if (type === "paragraph" && !normalizeText(expected)) return Boolean(normalizeText(value));
   return normalizeText(value) === normalizeText(expected);
+}
+
+function legacyCheckboxToSingleChoice(question) {
+  const correctAnswers = Array.isArray(question.answer) ? question.answer.filter(Boolean) : [];
+  const groupSize = Math.max(1, correctAnswers.length);
+  const correctOption = formatChoiceGroup(correctAnswers);
+  const distractors = combinations(question.options || [], groupSize)
+    .map(formatChoiceGroup)
+    .filter((option) => option && normalizeText(option) !== normalizeText(correctOption))
+    .slice(0, 3);
+  const options = [...distractors];
+  options.splice(Math.min(1, options.length), 0, correctOption);
+  const title = /^which athletes\b/i.test(question.title)
+    ? question.title.replace(/^which athletes\b/i, "Which pair of athletes")
+    : question.title;
+  const { answer, ...publicQuestion } = question;
+  return { ...publicQuestion, type: "radio", title, options: options.filter(Boolean) };
+}
+
+function combinations(items, size, start = 0, current = [], result = []) {
+  if (current.length === size) {
+    result.push([...current]);
+    return result;
+  }
+  for (let index = start; index <= items.length - (size - current.length); index += 1) {
+    current.push(items[index]);
+    combinations(items, size, index + 1, current, result);
+    current.pop();
+  }
+  return result;
+}
+
+function formatChoiceGroup(items) {
+  return (Array.isArray(items) ? items : []).join(" & ");
 }
 
 function normalizeExpectedAnswer(value, type) {

@@ -6,6 +6,7 @@ const html = fs.readFileSync("index.html", "utf8");
 const readerScript = fs.readFileSync("script.js", "utf8");
 const editorHtml = fs.readFileSync("editor.html", "utf8");
 const editorScript = fs.readFileSync("editor.js", "utf8");
+const styles = fs.readFileSync("styles.css", "utf8");
 
 test("reader confirmation contains no public score UI", () => {
   assert.doesNotMatch(html, /score-line|score-meter|Your score|Score revealed/i);
@@ -39,4 +40,14 @@ test("mobile editorial rails expose accessible carousel controls", () => {
 test("editor explains text-question scoring behavior", () => {
   assert.match(editorScript, /wording must otherwise match the answer key/);
   assert.match(editorScript, /award their points for any non-empty response/);
+});
+
+test("reader and editor do not offer multi-select questions", () => {
+  assert.doesNotMatch(editorHtml, /data-add-type="checkbox"|>Checkboxes</);
+  assert.doesNotMatch(editorScript, /\["checkbox", "Checkboxes"\]/);
+  assert.match(editorHtml, /data-add-type="radio">Single choice</);
+});
+test("every reader question keeps a visible separator even around ad slots", () => {
+  assert.match(styles, /#challenge-form \.question-card:not\(:first-child\)/);
+  assert.doesNotMatch(styles, /#challenge-form \.question-card \+ \.question-card/);
 });

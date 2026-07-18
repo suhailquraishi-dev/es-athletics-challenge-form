@@ -33,7 +33,7 @@ The UI is a child of EssentiallySports, not a standalone redesign.
 - Primary blue is `#0A7DFA`.
 - The reader uses one shared white challenge canvas. Questions are separated by one light-grey rule rather than individual outer cards.
 - Question metadata, answer controls, focus, and selected states are neutral; ES blue is reserved for links and genuine command buttons.
-- Answer rows are 48-52px on desktop and 46px on phone, with visible radio/checkbox indicators and restrained 8px corners.
+- Answer rows are 48-52px on desktop and 46px on phone, with visible single-choice radio indicators and restrained 8px corners.
 - The form includes a live answered count and slim progress indicator at the top, plus a completion summary above Submit.
 - Controls target clear scanning and comfortable hit areas for newsletter readers, including readers aged 50-60.
 - Mobile story modules use horizontal scrolling; desktop/tablet news modules remain sticky where space permits.
@@ -73,8 +73,7 @@ Supported types:
 
 - Short answer
 - Paragraph
-- Multiple choice
-- Checkboxes
+- Single choice
 - Dropdown
 - Linear scale
 - Date
@@ -169,7 +168,7 @@ Reader:
 - `current` and a specific slug load successfully.
 - Public challenge JSON contains no answer keys.
 - Empty email and missing required answers show clear inline errors.
-- Correct, incorrect, checkbox-order, dropdown, text, and scale grading are server-derived.
+- Correct, incorrect, single-choice, dropdown, text, and scale grading are server-derived. Legacy checkbox questions are converted into one bundled single-choice answer group.
 - Duplicate email returns submission status without exposing the original score or adding a row.
 - Failure preserves the reader's selections.
 - Source titles and news titles remain clickable without unwanted underlines.

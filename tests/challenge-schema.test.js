@@ -14,6 +14,17 @@ test("normalizes a valid challenge and strips answers from the public shape", ()
   assert.equal(publicChallenge.questions.some((question) => Object.hasOwn(question, "answer")), false);
   assert.equal(JSON.stringify(publicChallenge).includes("Alex\""), true);
   assert.equal(publicChallenge.questions[0].options.includes("Alex"), true);
+  assert.equal(publicChallenge.questions[1].type, "radio");
+  assert.equal(publicChallenge.questions[1].options.includes("Alex & Jordan"), true);
+});
+
+ test("rejects new checkbox questions while preserving legacy reads", () => {
+  const result = validateAndNormalizeChallenge(challenge, {
+    requireAnswers: true,
+    allowLegacyCheckbox: false
+  });
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.includes("questions.1.type"));
 });
 
 test("rejects a choice answer that is not one of the options", () => {
@@ -43,6 +54,15 @@ test("grades entirely on the stored challenge definition", () => {
     score: 10,
     totalPoints: 10
   });
+});
+
+test("grades a migrated legacy checkbox as one bundled single choice", () => {
+  const normalized = validateAndNormalizeChallenge(challenge, { requireAnswers: true }).value;
+  const grade = gradeChallenge(normalized, [
+    { id: "q1", value: "Alex" },
+    { id: "q2", value: "Alex & Jordan" }
+  ]);
+  assert.equal(grade.score, 10);
 });
 
 test("reports missing required answers", () => {

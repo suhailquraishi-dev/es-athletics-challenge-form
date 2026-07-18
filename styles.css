@@ -4068,7 +4068,7 @@ body {
   padding-top: 4px;
 }
 
-#challenge-form .question-card + .question-card {
+#challenge-form .question-card:not(:first-child) {
   border-top: 1px solid #e5e7eb;
 }
 
@@ -4243,7 +4243,7 @@ body {
   padding-top: 30px;
 }
 
-#challenge-form .question-card + .question-card {
+#challenge-form .question-card:not(:first-child) {
   border-top-color: #e3e5e8;
 }
 
